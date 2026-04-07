@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 
 export function DashboardHeader() {
   const { user, logout } = useAuthStore();
-  const initials = user?.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
+  const initials = user?.username?.slice(0, 2).toUpperCase() || user?.name?.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) || 'U';
 
   return (
     <header className="border-b border-white/10 bg-black/50 backdrop-blur-md glass-header">
@@ -23,14 +23,15 @@ export function DashboardHeader() {
           <DropdownMenu>
             <DropdownMenuTrigger>
               <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                <Avatar><AvatarFallback className="bg-white text-black">{initials || <User className="h-5 w-5" />}</AvatarFallback></Avatar>
+                <Avatar><AvatarFallback className="bg-white text-black">{initials}</AvatarFallback></Avatar>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56 bg-black/80 backdrop-blur-xl border-white/10" align="end">
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
                   <p className="text-sm font-medium text-white">{user?.name}</p>
-                  <p className="text-xs text-gray-400">{user?.email}</p>
+                  <p className="text-xs text-gray-400">@{user?.username}</p>
+                  <p className="text-xs text-gray-500">{user?.email}</p>
                   {user?.isPremium && <Badge variant="secondary" className="w-fit mt-1 bg-white/20 text-white">Premium</Badge>}
                 </div>
               </DropdownMenuLabel>

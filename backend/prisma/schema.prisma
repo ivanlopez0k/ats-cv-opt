@@ -9,9 +9,13 @@ datasource db {
 
 model User {
   id                     String    @id @default(cuid())
+  username               String    @unique
   email                  String    @unique
   passwordHash           String
   name                   String
+  nationality            String?
+  defaultTargetJob       String?
+  defaultTargetIndustry  String?
   avatarUrl              String?
   role                   Role      @default(USER)
   isPremium              Boolean   @default(false)

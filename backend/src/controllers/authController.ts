@@ -9,9 +9,17 @@ import { config } from '../config/index.js';
 // Zod schemas
 // ============================================================
 export const registerSchema = z.object({
+  username: z
+    .string()
+    .min(3, 'El username debe tener al menos 3 caracteres')
+    .max(20, 'El username debe tener máximo 20 caracteres')
+    .regex(/^[a-zA-Z0-9_]+$/, 'El username solo puede contener letras, números y guiones bajos'),
   email: z.string().email('Email inválido'),
   password: z.string().min(8, 'La contraseña debe tener al menos 8 caracteres'),
   name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
+  nationality: z.string().optional().or(z.literal('')),
+  defaultTargetJob: z.string().optional().or(z.literal('')),
+  defaultTargetIndustry: z.string().optional().or(z.literal('')),
 });
 
 export const loginSchema = z.object({
@@ -30,6 +38,14 @@ export const verifyEmailSchema = z.object({
 export const changePasswordSchema = z.object({
   currentPassword: z.string().min(1, 'Contraseña actual requerida'),
   newPassword: z.string().min(8, 'La nueva contraseña debe tener al menos 8 caracteres'),
+});
+
+export const updateUsernameSchema = z.object({
+  username: z
+    .string()
+    .min(3, 'El username debe tener al menos 3 caracteres')
+    .max(20, 'El username debe tener máximo 20 caracteres')
+    .regex(/^[a-zA-Z0-9_]+$/, 'El username solo puede contener letras, números y guiones bajos'),
 });
 
 // ============================================================
@@ -73,7 +89,7 @@ function getClientInfo(req: Request) {
 // ============================================================
 export const authController = {
   async register(req: Request, res: Response): Promise<void> {
-    const { email, password, name } = req.body;
+    const { username, email, password, name, nationality, defaultTargetJob, defaultTargetIndustry } = req.body;
 
     try {
       const existingUser = await userService.findByEmail(email);
@@ -82,7 +98,16 @@ export const authController = {
         return;
       }
 
-      const user = await userService.create({ email, password, name });
+      const user = await userService.create({
+        username,
+        email,
+        password,
+        name,
+        nationality: nationality || undefined,
+        defaultTargetJob: defaultTargetJob || undefined,
+        defaultTargetIndustry: defaultTargetIndustry || undefined,
+      });
+
       const clientInfo = getClientInfo(req);
       const tokens = await sessionService.createSession(
         { id: user.id, email: user.email, role: user.role },
@@ -110,8 +135,8 @@ export const authController = {
         data: { user, ...tokens, emailVerificationRequired: false },
       });
     } catch (error: any) {
-      // Password strength validation error
-      if (error.message?.includes('contraseña')) {
+      // Username or password validation error
+      if (error.message?.includes('username') || error.message?.includes('contraseña')) {
         res.status(400).json({ success: false, error: error.message });
         return;
       }
@@ -125,9 +150,6 @@ export const authController = {
 
     const user = await userService.findByEmail(email);
     if (!user) {
-      // Timing-safe: still do a dummy hash to prevent timing attacks
-      // (commented out for dev speed)
-      // await bcrypt.hash('dummy', 10);
       res.status(401).json({ success: false, error: 'Credenciales inválidas' });
       return;
     }
@@ -238,14 +260,20 @@ export const authController = {
 
   async updateProfile(req: AuthenticatedRequest, res: Response): Promise<void> {
     const userId = req.user?.userId;
-    const { name, avatarUrl } = req.body;
+    const { name, avatarUrl, nationality, defaultTargetJob, defaultTargetIndustry } = req.body;
 
     if (!userId) {
       res.status(401).json({ success: false, error: 'No autenticado' });
       return;
     }
 
-    const user = await userService.update(userId, { name, avatarUrl });
+    const user = await userService.update(userId, {
+      name,
+      avatarUrl,
+      nationality,
+      defaultTargetJob,
+      defaultTargetIndustry,
+    });
 
     await auditService.log({
       userId,
@@ -255,6 +283,44 @@ export const authController = {
     });
 
     res.json({ success: true, data: user });
+  },
+
+  async updateUsername(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const userId = req.user?.userId;
+    const { username } = req.body;
+
+    if (!userId) {
+      res.status(401).json({ success: false, error: 'No autenticado' });
+      return;
+    }
+
+    try {
+      const user = await userService.updateUsername(userId, username);
+      res.json({ success: true, data: user });
+    } catch (error: any) {
+      res.status(400).json({ success: false, error: error.message });
+    }
+  },
+
+  async checkUsername(req: Request, res: Response): Promise<void> {
+    const { username } = req.params;
+
+    if (!username) {
+      res.status(400).json({ success: false, error: 'Username requerido' });
+      return;
+    }
+
+    // Validate format first
+    const { validateUsername } = await import('../services/userService.js');
+    const validation = validateUsername(username);
+
+    if (validation && !validation.valid) {
+      res.json({ success: true, available: false, error: validation.error });
+      return;
+    }
+
+    const available = await userService.isUsernameAvailable(username);
+    res.json({ success: true, available });
   },
 
   // ============================================================

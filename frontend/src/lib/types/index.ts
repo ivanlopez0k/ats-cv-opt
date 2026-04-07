@@ -1,9 +1,13 @@
 export interface User {
   id: string;
+  username: string;
   email: string;
   name: string;
   role: string;
   isPremium: boolean;
+  nationality?: string;
+  defaultTargetJob?: string;
+  defaultTargetIndustry?: string;
   avatarUrl?: string;
   createdAt: string;
 }
@@ -23,7 +27,7 @@ export interface CV {
   upvotes: number;
   createdAt: string;
   updatedAt: string;
-  user?: Pick<User, 'id' | 'name' | 'avatarUrl'>;
+  user?: Pick<User, 'id' | 'username' | 'name' | 'avatarUrl'>;
   hasVoted?: boolean;
   _count?: { votes: number };
 }

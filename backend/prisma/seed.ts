@@ -9,6 +9,7 @@ async function main() {
     where: { email: 'demo@cvmaster.com' },
     update: {},
     create: {
+      username: 'demo',
       email: 'demo@cvmaster.com',
       passwordHash: '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/X4.PQjUq.T9QxQq6a',
       name: 'Demo User',

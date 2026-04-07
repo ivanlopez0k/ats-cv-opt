@@ -4,6 +4,7 @@ import {
   loginSchema,
   registerSchema,
   refreshSchema,
+  updateUsernameSchema,
 } from '../controllers/index.js';
 import { authenticate, validate } from '../middlewares/index.js';
 import { authRateLimit } from '../middlewares/rateLimit.js';
@@ -19,6 +20,10 @@ router.post('/logout', authController.logout);
 // Protected routes
 router.get('/me', authenticate, authController.me);
 router.patch('/profile', authenticate, authController.updateProfile);
+
+// Username management
+router.get('/check-username/:username', authController.checkUsername);
+router.patch('/username', authenticate, validate(updateUsernameSchema), authController.updateUsername);
 
 // Password management
 router.post('/change-password', authenticate, authController.changePassword);

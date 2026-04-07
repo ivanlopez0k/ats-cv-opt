@@ -6,6 +6,21 @@ import { config } from '../config/index.js';
 const prisma = new PrismaClient();
 
 // ============================================================
+// Username validation
+// ============================================================
+const USERNAME_REGEX = /^[a-zA-Z0-9_]{3,20}$/;
+
+export function validateUsername(username: string): { valid: boolean; error?: string } {
+  if (!USERNAME_REGEX.test(username)) {
+    return {
+      valid: false,
+      error: 'El username debe tener entre 3 y 20 caracteres, solo letras, números y guiones bajos',
+    };
+  }
+  return { valid: true };
+}
+
+// ============================================================
 // Password strength validation
 // ============================================================
 const PASSWORD_REGEX = {
@@ -32,10 +47,61 @@ export function validatePasswordStrength(password: string): { valid: boolean; er
 }
 
 // ============================================================
+// Common nationalities for the dropdown
+// ============================================================
+export const COMMON_NATIONALITIES = [
+  'Argentina',
+  'Bolivia',
+  'Brasil',
+  'Chile',
+  'Colombia',
+  'Costa Rica',
+  'Cuba',
+  'Ecuador',
+  'El Salvador',
+  'España',
+  'Guatemala',
+  'Honduras',
+  'México',
+  'Nicaragua',
+  'Panamá',
+  'Paraguay',
+  'Perú',
+  'República Dominicana',
+  'Uruguay',
+  'Venezuela',
+  'Estados Unidos',
+  'Otro',
+] as const;
+
+// ============================================================
 // User service
 // ============================================================
 export const userService = {
-  async create(data: { email: string; password: string; name: string }) {
+  async create(data: {
+    username: string;
+    email: string;
+    password: string;
+    name: string;
+    nationality?: string;
+    defaultTargetJob?: string;
+    defaultTargetIndustry?: string;
+  }) {
+    // Validate username
+    const usernameResult = validateUsername(data.username);
+    if (!usernameResult.valid) {
+      throw new Error(usernameResult.error);
+    }
+
+    // Check username availability
+    const existingUsername = await prisma.user.findUnique({
+      where: { username: data.username.toLowerCase() },
+      select: { id: true },
+    });
+    if (existingUsername) {
+      throw new Error('El username ya está en uso');
+    }
+
     // Validate password strength
     const strengthResult = validatePasswordStrength(data.password);
     if (!strengthResult.valid) {
@@ -54,17 +120,25 @@ export const userService = {
 
     return prisma.user.create({
       data: {
+        username: data.username.toLowerCase(),
         email: data.email.toLowerCase(),
         passwordHash,
         name: data.name,
+        nationality: data.nationality || null,
+        defaultTargetJob: data.defaultTargetJob || null,
+        defaultTargetIndustry: data.defaultTargetIndustry || null,
         isEmailVerified: !config.security.emailVerificationEnabled,
         emailVerifyToken,
         emailVerifyExpiresAt,
       },
       select: {
         id: true,
+        username: true,
         email: true,
         name: true,
+        nationality: true,
+        defaultTargetJob: true,
+        defaultTargetIndustry: true,
         role: true,
         isPremium: true,
         isEmailVerified: true,
@@ -80,13 +154,31 @@ export const userService = {
     });
   },
 
+  async findByUsername(username: string) {
+    return prisma.user.findUnique({
+      where: { username: username.toLowerCase() },
+    });
+  },
+
+  async isUsernameAvailable(username: string): Promise<boolean> {
+    const existing = await prisma.user.findUnique({
+      where: { username: username.toLowerCase() },
+      select: { id: true },
+    });
+    return !existing;
+  },
+
   async findById(id: string) {
     return prisma.user.findUnique({
       where: { id },
       select: {
         id: true,
+        username: true,
         email: true,
         name: true,
+        nationality: true,
+        defaultTargetJob: true,
+        defaultTargetIndustry: true,
         role: true,
         isPremium: true,
         isEmailVerified: true,
@@ -96,14 +188,24 @@ export const userService = {
     });
   },
 
-  async update(id: string, data: { name?: string; avatarUrl?: string }) {
+  async update(id: string, data: {
+    name?: string;
+    avatarUrl?: string;
+    nationality?: string;
+    defaultTargetJob?: string;
+    defaultTargetIndustry?: string;
+  }) {
     return prisma.user.update({
       where: { id },
       data,
       select: {
         id: true,
+        username: true,
         email: true,
         name: true,
+        nationality: true,
+        defaultTargetJob: true,
+        defaultTargetIndustry: true,
         role: true,
         isPremium: true,
         avatarUrl: true,
@@ -112,11 +214,29 @@ export const userService = {
     });
   },
 
+  async updateUsername(id: string, username: string) {
+    const usernameResult = validateUsername(username);
+    if (!usernameResult.valid) {
+      throw new Error(usernameResult.error);
+    }
+
+    const available = await this.isUsernameAvailable(username);
+    if (!available) {
+      throw new Error('El username ya está en uso');
+    }
+
+    return prisma.user.update({
+      where: { id },
+      data: { username: username.toLowerCase() },
+      select: { id: true, username: true, email: true, name: true },
+    });
+  },
+
   async updatePassword(id: string, passwordHash: string) {
     return prisma.user.update({
       where: { id },
       data: { passwordHash, failedLoginAttempts: 0, lockedUntil: null },
-      select: { id: true, email: true, name: true },
+      select: { id: true, email: true, username: true, name: true },
     });
   },
 
@@ -196,6 +316,7 @@ export const userService = {
       },
       select: {
         id: true,
+        username: true,
         email: true,
         name: true,
         isEmailVerified: true,
@@ -212,7 +333,7 @@ export const userService = {
     return prisma.user.update({
       where: { id: userId },
       data: { emailVerifyToken, emailVerifyExpiresAt },
-      select: { id: true, email: true, emailVerifyToken: true },
+      select: { id: true, email: true, username: true, emailVerifyToken: true },
     });
   },
 

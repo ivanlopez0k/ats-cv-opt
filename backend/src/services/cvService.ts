@@ -52,7 +52,7 @@ export const cvService = {
       where: { id: cvId },
       include: {
         user: {
-          select: { id: true, name: true, avatarUrl: true },
+          select: { id: true, username: true, name: true, avatarUrl: true },
         },
         votes: true,
         _count: { select: { votes: true } },
@@ -115,7 +115,7 @@ export const cvService = {
         take: limit,
         orderBy: { upvotes: 'desc' },
         include: {
-          user: { select: { id: true, name: true, avatarUrl: true } },
+          user: { select: { id: true, username: true, name: true, avatarUrl: true } },
           _count: { select: { votes: true } },
         },
       }),
@@ -139,7 +139,7 @@ export const cvService = {
       take: limit,
       orderBy: { upvotes: 'desc' },
       include: {
-        user: { select: { id: true, name: true, avatarUrl: true } },
+        user: { select: { id: true, username: true, name: true, avatarUrl: true } },
         _count: { select: { votes: true } },
       },
     });
