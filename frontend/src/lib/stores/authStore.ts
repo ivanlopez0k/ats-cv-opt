@@ -7,6 +7,7 @@ interface User {
   name: string;
   role: string;
   isPremium: boolean;
+  isEmailVerified?: boolean;
   avatarUrl?: string;
 }
 
@@ -15,14 +16,15 @@ interface AuthState {
   accessToken: string | null;
   refreshToken: string | null;
   isAuthenticated: boolean;
-  setAuth: (user: User, accessToken: string, refreshToken: string) => void;
+  setAuth: (user: User, accessToken: string, refreshToken?: string) => void;
   updateUser: (user: Partial<User>) => void;
   logout: () => void;
+  needsEmailVerification: () => boolean;
 }
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
       accessToken: null,
       refreshToken: null,
@@ -35,6 +37,10 @@ export const useAuthStore = create<AuthState>()(
         })),
       logout: () =>
         set({ user: null, accessToken: null, refreshToken: null, isAuthenticated: false }),
+      needsEmailVerification: () => {
+        const { user } = get();
+        return !!user && user.isEmailVerified === false;
+      },
     }),
     {
       name: 'cvmaster-auth',

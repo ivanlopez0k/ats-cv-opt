@@ -8,19 +8,25 @@ datasource db {
 }
 
 model User {
-  id           String    @id @default(cuid())
-  email        String    @unique
-  passwordHash String
-  name         String
-  avatarUrl    String?
-  role         Role      @default(USER)
-  isPremium    Boolean   @default(false)
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  id                     String    @id @default(cuid())
+  email                  String    @unique
+  passwordHash           String
+  name                   String
+  avatarUrl              String?
+  role                   Role      @default(USER)
+  isPremium              Boolean   @default(false)
+  isEmailVerified        Boolean   @default(false)
+  emailVerifyToken       String?
+  emailVerifyExpiresAt   DateTime?
+  failedLoginAttempts    Int       @default(0)
+  lockedUntil            DateTime?
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
 
-  cvs     CV[]
-  votes   Vote[]
-  sessions Session[]
+  cvs           CV[]
+  votes         Vote[]
+  sessions      Session[]
+  auditLogs     AuditLog[]
 }
 
 enum Role {
@@ -34,6 +40,8 @@ model Session {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   refreshToken String   @unique
   expiresAt    DateTime
+  ipAddress    String?
+  userAgent    String?
   createdAt    DateTime @default(now())
 }
 
@@ -72,4 +80,19 @@ model Vote {
   createdAt DateTime @default(now())
 
   @@unique([userId, cvId])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  event     String   // LOGIN_SUCCESS, LOGIN_FAILED, PASSWORD_CHANGE, SESSION_CREATED, SESSION_REVOKED, EMAIL_VERIFIED, ACCOUNT_LOCKED, etc.
+  ipAddress String?
+  userAgent String?
+  details   Json?    // Additional context
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([event])
+  @@index([createdAt])
 }

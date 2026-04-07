@@ -31,7 +31,8 @@ export const requireAdmin = (
   res: Response,
   next: NextFunction
 ): void => {
-  if (!req.user || req.user.role !== 'ADMIN') {
+  const authReq = req as Request & { user?: JwtPayload };
+  if (!authReq.user || authReq.user.role !== 'ADMIN') {
     res.status(403).json({ success: false, error: 'Acceso denegado' });
     return;
   }

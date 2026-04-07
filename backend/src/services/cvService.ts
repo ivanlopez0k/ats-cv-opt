@@ -103,7 +103,7 @@ export const cvService = {
     
     const where = {
       isPublic: true,
-      status: 'COMPLETED',
+      status: 'COMPLETED' as const,
       ...(filters?.targetJob && { targetJob: { contains: filters.targetJob, mode: 'insensitive' as const } }),
       ...(filters?.targetIndustry && { targetIndustry: { contains: filters.targetIndustry, mode: 'insensitive' as const } }),
     };

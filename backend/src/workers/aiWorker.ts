@@ -50,10 +50,10 @@ const aiWorker = new Worker(
       await prisma.cV.update({
         where: { id: cvId },
         data: {
-          status: 'COMPLETED',
+          status: 'COMPLETED' as const,
           improvedPdfUrl,
-          improvedJson: improvement.structuredCV,
-          analysisResult: improvement.analysis,
+          improvedJson: improvement.structuredCV as any,
+          analysisResult: improvement.analysis as any,
         },
       });
 

@@ -109,8 +109,8 @@ export const createPDFFromText = async (
 
 export const validatePDF = async (fileBuffer: Buffer): Promise<boolean> => {
   try {
-    const data = await pdfParse(fileBuffer);
-    return data.pages > 0 && data.pages <= 5;
+    const data = await pdfParse(fileBuffer) as any;
+    return data.numpages > 0 && data.numpages <= 5;
   } catch {
     return false;
   }
