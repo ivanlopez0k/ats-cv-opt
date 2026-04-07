@@ -37,7 +37,40 @@ export default function CVDetailPage({ params }: { params: { id: string } }) {
         {cv.status === 'PROCESSING' && <Card className="glass-card"><CardContent className="py-12 text-center"><div className={`inline-flex items-center justify-center w-16 h-16 rounded-full ${status.bg} mb-4`}><Clock className={`h-8 w-8 ${status.color}`} /></div><h2 className="text-xl font-semibold mb-2 text-white">Procesando</h2><p className="text-gray-400">La IA está analizando tu CV...</p><Progress value={66} className="max-w-md mx-auto mt-4" /></CardContent></Card>}
         {cv.status === 'COMPLETED' && cv.analysisResult && (
           <Tabs defaultValue="analysis" className="space-y-6">
-            <TabsList className="bg-black/40 border border-white/10"><TabsTrigger value="analysis" className="text-white data-[state=active]:bg-white data-[state=active]:text-black">Análisis</TabsTrigger><TabsTrigger value="suggestions" className="text-white data-[state=active]:bg-white data-[state=active]:text-black">Sugerencias</TabsTrigger></TabsList>
+            <TabsList className="bg-black/40 border border-white/10"><TabsTrigger value="context" className="text-white data-[state=active]:bg-white data-[state=active]:text-black">Contexto</TabsTrigger><TabsTrigger value="analysis" className="text-white data-[state=active]:bg-white data-[state=active]:text-black">Análisis</TabsTrigger><TabsTrigger value="suggestions" className="text-white data-[state=active]:bg-white data-[state=active]:text-black">Sugerencias</TabsTrigger></TabsList>
+            <TabsContent value="context">
+              <Card className="glass-card">
+                <CardHeader><CardTitle className="text-white">Contexto de la IA</CardTitle><CardDescription className="text-gray-400">Respuestas que usó la IA para optimizar tu CV</CardDescription></CardHeader>
+                <CardContent>
+                  {(cv as any).contextAnswers ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {Object.entries((cv as any).contextAnswers).map(([key, value]) => {
+                        if (!value || key === 'targetJob' || key === 'targetIndustry') return null;
+                        const labels: Record<string, string> = {
+                          targetCompany: 'Empresa objetivo',
+                          experienceLevel: 'Nivel de experiencia',
+                          optimizationFocus: 'Enfoque de optimización',
+                          additionalNotes: 'Notas adicionales',
+                        };
+                        const levelLabels: Record<string, string> = { junior: 'Junior / Trainee', mid: 'Semi-Senior', senior: 'Senior', lead: 'Lead / Manager' };
+                        const focusLabels: Record<string, string> = { technical: 'Experiencia técnica', soft: 'Habilidades blandas', both: 'Ambas', 'career-change': 'Cambio de carrera' };
+                        let displayValue = value as string;
+                        if (key === 'experienceLevel') displayValue = levelLabels[displayValue] || displayValue;
+                        if (key === 'optimizationFocus') displayValue = focusLabels[displayValue] || displayValue;
+                        return (
+                          <div key={key} className="p-3 rounded-lg bg-white/5 border border-white/10">
+                            <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">{labels[key] || key}</p>
+                            <p className="text-white">{displayValue}</p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p className="text-gray-400">No se proporcionó contexto adicional para este CV.</p>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
             <TabsContent value="analysis"><Card className="glass-card"><CardHeader><CardTitle className="text-white">Puntuación ATS</CardTitle><CardDescription className="text-gray-400">Qué tan bien está optimizado</CardDescription></CardHeader><CardContent><div className="flex items-center gap-4"><div className={`text-6xl font-bold ${cv.analysisResult.score >= 70 ? 'text-green-400' : cv.analysisResult.score >= 40 ? 'text-yellow-400' : 'text-red-400'}`}>{cv.analysisResult.score}</div><div className="flex-1"><Progress value={cv.analysisResult.score} className="h-4" /></div></div>{cv.analysisResult.missingKeywords.length > 0 && <div className="mt-4"><h3 className="font-semibold mb-2 text-white">Keywords faltantes</h3><div className="flex flex-wrap gap-2">{cv.analysisResult.missingKeywords.map((kw, i) => <Badge key={i} variant="outline" className="border-white/20 text-white">{kw}</Badge>)}</div></div>}</CardContent></Card></TabsContent>
             <TabsContent value="suggestions"><Card className="glass-card"><CardHeader><CardTitle className="text-white">Sugerencias</CardTitle></CardHeader><CardContent><div className="space-y-4">{cv.analysisResult.issues.map((issue, i) => <div key={i} className="flex items-start gap-3 p-3 rounded-lg bg-red-500/10 border border-red-500/20"><XCircle className="h-5 w-5 text-red-400 mt-0.5" /><span className="text-gray-300">{issue}</span></div>)}{cv.analysisResult.suggestions.map((s, i) => <div key={i} className="flex items-start gap-3 p-3 rounded-lg bg-green-500/10 border border-green-500/20"><CheckCircle className="h-5 w-5 text-green-400 mt-0.5" /><span className="text-gray-300">{s}</span></div>)}</div></CardContent></Card></TabsContent>
           </Tabs>

@@ -44,7 +44,12 @@ export const cvController = {
     const { title, targetJob, targetIndustry } = req.body;
 
     try {
-      const cv = await cvService.create(userId, { title, targetJob, targetIndustry }, file.buffer, file.originalname);
+      const cv = await cvService.create(
+        userId,
+        { title, targetJob, targetIndustry },
+        file.buffer,
+        file.originalname
+      );
 
       res.status(201).json({
         success: true,
@@ -52,6 +57,7 @@ export const cvController = {
         message: 'CV subido exitosamente. Procesamiento en progreso...',
       });
     } catch (error) {
+      console.error('Error uploading CV:', error);
       res.status(500).json({ success: false, error: 'Error al procesar el CV' });
     }
   },

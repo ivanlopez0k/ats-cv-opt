@@ -18,8 +18,36 @@ Retorna un JSON con:
 - structuredCV: objeto con la estructura del CV
 - analysis: objeto con score, issues, missingKeywords, suggestions`;
 
+/**
+ * Generate mock analysis/improvement for development without OpenAI credits.
+ */
+function generateMockAnalysis(cvText: string, targetJob?: string, targetIndustry?: string): CVImprovementResult {
+  return {
+    improvedText: `# CV Optimizado para ATS - ${targetJob || 'Profesional'}\n\n${cvText}\n\n---\n*Versión mejorada por CVMaster AI (modo desarrollo)*`,
+    structuredCV: {
+      personalInfo: { name: 'Nombre del candidato' },
+      summary: 'Profesional con experiencia relevante',
+      experience: [{ title: 'Puesto anterior', company: 'Empresa', duration: '2020-2024', achievements: ['Logro 1', 'Logro 2'] }],
+      education: [{ degree: 'Título', institution: 'Universidad', year: '2020' }],
+      skills: ['Habilidad 1', 'Habilidad 2', targetJob || 'General'].filter(Boolean),
+    },
+    analysis: {
+      score: 72,
+      issues: ['Falta cuantificar logros', 'Sección de skills poco detallada'],
+      missingKeywords: ['Liderazgo', 'Gestión de proyectos', 'Comunicación', ...(targetJob ? [targetJob] : [])],
+      suggestions: ['Agregar métricas a los logros', 'Incluir certificaciones relevantes', 'Usar verbos de acción'],
+    },
+  };
+}
+
 export const aiService = {
   async analyzeCV(cvText: string, targetJob?: string, targetIndustry?: string): Promise<CVAnalysisResult> {
+    if (config.openai.mockEnabled) {
+      console.log('🎭 Using mock AI analysis (development mode)');
+      const mock = generateMockAnalysis(cvText, targetJob, targetIndustry);
+      return mock.analysis;
+    }
+
     const userPrompt = `
 CV a analizar:
 ${cvText}
@@ -30,7 +58,7 @@ ${targetIndustry ? `Industria: ${targetIndustry}` : ''}
 Responde SOLO con JSON válido, sin texto adicional.`;
 
     const response = await openai.chat.completions.create({
-      model: 'gpt-4-turbo-preview',
+      model: 'gpt-4o',
       messages: [
         { role: 'system', content: SYSTEM_PROMPT_ANALYSIS },
         { role: 'user', content: userPrompt },
@@ -46,6 +74,11 @@ Responde SOLO con JSON válido, sin texto adicional.`;
   },
 
   async improveCV(cvText: string, targetJob?: string, targetIndustry?: string): Promise<CVImprovementResult> {
+    if (config.openai.mockEnabled) {
+      console.log('🎭 Using mock AI improvement (development mode)');
+      return generateMockAnalysis(cvText, targetJob, targetIndustry);
+    }
+
     const userPrompt = `
 CV a mejorar:
 ${cvText}
@@ -56,7 +89,7 @@ ${targetIndustry ? `Industria: ${targetIndustry}` : ''}
 Responde SOLO con JSON válido, sin texto adicional.`;
 
     const response = await openai.chat.completions.create({
-      model: 'gpt-4-turbo-preview',
+      model: 'gpt-4o',
       messages: [
         { role: 'system', content: SYSTEM_PROMPT_IMPROVEMENT },
         { role: 'user', content: userPrompt },

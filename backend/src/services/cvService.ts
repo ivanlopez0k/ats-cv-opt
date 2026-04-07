@@ -1,21 +1,35 @@
 import { prisma } from './userService.js';
-import { uploadToCloudinary, deleteFromCloudinary, getPublicIdFromUrl } from '../utils/cloudinary.js';
-import { extractTextFromPDF } from '../utils/pdf.js';
+import { config } from '../config/index.js';
+import path from 'path';
+import fs from 'fs';
 import { Queue } from 'bullmq';
 import IORedis from 'ioredis';
-import { config } from '../config/index.js';
 
 const redis = new IORedis(config.redis.url, { maxRetriesPerRequest: null });
 export const aiQueue = new Queue('ai-processing', { connection: redis });
 
 export const cvService = {
-  async create(userId: string, data: {
-    title: string;
-    targetJob?: string;
-    targetIndustry?: string;
-  }, pdfBuffer: Buffer, filename: string) {
-    const { url: originalPdfUrl } = await uploadToCloudinary(pdfBuffer, filename, 'cvmaster/cvs');
-    
+  async create(
+    userId: string,
+    data: {
+      title: string;
+      targetJob?: string;
+      targetIndustry?: string;
+    },
+    pdfBuffer: Buffer,
+    filename: string
+  ) {
+    const uploadsDir = path.join(process.cwd(), 'uploads', userId);
+    if (!fs.existsSync(uploadsDir)) {
+      fs.mkdirSync(uploadsDir, { recursive: true });
+    }
+
+    const uniqueFilename = `${Date.now()}-${filename}`;
+    const filePath = path.join(uploadsDir, uniqueFilename);
+    fs.writeFileSync(filePath, pdfBuffer);
+
+    const originalPdfUrl = `/uploads/${userId}/${uniqueFilename}`;
+
     const cv = await prisma.cV.create({
       data: {
         userId,
@@ -32,6 +46,7 @@ export const cvService = {
       userId,
       targetJob: data.targetJob,
       targetIndustry: data.targetIndustry,
+      filePath,
     });
 
     return cv;
@@ -52,7 +67,7 @@ export const cvService = {
       where: { id: cvId },
       include: {
         user: {
-          select: { id: true, username: true, name: true, avatarUrl: true },
+          select: { id: true, name: true, avatarUrl: true },
         },
         votes: true,
         _count: { select: { votes: true } },
@@ -84,12 +99,16 @@ export const cvService = {
     if (cv.userId !== userId) throw new Error('No tienes permisos');
 
     if (cv.originalPdfUrl) {
-      const publicId = getPublicIdFromUrl(cv.originalPdfUrl);
-      await deleteFromCloudinary(publicId);
+      const filePath = path.join(process.cwd(), cv.originalPdfUrl);
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
     }
     if (cv.improvedPdfUrl) {
-      const publicId = getPublicIdFromUrl(cv.improvedPdfUrl);
-      await deleteFromCloudinary(publicId);
+      const filePath = path.join(process.cwd(), cv.improvedPdfUrl);
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
     }
 
     return prisma.cV.delete({ where: { id: cvId } });
@@ -115,7 +134,7 @@ export const cvService = {
         take: limit,
         orderBy: { upvotes: 'desc' },
         include: {
-          user: { select: { id: true, username: true, name: true, avatarUrl: true } },
+          user: { select: { id: true, name: true, avatarUrl: true } },
           _count: { select: { votes: true } },
         },
       }),
@@ -139,7 +158,7 @@ export const cvService = {
       take: limit,
       orderBy: { upvotes: 'desc' },
       include: {
-        user: { select: { id: true, username: true, name: true, avatarUrl: true } },
+        user: { select: { id: true, name: true, avatarUrl: true } },
         _count: { select: { votes: true } },
       },
     });

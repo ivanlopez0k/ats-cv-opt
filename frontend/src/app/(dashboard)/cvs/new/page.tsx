@@ -1,8 +1,8 @@
 'use client';
 import { DashboardHeader } from '@/components/features/dashboard/DashboardHeader';
-import { CVUploadForm } from '@/components/features/cv/CVUploadForm';
-import Link from 'next/link';
+import { CVUploadDialog } from '@/components/features/cv/CVUploadDialog';
 import { ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
 
 export default function NewCVPage() {
   return (
@@ -10,8 +10,9 @@ export default function NewCVPage() {
       <DashboardHeader />
       <main className="container mx-auto px-4 py-8 max-w-2xl">
         <Link href="/dashboard" className="inline-flex items-center text-gray-400 hover:text-white mb-4 transition-colors"><ArrowLeft className="mr-2 h-4 w-4" />Volver</Link>
-        <h1 className="text-3xl font-bold mb-2 text-white">Subir Nuevo CV</h1><p className="text-gray-400 mb-6">La IA lo optimizará</p>
-        <CVUploadForm />
+        <h1 className="text-3xl font-bold mb-2 text-white">Subir Nuevo CV</h1>
+        <p className="text-gray-400 mb-6">La IA lo optimizará para ATS</p>
+        <CVUploadDialog />
       </main>
     </div>
   );

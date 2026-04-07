@@ -2,55 +2,130 @@
 
 import { useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Loader2, Upload, FileText, X } from 'lucide-react';
+import { Loader2, Upload, FileText, X, ArrowRight, ArrowLeft, Sparkles, Briefcase, Building2, Target, Lightbulb, FileQuestion, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
 import apiClient from '@/lib/api';
 import { toast } from 'sonner';
 
+const INDUSTRIES = [
+  'Tecnología / Software',
+  'Finanzas / Banca',
+  'Salud / Medicina',
+  'Educación',
+  'Marketing / Publicidad',
+  'Consultoría',
+  'Ingeniería',
+  'Diseño / Creativo',
+  'Ventas / Comercio',
+  'Recursos Humanos',
+  'Legal / Abogacía',
+  'Manufactura / Producción',
+  'Gobierno / Sector público',
+  'ONG / Sin fines de lucro',
+  'Otro',
+];
+
+const EXPERIENCE_LEVELS = [
+  { value: 'junior', label: 'Junior / Trainee', desc: '0-2 años de experiencia' },
+  { value: 'mid', label: 'Semi-Senior', desc: '2-5 años de experiencia' },
+  { value: 'senior', label: 'Senior', desc: '5-10 años de experiencia' },
+  { value: 'lead', label: 'Lead / Manager', desc: '10+ años o gestión de equipos' },
+];
+
+const OPTIMIZATION_FOCUSES = [
+  { value: 'technical', label: 'Experiencia técnica', icon: '💻', desc: 'Destacar habilidades técnicas y proyectos' },
+  { value: 'soft', label: 'Habilidades blandas', icon: '🤝', desc: 'Liderazgo, comunicación, trabajo en equipo' },
+  { value: 'both', label: 'Ambas', icon: '⚡', desc: 'Balance entre técnica y habilidades blandas' },
+  { value: 'career-change', label: 'Cambio de carrera', icon: '🔄', desc: 'Transición a un nuevo rol o industria' },
+];
+
+type Step = 'upload' | 'context' | 'uploading';
+
+interface ContextAnswers {
+  targetJob: string;
+  targetCompany: string;
+  targetIndustry: string;
+  experienceLevel: string;
+  optimizationFocus: string;
+  additionalNotes: string;
+}
+
 export function CVUploadForm() {
   const router = useRouter();
+  const [step, setStep] = useState<Step>('upload');
   const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState('');
-  const [targetJob, setTargetJob] = useState('');
-  const [targetIndustry, setTargetIndustry] = useState('');
-  const [isUploading, setIsUploading] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+
+  const [context, setContext] = useState<ContextAnswers>({
+    targetJob: '',
+    targetCompany: '',
+    targetIndustry: '',
+    experienceLevel: '',
+    optimizationFocus: 'both',
+    additionalNotes: '',
+  });
 
   const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
-      if (selectedFile.type !== 'application/pdf') { toast.error('Solo PDF'); return; }
-      if (selectedFile.size > 10 * 1024 * 1024) { toast.error('Máx 10MB'); return; }
+      if (selectedFile.type !== 'application/pdf') { toast.error('Solo se aceptan archivos PDF'); return; }
+      if (selectedFile.size > 10 * 1024 * 1024) { toast.error('El archivo debe ser menor a 10MB'); return; }
       setFile(selectedFile);
       if (!title) setTitle(selectedFile.name.replace('.pdf', ''));
     }
   }, [title]);
 
+  const handleDragEnter = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isDragOver) setIsDragOver(true);
+  }, [isDragOver]);
+
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
     const droppedFile = e.dataTransfer.files?.[0];
-    if (droppedFile && droppedFile.type === 'application/pdf') {
+    if (droppedFile) {
+      if (droppedFile.type !== 'application/pdf') { toast.error('Solo se aceptan archivos PDF'); return; }
+      if (droppedFile.size > 10 * 1024 * 1024) { toast.error('El archivo debe ser menor a 10MB'); return; }
       setFile(droppedFile);
       if (!title) setTitle(droppedFile.name.replace('.pdf', ''));
     }
   }, [title]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!file || !title.trim()) { toast.error('Completa los campos'); return; }
+  const canProceedToContext = file && title.trim().length > 0;
+  const canSubmit = context.targetJob.trim().length > 0 && context.experienceLevel.length > 0;
 
-    setIsUploading(true);
+  const handleSubmit = async () => {
+    setStep('uploading');
     setUploadProgress(0);
 
     const formData = new FormData();
-    formData.append('pdf', file);
+    formData.append('pdf', file!);
     formData.append('title', title);
-    if (targetJob) formData.append('targetJob', targetJob);
-    if (targetIndustry) formData.append('targetIndustry', targetIndustry);
+    formData.append('targetJob', context.targetJob);
+    formData.append('targetIndustry', context.targetIndustry);
+    formData.append('contextAnswers', JSON.stringify(context));
 
     try {
       await apiClient.post('/cvs/upload', formData, {
@@ -59,59 +134,290 @@ export function CVUploadForm() {
           if (progressEvent.total) setUploadProgress(Math.round((progressEvent.loaded * 100) / progressEvent.total));
         },
       });
-      toast.success('CV subido! Procesando...');
-      router.push('/dashboard/cvs');
+      toast.success('¡CV subido! La IA lo está analizando...');
+      router.push('/dashboard');
     } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Error');
-    } finally {
-      setIsUploading(false);
+      toast.error(error.response?.data?.error || 'Error al subir el CV');
+      setStep('context');
     }
   };
 
+  // ============================================================
+  // STEP 1: Upload
+  // ============================================================
+  if (step === 'upload') {
+    return (
+      <Card className="glass-card">
+        <CardHeader>
+          <CardTitle className="text-white text-2xl">Subí tu CV</CardTitle>
+          <CardDescription className="text-gray-400">Arrastrá tu CV en PDF o seleccionalo manualmente</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Drop Zone */}
+          <label htmlFor="file-upload" className="block">
+            <div
+              className={`relative border-2 border-dashed rounded-xl p-12 text-center transition-all duration-300 cursor-pointer ${
+                isDragOver
+                  ? 'border-white/40 bg-white/10 scale-[1.02]'
+                  : file
+                    ? 'border-green-500/50 bg-green-500/5'
+                    : 'border-white/20 hover:border-white/40 hover:bg-white/5'
+              }`}
+              onDragEnter={handleDragEnter}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+            >
+              <input type="file" accept=".pdf" onChange={handleFileChange} className="hidden" id="file-upload" />
+
+            {file ? (
+              <div className="flex flex-col items-center gap-3">
+                <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center">
+                  <FileText className="h-8 w-8 text-green-400" />
+                </div>
+                <div>
+                  <p className="font-medium text-white text-lg">{file.name}</p>
+                  <p className="text-sm text-gray-400">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="text-gray-400 hover:text-white mt-1"
+                  onClick={(e) => { e.stopPropagation(); setFile(null); setTitle(''); }}
+                >
+                  <X className="h-4 w-4 mr-1" /> Quitar
+                </Button>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center gap-3">
+                <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center">
+                  <Upload className="h-8 w-8 text-gray-500" />
+                </div>
+                <div>
+                  <p className="text-gray-300">
+                    Arrastrá tu CV acá o <span className="text-white font-medium underline">buscá en tu computadora</span>
+                  </p>
+                  <p className="text-sm text-gray-500 mt-1">Solo PDF — máximo 10MB</p>
+                </div>
+              </div>
+            )}
+          </div>
+          </label>
+
+          {/* Title */}
+          {file && (
+            <div className="space-y-2">
+              <Label htmlFor="title" className="text-white">Título del CV *</Label>
+              <Input
+                id="title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Ej: Mi CV — Desarrollador Full Stack"
+                className="bg-black/40 border-white/10 text-white placeholder:text-gray-500"
+              />
+            </div>
+          )}
+
+          {/* Next Button */}
+          <Button
+            className="w-full bg-white text-black font-semibold hover:bg-gray-200 shadow-lg shadow-white/10 h-12 text-base"
+            disabled={!canProceedToContext}
+            onClick={() => setStep('context')}
+          >
+            Continuar <ArrowRight className="ml-2 h-5 w-5" />
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // ============================================================
+  // STEP 2: Context Questions
+  // ============================================================
+  if (step === 'context') {
+    return (
+      <Card className="glass-card">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-white text-2xl">Contexto para la IA</CardTitle>
+              <CardDescription className="text-gray-400">Respondé estas preguntas para que la IA optimice mejor tu CV</CardDescription>
+            </div>
+            <Badge variant="secondary" className="bg-white/10 text-white border-white/10">
+              <Sparkles className="h-3 w-3 mr-1" /> Paso 2 de 2
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* File info */}
+          <div className="flex items-center gap-3 p-3 rounded-lg bg-white/5 border border-white/10">
+            <FileText className="h-5 w-5 text-gray-400" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm text-white truncate">{file?.name}</p>
+              <p className="text-xs text-gray-500">{file ? (file.size / 1024 / 1024).toFixed(2) : '0'} MB</p>
+            </div>
+            <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white shrink-0" onClick={() => setStep('upload')}>
+              Cambiar
+            </Button>
+          </div>
+
+          {/* Q1: Target Job (required) */}
+          <div className="space-y-2">
+            <Label className="text-white flex items-center gap-2">
+              <Briefcase className="h-4 w-4 text-gray-400" />
+              ¿A qué puesto querés aplicar? *
+            </Label>
+            <Input
+              value={context.targetJob}
+              onChange={(e) => setContext(prev => ({ ...prev, targetJob: e.target.value }))}
+              placeholder="Ej: Desarrollador Full Stack, Data Scientist, Product Manager"
+              className="bg-black/40 border-white/10 text-white placeholder:text-gray-500"
+            />
+          </div>
+
+          {/* Q2: Target Company */}
+          <div className="space-y-2">
+            <Label className="text-white flex items-center gap-2">
+              <Building2 className="h-4 w-4 text-gray-400" />
+              ¿A qué empresa va dirigido? <span className="text-gray-500 font-normal">(opcional)</span>
+            </Label>
+            <Input
+              value={context.targetCompany}
+              onChange={(e) => setContext(prev => ({ ...prev, targetCompany: e.target.value }))}
+              placeholder="Ej: Google, MercadoLibre, Accenture"
+              className="bg-black/40 border-white/10 text-white placeholder:text-gray-500"
+            />
+          </div>
+
+          {/* Q3: Industry */}
+          <div className="space-y-2">
+            <Label className="text-white flex items-center gap-2">
+              <Target className="h-4 w-4 text-gray-400" />
+              ¿A qué industria/sector pertenece? <span className="text-gray-500 font-normal">(opcional)</span>
+            </Label>
+            <select
+              value={context.targetIndustry}
+              onChange={(e) => setContext(prev => ({ ...prev, targetIndustry: e.target.value }))}
+              className="flex h-10 w-full rounded-md border border-white/10 bg-black/40 px-3 py-2 text-sm text-white shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30"
+            >
+              <option value="" className="bg-black">Seleccionar industria...</option>
+              {INDUSTRIES.map((ind) => (
+                <option key={ind} value={ind} className="bg-black">{ind}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Q4: Experience Level */}
+          <div className="space-y-3">
+            <Label className="text-white flex items-center gap-2">
+              <FileQuestion className="h-4 w-4 text-gray-400" />
+              ¿Cuál es tu nivel de experiencia? *
+            </Label>
+            <div className="grid grid-cols-2 gap-3">
+              {EXPERIENCE_LEVELS.map((level) => (
+                <button
+                  key={level.value}
+                  type="button"
+                  onClick={() => setContext(prev => ({ ...prev, experienceLevel: level.value }))}
+                  className={`p-3 rounded-lg border text-left transition-all ${
+                    context.experienceLevel === level.value
+                      ? 'border-white/40 bg-white/10 shadow-md'
+                      : 'border-white/10 bg-black/20 hover:bg-white/5'
+                  }`}
+                >
+                  <p className="text-sm font-medium text-white">{level.label}</p>
+                  <p className="text-xs text-gray-400">{level.desc}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Q5: Optimization Focus */}
+          <div className="space-y-3">
+            <Label className="text-white flex items-center gap-2">
+              <Lightbulb className="h-4 w-4 text-gray-400" />
+              ¿Qué querés destacar en tu CV?
+            </Label>
+            <div className="grid grid-cols-2 gap-3">
+              {OPTIMIZATION_FOCUSES.map((focus) => (
+                <button
+                  key={focus.value}
+                  type="button"
+                  onClick={() => setContext(prev => ({ ...prev, optimizationFocus: focus.value }))}
+                  className={`p-3 rounded-lg border text-left transition-all ${
+                    context.optimizationFocus === focus.value
+                      ? 'border-white/40 bg-white/10 shadow-md'
+                      : 'border-white/10 bg-black/20 hover:bg-white/5'
+                  }`}
+                >
+                  <p className="text-sm font-medium text-white">{focus.icon} {focus.label}</p>
+                  <p className="text-xs text-gray-400">{focus.desc}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Q6: Additional Notes */}
+          <div className="space-y-2">
+            <Label className="text-white flex items-center gap-2">
+              <FileQuestion className="h-4 w-4 text-gray-400" />
+              ¿Hay algo específico que quieras mejorar? <span className="text-gray-500 font-normal">(opcional)</span>
+            </Label>
+            <textarea
+              value={context.additionalNotes}
+              onChange={(e) => setContext(prev => ({ ...prev, additionalNotes: e.target.value }))}
+              placeholder="Ej: Quiero que destaque más mi experiencia en liderazgo de equipos, o que agregue keywords de React y Node.js..."
+              rows={3}
+              className="flex w-full rounded-md border border-white/10 bg-black/40 px-3 py-2 text-sm text-white placeholder:text-gray-500 shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30 resize-none"
+            />
+          </div>
+
+          {/* Navigation */}
+          <div className="flex gap-3">
+            <Button
+              variant="ghost"
+              className="flex-1 text-white hover:bg-white/10 h-12"
+              onClick={() => setStep('upload')}
+            >
+              <ArrowLeft className="mr-2 h-5 w-5" /> Volver
+            </Button>
+            <Button
+              className="flex-[2] bg-white text-black font-semibold hover:bg-gray-200 shadow-lg shadow-white/10 h-12 text-base"
+              disabled={!canSubmit}
+              onClick={handleSubmit}
+            >
+              <Sparkles className="mr-2 h-5 w-5" /> Analizar y Mejorar con IA
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // ============================================================
+  // STEP 3: Uploading
+  // ============================================================
   return (
     <Card className="glass-card">
-      <CardHeader>
-        <CardTitle className="text-white">Subir tu CV</CardTitle>
-        <CardDescription className="text-gray-400">La IA lo optimizará para ATS</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="border-2 border-dashed border-white/20 rounded-lg p-8 text-center cursor-pointer hover:border-white/40 hover:bg-white/5 transition-all" onDragOver={(e) => e.preventDefault()} onDrop={handleDrop}>
-            <input type="file" accept=".pdf" onChange={handleFileChange} className="hidden" id="file-upload" />
-            <label htmlFor="file-upload" className="cursor-pointer">
-              {file ? (
-                <div className="flex items-center justify-center gap-3">
-                  <FileText className="h-10 w-10 text-white" />
-                  <div className="text-left">
-                    <p className="font-medium text-white">{file.name}</p>
-                    <p className="text-sm text-gray-400">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
-                  </div>
-                  <Button type="button" variant="ghost" size="icon" className="text-gray-400 hover:text-white" onClick={(e) => { e.preventDefault(); setFile(null); }}><X className="h-4 w-4" /></Button>
-                </div>
-              ) : (
-                <><Upload className="h-10 w-10 mx-auto text-gray-500 mb-3" /><p className="text-sm text-gray-400">Arrastra tu CV o <span className="text-white font-medium">busca</span></p></>
-              )}
-            </label>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="title" className="text-white">Título *</Label>
-            <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Mi CV" className="bg-black/40 border-white/10 text-white placeholder:text-gray-500" />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="targetJob" className="text-white">Puesto objetivo</Label>
-              <Input id="targetJob" value={targetJob} onChange={(e) => setTargetJob(e.target.value)} placeholder="Developer" className="bg-black/40 border-white/10 text-white placeholder:text-gray-500" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="targetIndustry" className="text-white">Industria</Label>
-              <Input id="targetIndustry" value={targetIndustry} onChange={(e) => setTargetIndustry(e.target.value)} placeholder="Tech" className="bg-black/40 border-white/10 text-white placeholder:text-gray-500" />
-            </div>
-          </div>
-          {isUploading && <div className="space-y-2"><div className="flex justify-between text-sm text-gray-400"><span>Subiendo...</span><span>{uploadProgress}%</span></div><Progress value={uploadProgress} /></div>}
-          <Button type="submit" className="w-full bg-white text-black font-semibold hover:bg-gray-200 shadow-lg shadow-white/10" disabled={isUploading || !file}>
-            {isUploading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Subiendo...</> : <><Upload className="mr-2 h-4 w-4" />Subir y Analizar</>}
-          </Button>
-        </form>
+      <CardContent className="py-16 text-center">
+        <div className="w-20 h-20 rounded-full bg-white/10 flex items-center justify-center mx-auto mb-6">
+          {uploadProgress >= 100 ? (
+            <CheckCircle2 className="h-10 w-10 text-green-400" />
+          ) : (
+            <Loader2 className="h-10 w-10 text-white animate-spin" />
+          )}
+        </div>
+        <h3 className="text-xl font-semibold text-white mb-2">
+          {uploadProgress >= 100 ? '¡CV subido!' : 'Subiendo tu CV...'}
+        </h3>
+        <p className="text-gray-400 mb-6">
+          {uploadProgress >= 100
+            ? 'La IA está analizando y optimizando tu CV'
+            : 'Esto puede tomar unos momentos'}
+        </p>
+        <Progress value={uploadProgress} className="max-w-md mx-auto h-2" />
+        <p className="text-sm text-gray-500 mt-3">{uploadProgress}%</p>
       </CardContent>
     </Card>
   );

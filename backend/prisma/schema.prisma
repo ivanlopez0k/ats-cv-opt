@@ -59,6 +59,7 @@ model CV {
   improvedJson   Json?
   targetJob      String?
   targetIndustry String?
+  contextAnswers Json?
   analysisResult Json?
   status         CVStatus @default(PROCESSING)
   isPublic       Boolean  @default(false)
@@ -90,10 +91,10 @@ model AuditLog {
   id        String   @id @default(cuid())
   userId    String?
   user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
-  event     String   // LOGIN_SUCCESS, LOGIN_FAILED, PASSWORD_CHANGE, SESSION_CREATED, SESSION_REVOKED, EMAIL_VERIFIED, ACCOUNT_LOCKED, etc.
+  event     String
   ipAddress String?
   userAgent String?
-  details   Json?    // Additional context
+  details   Json?
   createdAt DateTime @default(now())
 
   @@index([userId])

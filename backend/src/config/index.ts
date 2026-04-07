@@ -26,6 +26,7 @@ export const config = {
 
   openai: {
     apiKey: process.env.OPENAI_API_KEY!,
+    mockEnabled: envBool('OPENAI_MOCK_ENABLED', false),
   },
 
   cloudinary: {

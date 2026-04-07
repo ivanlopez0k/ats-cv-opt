@@ -6,12 +6,25 @@ import { extractTextFromPDF, createPDFFromText } from '../utils/pdf.js';
 import { uploadToCloudinary, getPublicIdFromUrl } from '../utils/cloudinary.js';
 import { aiService } from '../services/index.js';
 import https from 'https';
+import http from 'http';
 
 const connection = new IORedis(config.redis.url, { maxRetriesPerRequest: null });
 
+/**
+ * Download a file from a URL (supports http/https)
+ */
 const downloadBuffer = (url: string): Promise<Buffer> => {
   return new Promise((resolve, reject) => {
-    https.get(url, (response) => {
+    const protocol = url.startsWith('https') ? https : http;
+    protocol.get(url, (response) => {
+      if (response.statusCode === 301 || response.statusCode === 302) {
+        downloadBuffer(response.headers.location!).then(resolve).catch(reject);
+        return;
+      }
+      if (response.statusCode && response.statusCode >= 400) {
+        reject(new Error(`Download failed: ${response.statusCode}`));
+        return;
+      }
       const chunks: Buffer[] = [];
       response.on('data', (chunk) => chunks.push(chunk));
       response.on('end', () => resolve(Buffer.concat(chunks)));
@@ -19,6 +32,50 @@ const downloadBuffer = (url: string): Promise<Buffer> => {
     }).on('error', reject);
   });
 };
+
+/**
+ * Resolve a relative URL (like /uploads/...) to an absolute one.
+ */
+const resolvePdfUrl = (originalUrl: string): string => {
+  if (originalUrl.startsWith('http://') || originalUrl.startsWith('https://')) {
+    return originalUrl;
+  }
+  return `http://localhost:${config.port}${originalUrl.startsWith('/') ? '' : '/'}${originalUrl}`;
+};
+
+/**
+ * Sleep for a given number of milliseconds
+ */
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+/**
+ * Retry a function with exponential backoff for rate limit errors (429).
+ * Retries up to `maxRetries` times, waiting 2^attempt * 1000ms between retries.
+ */
+async function withRetry<T>(fn: () => Promise<T>, maxRetries = 3): Promise<T> {
+  let lastError: Error | undefined;
+
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error: any) {
+      lastError = error;
+      const isRateLimit = error?.status === 429 || error?.code === 'insufficient_quota';
+
+      if (isRateLimit && attempt < maxRetries - 1) {
+        const waitMs = Math.pow(2, attempt) * 1000;
+        console.warn(`⚠️ OpenAI rate limit hit. Retrying in ${waitMs / 1000}s (attempt ${attempt + 1}/${maxRetries})`);
+        await sleep(waitMs);
+      } else if (isRateLimit && attempt >= maxRetries - 1) {
+        throw new Error(`OpenAI quota exceeded. Check your billing details at https://platform.openai.com/account/billing`);
+      } else {
+        throw error;
+      }
+    }
+  }
+
+  throw lastError;
+}
 
 const aiWorker = new Worker(
   'ai-processing',
@@ -31,13 +88,19 @@ const aiWorker = new Worker(
     if (!cv) throw new Error('CV not found');
 
     try {
-      const pdfBuffer = await downloadBuffer(cv.originalPdfUrl);
+      // Resolve relative URLs to absolute backend URLs
+      const pdfUrl = resolvePdfUrl(cv.originalPdfUrl);
+      console.log(`Downloading PDF from: ${pdfUrl}`);
+
+      const pdfBuffer = await downloadBuffer(pdfUrl);
       const extracted = await extractTextFromPDF(pdfBuffer);
 
-      const improvement = await aiService.improveCV(
-        extracted.text,
-        targetJob,
-        targetIndustry
+      console.log(`Extracted ${extracted.text.length} characters from PDF`);
+
+      // Retry with exponential backoff for rate limit errors
+      const improvement = await withRetry(
+        () => aiService.improveCV(extracted.text, targetJob, targetIndustry),
+        3 // max 3 retries
       );
 
       const improvedPdfBuffer = await createPDFFromText(improvement.improvedText);
@@ -57,15 +120,17 @@ const aiWorker = new Worker(
         },
       });
 
-      console.log(`CV ${cvId} processed successfully`);
-    } catch (error) {
-      console.error(`Error processing CV ${cvId}:`, error);
+      console.log(`✅ CV ${cvId} processed successfully`);
+    } catch (error: any) {
+      console.error(`❌ Error processing CV ${cvId}:`, error);
+
+      const errorMessage = error?.message || 'Processing failed';
 
       await prisma.cV.update({
         where: { id: cvId },
         data: {
           status: 'FAILED',
-          analysisResult: { error: 'Processing failed' },
+          analysisResult: { error: errorMessage },
         },
       });
 
@@ -74,16 +139,16 @@ const aiWorker = new Worker(
   },
   {
     connection,
-    concurrency: 2,
+    concurrency: 1, // Single job at a time to avoid hitting rate limits
   }
 );
 
 aiWorker.on('completed', (job) => {
-  console.log(`Job ${job.id} completed`);
+  console.log(`✅ Job ${job.id} completed`);
 });
 
 aiWorker.on('failed', (job, err) => {
-  console.error(`Job ${job?.id} failed:`, err.message);
+  console.error(`❌ Job ${job?.id} failed:`, err.message);
 });
 
 export { aiWorker };
