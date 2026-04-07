@@ -25,23 +25,23 @@ export default function SettingsPage() {
   const initials = user?.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-black">
       <DashboardHeader />
       <main className="container mx-auto px-4 py-8 max-w-2xl">
-        <h1 className="text-3xl font-bold mb-8">Configuración</h1>
+        <h1 className="text-3xl font-bold mb-8 text-white">Configuración</h1>
         <div className="space-y-6">
-          <Card>
-            <CardHeader><CardTitle>Perfil</CardTitle><CardDescription>Tu información</CardDescription></CardHeader>
+          <Card className="glass-card">
+            <CardHeader><CardTitle className="text-white">Perfil</CardTitle><CardDescription className="text-gray-400">Tu información</CardDescription></CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                <div className="flex items-center gap-4 mb-6"><Avatar className="h-20 w-20"><AvatarFallback className="text-xl bg-primary text-primary-foreground">{initials}</AvatarFallback></Avatar></div>
-                <div className="space-y-2"><Label htmlFor="name">Nombre</Label><Input id="name" {...register('name')} />{errors.name && <p className="text-sm text-red-500">{errors.name.message}</p>}</div>
-                <div className="space-y-2"><Label>Email</Label><Input value={user?.email} disabled /><p className="text-sm text-muted-foreground">No se puede cambiar</p></div>
-                <Button type="submit" disabled={isLoading}>{isLoading ? 'Guardando...' : 'Guardar'}</Button>
+                <div className="flex items-center gap-4 mb-6"><Avatar className="h-20 w-20"><AvatarFallback className="text-xl bg-white text-black">{initials}</AvatarFallback></Avatar></div>
+                <div className="space-y-2"><Label htmlFor="name" className="text-white">Nombre</Label><Input id="name" {...register('name')} className="bg-black/40 border-white/10 text-white" />{errors.name && <p className="text-sm text-red-400">{errors.name.message}</p>}</div>
+                <div className="space-y-2"><Label className="text-white">Email</Label><Input value={user?.email} disabled className="bg-black/40 border-white/10 text-gray-400" /><p className="text-sm text-gray-400">No se puede cambiar</p></div>
+                <Button type="submit" disabled={isLoading} className="bg-white text-black font-medium hover:bg-gray-200 shadow-lg shadow-white/10">{isLoading ? 'Guardando...' : 'Guardar'}</Button>
               </form>
             </CardContent>
           </Card>
-          <Card className="border-red-200"><CardHeader><CardTitle className="text-red-600">Zona de peligro</CardTitle><CardDescription>Acciones irreversibles</CardDescription></CardHeader><CardContent><Button variant="destructive" onClick={() => { logout(); router.push('/login'); }}>Cerrar sesión</Button></CardContent></Card>
+          <Card className="glass-card border-red-500/30"><CardHeader><CardTitle className="text-red-400">Zona de peligro</CardTitle><CardDescription className="text-gray-400">Acciones irreversibles</CardDescription></CardHeader><CardContent><Button variant="destructive" onClick={() => { logout(); router.push('/login'); }}>Cerrar sesión</Button></CardContent></Card>
         </div>
       </main>
     </div>

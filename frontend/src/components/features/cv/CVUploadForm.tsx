@@ -69,46 +69,46 @@ export function CVUploadForm() {
   };
 
   return (
-    <Card>
+    <Card className="glass-card">
       <CardHeader>
-        <CardTitle>Subir tu CV</CardTitle>
-        <CardDescription>La IA lo optimizará para ATS</CardDescription>
+        <CardTitle className="text-white">Subir tu CV</CardTitle>
+        <CardDescription className="text-gray-400">La IA lo optimizará para ATS</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:border-primary/50" onDragOver={(e) => e.preventDefault()} onDrop={handleDrop}>
+          <div className="border-2 border-dashed border-white/20 rounded-lg p-8 text-center cursor-pointer hover:border-white/40 hover:bg-white/5 transition-all" onDragOver={(e) => e.preventDefault()} onDrop={handleDrop}>
             <input type="file" accept=".pdf" onChange={handleFileChange} className="hidden" id="file-upload" />
             <label htmlFor="file-upload" className="cursor-pointer">
               {file ? (
                 <div className="flex items-center justify-center gap-3">
-                  <FileText className="h-10 w-10 text-primary" />
+                  <FileText className="h-10 w-10 text-white" />
                   <div className="text-left">
-                    <p className="font-medium">{file.name}</p>
-                    <p className="text-sm text-muted-foreground">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                    <p className="font-medium text-white">{file.name}</p>
+                    <p className="text-sm text-gray-400">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
                   </div>
-                  <Button type="button" variant="ghost" size="icon" onClick={(e) => { e.preventDefault(); setFile(null); }}><X className="h-4 w-4" /></Button>
+                  <Button type="button" variant="ghost" size="icon" className="text-gray-400 hover:text-white" onClick={(e) => { e.preventDefault(); setFile(null); }}><X className="h-4 w-4" /></Button>
                 </div>
               ) : (
-                <><Upload className="h-10 w-10 mx-auto text-muted-foreground mb-3" /><p className="text-sm text-muted-foreground">Arrastra tu CV o <span className="text-primary font-medium">busca</span></p></>
+                <><Upload className="h-10 w-10 mx-auto text-gray-500 mb-3" /><p className="text-sm text-gray-400">Arrastra tu CV o <span className="text-white font-medium">busca</span></p></>
               )}
             </label>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="title">Título *</Label>
-            <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Mi CV" />
+            <Label htmlFor="title" className="text-white">Título *</Label>
+            <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Mi CV" className="bg-black/40 border-white/10 text-white placeholder:text-gray-500" />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="targetJob">Puesto objetivo</Label>
-              <Input id="targetJob" value={targetJob} onChange={(e) => setTargetJob(e.target.value)} placeholder="Developer" />
+              <Label htmlFor="targetJob" className="text-white">Puesto objetivo</Label>
+              <Input id="targetJob" value={targetJob} onChange={(e) => setTargetJob(e.target.value)} placeholder="Developer" className="bg-black/40 border-white/10 text-white placeholder:text-gray-500" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="targetIndustry">Industria</Label>
-              <Input id="targetIndustry" value={targetIndustry} onChange={(e) => setTargetIndustry(e.target.value)} placeholder="Tech" />
+              <Label htmlFor="targetIndustry" className="text-white">Industria</Label>
+              <Input id="targetIndustry" value={targetIndustry} onChange={(e) => setTargetIndustry(e.target.value)} placeholder="Tech" className="bg-black/40 border-white/10 text-white placeholder:text-gray-500" />
             </div>
           </div>
-          {isUploading && <div className="space-y-2"><div className="flex justify-between text-sm"><span>Subiendo...</span><span>{uploadProgress}%</span></div><Progress value={uploadProgress} /></div>}
-          <Button type="submit" className="w-full" disabled={isUploading || !file}>
+          {isUploading && <div className="space-y-2"><div className="flex justify-between text-sm text-gray-400"><span>Subiendo...</span><span>{uploadProgress}%</span></div><Progress value={uploadProgress} /></div>}
+          <Button type="submit" className="w-full bg-white text-black font-semibold hover:bg-gray-200 shadow-lg shadow-white/10" disabled={isUploading || !file}>
             {isUploading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Subiendo...</> : <><Upload className="mr-2 h-4 w-4" />Subir y Analizar</>}
           </Button>
         </form>

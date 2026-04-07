@@ -40,39 +40,39 @@ export function RegisterForm() {
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto">
+    <Card className="w-full max-w-md mx-auto glass-card">
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold text-center">Crear Cuenta</CardTitle>
-        <CardDescription className="text-center">Ingresa tus datos</CardDescription>
+        <CardTitle className="text-2xl font-bold text-center text-white">Crear Cuenta</CardTitle>
+        <CardDescription className="text-center text-gray-400">Ingresa tus datos</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Nombre</Label>
-            <Input id="name" type="text" placeholder="Juan Pérez" {...register('name')} />
-            {errors.name && <p className="text-sm text-red-500">{errors.name.message}</p>}
+            <Label htmlFor="name" className="text-white">Nombre</Label>
+            <Input id="name" type="text" placeholder="Juan Pérez" {...register('name')} className="bg-black/40 border-white/10 text-white placeholder:text-gray-500" />
+            {errors.name && <p className="text-sm text-red-400">{errors.name.message}</p>}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" placeholder="tu@email.com" {...register('email')} />
-            {errors.email && <p className="text-sm text-red-500">{errors.email.message}</p>}
+            <Label htmlFor="email" className="text-white">Email</Label>
+            <Input id="email" type="email" placeholder="tu@email.com" {...register('email')} className="bg-black/40 border-white/10 text-white placeholder:text-gray-500" />
+            {errors.email && <p className="text-sm text-red-400">{errors.email.message}</p>}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">Contraseña</Label>
+            <Label htmlFor="password" className="text-white">Contraseña</Label>
             <div className="relative">
-              <Input id="password" type={showPassword ? 'text' : 'password'} placeholder="••••••••" {...register('password')} />
-              <Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-full px-3" onClick={() => setShowPassword(!showPassword)}>
+              <Input id="password" type={showPassword ? 'text' : 'password'} placeholder="••••••••" {...register('password')} className="bg-black/40 border-white/10 text-white placeholder:text-gray-500" />
+              <Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-full px-3 text-gray-400 hover:text-white" onClick={() => setShowPassword(!showPassword)}>
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </Button>
             </div>
-            {errors.password && <p className="text-sm text-red-500">{errors.password.message}</p>}
+            {errors.password && <p className="text-sm text-red-400">{errors.password.message}</p>}
           </div>
-          <Button type="submit" className="w-full" disabled={isLoading}>
+          <Button type="submit" className="w-full bg-white text-black font-semibold hover:bg-gray-200 shadow-lg shadow-white/10">
             {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Creando...</> : 'Crear Cuenta'}
           </Button>
         </form>
         <div className="mt-4 text-center text-sm">
-          ¿Ya tienes cuenta? <a href="/login" className="text-primary hover:underline">Inicia sesión</a>
+          <span className="text-gray-400">¿Ya tienes cuenta?</span> <a href="/login" className="text-white hover:underline font-medium">Inicia sesión</a>
         </div>
       </CardContent>
     </Card>
