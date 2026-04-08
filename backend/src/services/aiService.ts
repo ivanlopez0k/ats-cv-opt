@@ -31,7 +31,7 @@ El JSON debe tener esta estructura:
 /**
  * Generate mock analysis/improvement for development without OpenAI credits.
  */
-function generateMockAnalysis(cvText: string, targetJob?: string, targetIndustry?: string): CVImprovementResult {
+export function generateMockAnalysis(cvText: string, targetJob?: string, targetIndustry?: string): CVImprovementResult {
   const score = Math.floor(Math.random() * 60) + 40; // Random 40-99
 
   const allIssues = [
@@ -116,18 +116,35 @@ async function callOllama(prompt: string): Promise<string> {
         res.on('end', () => {
           try {
             const parsed = JSON.parse(data);
+            // Check for Ollama errors in the response
+            if (parsed.error) {
+              reject(new Error(`Ollama error: ${parsed.error}`));
+              return;
+            }
+            if (!parsed.response && parsed.response !== '') {
+              console.error('[Ollama] Raw response:', data.slice(0, 1000));
+              reject(new Error(`Ollama returned no response field. Raw: ${data.slice(0, 500)}`));
+              return;
+            }
             resolve(parsed.response || '');
-          } catch {
-            reject(new Error(`Ollama response parse error: ${data.slice(0, 200)}`));
+          } catch (parseErr: any) {
+            console.error('[Ollama] Failed to parse response:', data.slice(0, 1000));
+            reject(new Error(`Ollama response parse error: ${parseErr.message}. Raw: ${data.slice(0, 500)}`));
           }
         });
       }
     );
 
-    req.on('error', reject);
+    req.on('error', (err: any) => {
+      if (err.code === 'ECONNREFUSED') {
+        reject(new Error('Could not connect to Ollama. Make sure Ollama is running on ' + config.ollama.baseUrl));
+      } else {
+        reject(err);
+      }
+    });
     req.on('timeout', () => {
       req.destroy();
-      reject(new Error('Ollama request timed out'));
+      reject(new Error('Ollama request timed out (10 min). The model might be too large for your system.'));
     });
 
     req.write(body);

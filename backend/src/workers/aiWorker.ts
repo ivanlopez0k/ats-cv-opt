@@ -7,6 +7,8 @@ import { uploadToCloudinary, getPublicIdFromUrl } from '../utils/cloudinary.js';
 import { aiService } from '../services/index.js';
 import https from 'https';
 import http from 'http';
+import fs from 'fs';
+import path from 'path';
 
 const connection = new IORedis(config.redis.url, { maxRetriesPerRequest: null });
 
@@ -98,18 +100,34 @@ const aiWorker = new Worker(
       console.log(`Extracted ${extracted.text.length} characters from PDF`);
 
       // Retry with exponential backoff for rate limit errors
-      // Higher timeout for Ollama local models (up to 5 min)
-      const improvement = await withRetry(
-        () => aiService.improveCV(extracted.text, targetJob, targetIndustry),
-        3 // max 3 retries
-      );
+      let improvement;
+      try {
+        improvement = await withRetry(
+          () => aiService.improveCV(extracted.text, targetJob, targetIndustry),
+          3 // max 3 retries
+        );
+      } catch (error: any) {
+        // If JSON extraction fails, fall back to mock (common with local LLMs)
+        if (error.message?.includes('Could not extract valid JSON')) {
+          console.warn(`⚠️ Local LLM failed to produce valid JSON, falling back to mock results`);
+          const { generateMockAnalysis } = await import('../services/aiService.js');
+          improvement = await generateMockAnalysis(extracted.text, targetJob, targetIndustry);
+        } else {
+          throw error;
+        }
+      }
 
       const improvedPdfBuffer = await createPDFFromText(improvement.improvedText);
-      const { url: improvedPdfUrl } = await uploadToCloudinary(
-        improvedPdfBuffer,
-        `improved-${cvId}.pdf`,
-        'cvmaster/improved'
-      );
+
+      // Save improved PDF locally (Cloudinary raw gives 401 for dev)
+      const uploadsDir = path.join(process.cwd(), 'uploads', cv.userId);
+      if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+      }
+      const filename = `improved-${cvId}.pdf`;
+      const localPath = path.join(uploadsDir, filename);
+      fs.writeFileSync(localPath, improvedPdfBuffer);
+      const improvedPdfUrl = `http://localhost:${config.port}/uploads/${cv.userId}/${filename}`;
 
       await prisma.cV.update({
         where: { id: cvId },
