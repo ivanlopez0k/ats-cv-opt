@@ -1,22 +1,27 @@
 import OpenAI from 'openai';
 import { config } from '../config/index.js';
 import { CVAnalysisResult, CVImprovementResult } from '../types/index.js';
+import http from 'http';
 
 const openai = new OpenAI({ apiKey: config.openai.apiKey });
 
 const SYSTEM_PROMPT_ANALYSIS = `Eres un experto en ATS (Applicant Tracking Systems) y optimización de CVs. 
-Analiza el CV proporcionado y retorna un JSON con:
+Analiza el CV proporcionado y retorna SOLO un JSON válido con:
 - score: número del 0-100 representando qué tan ATS-friendly es
 - issues: array de problemas encontrados
 - missingKeywords: keywords importantes que faltan para el puesto
-- suggestions: array de sugerencias de mejora`;
+- suggestions: array de sugerencias de mejora
+
+No incluyas markdown ni texto adicional, solo el JSON.`;
 
 const SYSTEM_PROMPT_IMPROVEMENT = `Eres un experto en ATS y optimización de CVs. 
 Recibes un CV y debes mejorarlo manteniendo toda la información real.
-Retorna un JSON con:
+Retorna SOLO un JSON válido con:
 - improvedText: texto del CV mejorado (formato limpio para PDF)
-- structuredCV: objeto con la estructura del CV
-- analysis: objeto con score, issues, missingKeywords, suggestions`;
+- structuredCV: objeto con la estructura del CV (personalInfo, summary, experience, education, skills)
+- analysis: objeto con score, issues, missingKeywords, suggestions
+
+No incluyas markdown ni texto adicional, solo el JSON.`;
 
 /**
  * Generate mock analysis/improvement for development without OpenAI credits.
@@ -52,12 +57,10 @@ function generateMockAnalysis(cvText: string, targetJob?: string, targetIndustry
     'Incluir habilidades blandas con ejemplos concretos',
   ];
 
-  // Pick 2-4 random issues
+  // Pick random items
   const issues = allIssues.sort(() => Math.random() - 0.5).slice(0, Math.floor(Math.random() * 3) + 2);
-  // Pick 3-5 random missing keywords
   const missingKeywords = allKeywords.sort(() => Math.random() - 0.5).slice(0, Math.floor(Math.random() * 3) + 3);
   if (targetJob && !missingKeywords.includes(targetJob)) missingKeywords.unshift(targetJob);
-  // Pick 2-3 random suggestions
   const suggestions = allSuggestions.sort(() => Math.random() - 0.5).slice(0, Math.floor(Math.random() * 2) + 2);
 
   return {
@@ -73,14 +76,107 @@ function generateMockAnalysis(cvText: string, targetJob?: string, targetIndustry
   };
 }
 
+/**
+ * Call Ollama local API directly (no extra dependency needed).
+ */
+async function callOllama(prompt: string): Promise<string> {
+  const body = JSON.stringify({
+    model: config.ollama.model,
+    prompt,
+    stream: false,
+    options: {
+      temperature: 0.3,
+      num_ctx: 8192,
+    },
+  });
+
+  const url = new URL(config.ollama.baseUrl);
+
+  return new Promise((resolve, reject) => {
+    const req = http.request(
+      {
+        hostname: url.hostname,
+        port: url.port || 11434,
+        path: '/api/generate',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Content-Length': Buffer.byteLength(body),
+        },
+        timeout: 120_000, // 2 min timeout for local model
+      },
+      (res) => {
+        let data = '';
+        res.on('data', (chunk) => (data += chunk));
+        res.on('end', () => {
+          try {
+            const parsed = JSON.parse(data);
+            resolve(parsed.response || '');
+          } catch {
+            reject(new Error(`Ollama response parse error: ${data.slice(0, 200)}`));
+          }
+        });
+      }
+    );
+
+    req.on('error', reject);
+    req.on('timeout', () => {
+      req.destroy();
+      reject(new Error('Ollama request timed out'));
+    });
+
+    req.write(body);
+    req.end();
+  });
+}
+
+/**
+ * Try to extract JSON from a response that might contain markdown code blocks.
+ */
+function extractJson(text: string): any {
+  // Try direct parse first
+  try {
+    return JSON.parse(text);
+  } catch {
+    // Try to extract from ```json ... ``` blocks
+    const match = text.match(/```(?:json)?\s*\n?([\s\S]*?)\n?```/);
+    if (match) {
+      try {
+        return JSON.parse(match[1]);
+      } catch {
+        // Try to find anything that looks like a JSON object
+        const objMatch = text.match(/\{[\s\S]*\}/);
+        if (objMatch) {
+          try {
+            return JSON.parse(objMatch[0]);
+          } catch {
+            // Last resort: find the largest balanced brace block
+          }
+        }
+      }
+    }
+  }
+  throw new Error('Could not extract valid JSON from AI response');
+}
+
 export const aiService = {
   async analyzeCV(cvText: string, targetJob?: string, targetIndustry?: string): Promise<CVAnalysisResult> {
+    // Mode 1: Ollama (local, free)
+    if (config.ollama.enabled) {
+      console.log(`🦙 Using Ollama (${config.ollama.model}) for analysis`);
+      const prompt = `${SYSTEM_PROMPT_ANALYSIS}\n\nCV a analizar:\n${cvText}\n\n${targetJob ? `Puesto objetivo: ${targetJob}` : ''}${targetIndustry ? `Industria: ${targetIndustry}` : ''}`;
+      const response = await callOllama(prompt);
+      return extractJson(response) as CVAnalysisResult;
+    }
+
+    // Mode 2: Mock (dev, no API needed)
     if (config.openai.mockEnabled) {
       console.log('🎭 Using mock AI analysis (development mode)');
       const mock = generateMockAnalysis(cvText, targetJob, targetIndustry);
       return mock.analysis;
     }
 
+    // Mode 3: OpenAI (production)
     const userPrompt = `
 CV a analizar:
 ${cvText}
@@ -107,11 +203,21 @@ Responde SOLO con JSON válido, sin texto adicional.`;
   },
 
   async improveCV(cvText: string, targetJob?: string, targetIndustry?: string): Promise<CVImprovementResult> {
+    // Mode 1: Ollama (local, free)
+    if (config.ollama.enabled) {
+      console.log(`🦙 Using Ollama (${config.ollama.model}) for improvement`);
+      const prompt = `${SYSTEM_PROMPT_IMPROVEMENT}\n\nCV a mejorar:\n${cvText}\n\n${targetJob ? `Puesto objetivo: ${targetJob}` : ''}${targetIndustry ? `Industria: ${targetIndustry}` : ''}`;
+      const response = await callOllama(prompt);
+      return extractJson(response) as CVImprovementResult;
+    }
+
+    // Mode 2: Mock (dev, no API needed)
     if (config.openai.mockEnabled) {
       console.log('🎭 Using mock AI improvement (development mode)');
       return generateMockAnalysis(cvText, targetJob, targetIndustry);
     }
 
+    // Mode 3: OpenAI (production)
     const userPrompt = `
 CV a mejorar:
 ${cvText}

@@ -98,6 +98,7 @@ const aiWorker = new Worker(
       console.log(`Extracted ${extracted.text.length} characters from PDF`);
 
       // Retry with exponential backoff for rate limit errors
+      // Higher timeout for Ollama local models (up to 5 min)
       const improvement = await withRetry(
         () => aiService.improveCV(extracted.text, targetJob, targetIndustry),
         3 // max 3 retries

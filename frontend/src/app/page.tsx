@@ -1,10 +1,13 @@
 'use client';
 import Link from 'next/link';
-import { FileText, Sparkles, ArrowRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { FileText, Sparkles, ArrowRight, User } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useAuthStore } from '@/lib/stores/authStore';
 
 export default function LandingPage() {
+  const { isAuthenticated, user } = useAuthStore();
+  const initials = user?.username?.slice(0, 2).toUpperCase() || user?.name?.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) || 'U';
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-950 to-black">
       <header className="border-b border-white/10 bg-black/50 backdrop-blur-md sticky top-0 z-50">
@@ -14,7 +17,13 @@ export default function LandingPage() {
           </div>
           <nav className="flex items-center gap-4">
             <Link href="/community" className="inline-flex items-center px-3 py-2 text-sm font-medium text-white rounded-lg hover:bg-white/10 transition-colors">Comunidad</Link>
-            <Link href="/register" className="inline-flex items-center px-4 py-2 text-sm font-medium text-black bg-white rounded-lg hover:bg-gray-200 shadow-lg shadow-white/10 transition-all">Empezar gratis</Link>
+            {isAuthenticated ? (
+              <Link href="/dashboard" className="flex items-center justify-center w-10 h-10 rounded-full bg-white/10 border border-white/20 text-white hover:bg-white/20 transition-all">
+                <span className="text-sm font-semibold">{initials}</span>
+              </Link>
+            ) : (
+              <Link href="/register" className="inline-flex items-center px-4 py-2 text-sm font-medium text-black bg-white rounded-lg hover:bg-gray-200 shadow-lg shadow-white/10 transition-all">Empezar gratis</Link>
+            )}
           </nav>
         </div>
       </header>
@@ -27,7 +36,13 @@ export default function LandingPage() {
             <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight text-white">Tu CV listo para<span className="text-white"> pasar los filtros ATS</span></h1>
             <p className="text-xl text-gray-400 mb-8 max-w-2xl mx-auto">Sube tu CV, indica el puesto y nuestra IA lo optimizará para superar los sistemas de seguimiento.</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a href="/register" className="inline-flex items-center px-8 py-4 text-base font-semibold text-black bg-gradient-to-r from-white to-gray-200 rounded-lg shadow-xl shadow-white/20 hover:shadow-white/30 hover:scale-105 transition-all duration-300 glow-white-hover">Crear cuenta gratis<ArrowRight className="ml-2 h-5 w-5" /></a>
+              {isAuthenticated ? (
+                <Link href="/dashboard" className="inline-flex items-center px-8 py-4 text-base font-semibold text-black bg-gradient-to-r from-white to-gray-200 rounded-lg shadow-xl shadow-white/20 hover:shadow-white/30 hover:scale-105 transition-all duration-300 glow-white-hover">
+                  Ir al Dashboard<ArrowRight className="ml-2 h-5 w-5" />
+                </Link>
+              ) : (
+                <a href="/register" className="inline-flex items-center px-8 py-4 text-base font-semibold text-black bg-gradient-to-r from-white to-gray-200 rounded-lg shadow-xl shadow-white/20 hover:shadow-white/30 hover:scale-105 transition-all duration-300 glow-white-hover">Crear cuenta gratis<ArrowRight className="ml-2 h-5 w-5" /></a>
+              )}
               <a href="/community" className="inline-flex items-center px-6 py-4 text-base font-medium text-white border border-white/20 rounded-lg hover:bg-white/10 transition-colors">Ver ejemplos</a>
             </div>
           </div>
@@ -45,8 +60,14 @@ export default function LandingPage() {
         <section className="py-16 px-4 bg-gradient-to-r from-gray-900 to-black border-y border-white/10">
           <div className="container mx-auto text-center max-w-2xl">
             <h2 className="text-3xl font-bold mb-4 text-white">Empieza hoy</h2>
-            <p className="text-gray-400 mb-8">Regístrate gratis y recibe tu primer CV optimizado en minutos</p>
-            <a href="/register" className="inline-flex items-center px-8 py-4 text-base font-semibold text-black bg-gradient-to-r from-white to-gray-200 rounded-lg shadow-xl shadow-white/20 hover:shadow-white/30 hover:scale-105 transition-all duration-300 glow-white-hover">Crear cuenta gratis<ArrowRight className="ml-2 h-5 w-5" /></a>
+            <p className="text-gray-400 mb-8">{isAuthenticated ? 'Gestiona y optimiza tus CVs desde el dashboard' : 'Regístrate gratis y recibe tu primer CV optimizado en minutos'}</p>
+            {isAuthenticated ? (
+              <Link href="/dashboard" className="inline-flex items-center px-8 py-4 text-base font-semibold text-black bg-gradient-to-r from-white to-gray-200 rounded-lg shadow-xl shadow-white/20 hover:shadow-white/30 hover:scale-105 transition-all duration-300 glow-white-hover">
+                Ir al Dashboard<ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+            ) : (
+              <a href="/register" className="inline-flex items-center px-8 py-4 text-base font-semibold text-black bg-gradient-to-r from-white to-gray-200 rounded-lg shadow-xl shadow-white/20 hover:shadow-white/30 hover:scale-105 transition-all duration-300 glow-white-hover">Crear cuenta gratis<ArrowRight className="ml-2 h-5 w-5" /></a>
+            )}
           </div>
         </section>
       </main>

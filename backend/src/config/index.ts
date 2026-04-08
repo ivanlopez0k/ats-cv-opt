@@ -29,6 +29,12 @@ export const config = {
     mockEnabled: envBool('OPENAI_MOCK_ENABLED', false),
   },
 
+  ollama: {
+    enabled: envBool('OLLAMA_ENABLED', false),
+    baseUrl: process.env.OLLAMA_BASE_URL || 'http://localhost:11434',
+    model: process.env.OLLAMA_MODEL || 'qwen2.5:7b',
+  },
+
   cloudinary: {
     cloudName: process.env.CLOUDINARY_CLOUD_NAME!,
     apiKey: process.env.CLOUDINARY_API_KEY!,
