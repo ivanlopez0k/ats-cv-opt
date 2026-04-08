@@ -107,7 +107,7 @@ const aiWorker = new Worker(
       const improvedPdfBuffer = await createPDFFromText(improvement.improvedText);
       const { url: improvedPdfUrl } = await uploadToCloudinary(
         improvedPdfBuffer,
-        `improved-${cvId}`,
+        `improved-${cvId}.pdf`,
         'cvmaster/improved'
       );
 

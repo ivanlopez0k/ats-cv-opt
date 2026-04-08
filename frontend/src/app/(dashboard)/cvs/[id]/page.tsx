@@ -1,4 +1,5 @@
 'use client';
+import { use } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { DashboardHeader } from '@/components/features/dashboard/DashboardHeader';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -12,8 +13,10 @@ import Link from 'next/link';
 import apiClient from '@/lib/api';
 import type { CV } from '@/lib/types';
 
-export default function CVDetailPage({ params }: { params: { id: string } }) {
-  const { data: cv, isLoading } = useQuery({ queryKey: ['cv', params.id], queryFn: async () => { const r = await apiClient.get(`/cvs/${params.id}`); return r.data.data as CV; } });
+export default function CVDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
+
+  const { data: cv, isLoading } = useQuery({ queryKey: ['cv', id], queryFn: async () => { const r = await apiClient.get(`/cvs/${id}`); return r.data.data as CV; } });
 
   if (isLoading) return <div className="min-h-screen bg-black"><DashboardHeader /><main className="container mx-auto px-4 py-8"><Skeleton className="h-48 bg-white/5" /></main></div>;
 

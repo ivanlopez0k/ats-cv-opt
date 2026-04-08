@@ -17,8 +17,11 @@ export const uploadToCloudinary = async (
     const uploadStream = cloudinary.uploader.upload_stream(
       {
         folder,
-        public_id: filename.replace(/\.[^/.]+$/, ''),
-        resource_type: 'raw', // PDFs must be uploaded as 'raw' to avoid 401/signing issues
+        // For PDFs (raw resources), keep the .pdf extension in the public_id
+        // so the download URL preserves the extension
+        public_id: filename,
+        resource_type: 'raw',
+        format: 'pdf', // Force PDF format in the URL
       },
       (error, result) => {
         if (error) return reject(error);

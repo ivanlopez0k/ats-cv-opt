@@ -16,12 +16,17 @@ No incluyas markdown ni texto adicional, solo el JSON.`;
 
 const SYSTEM_PROMPT_IMPROVEMENT = `Eres un experto en ATS y optimización de CVs. 
 Recibes un CV y debes mejorarlo manteniendo toda la información real.
-Retorna SOLO un JSON válido con:
-- improvedText: texto del CV mejorado (formato limpio para PDF)
-- structuredCV: objeto con la estructura del CV (personalInfo, summary, experience, education, skills)
-- analysis: objeto con score, issues, missingKeywords, suggestions
 
-No incluyas markdown ni texto adicional, solo el JSON.`;
+IMPORTANTE: Responde EXCLUSIVAMENTE con un objeto JSON válido. 
+- NO uses saltos de línea reales dentro de los strings.
+- Si necesitas saltos de línea, usa \\n literal.
+- NO incluyas markdown, bloques de código ni texto adicional.
+- Solo el JSON crudo.
+
+El JSON debe tener esta estructura:
+- improvedText: string con el CV mejorado
+- structuredCV: objeto con personalInfo, summary, experience, education, skills
+- analysis: objeto con score, issues, missingKeywords, suggestions`;
 
 /**
  * Generate mock analysis/improvement for development without OpenAI credits.
@@ -103,7 +108,7 @@ async function callOllama(prompt: string): Promise<string> {
           'Content-Type': 'application/json',
           'Content-Length': Buffer.byteLength(body),
         },
-        timeout: 300_000, // 5 min timeout for local models
+        timeout: 600_000, // 10 min timeout for local models
       },
       (res) => {
         let data = '';
@@ -134,26 +139,37 @@ async function callOllama(prompt: string): Promise<string> {
  * Try to extract JSON from a response that might contain markdown code blocks.
  */
 function extractJson(text: string): any {
+  // Strip markdown code block wrapper
+  let cleaned = text.trim();
+  const mdMatch = cleaned.match(/```(?:json)?\s*\n?([\s\S]*?)\n?```/);
+  if (mdMatch) cleaned = mdMatch[1].trim();
+
   // Try direct parse first
   try {
-    return JSON.parse(text);
-  } catch {
-    // Try to extract from ```json ... ``` or ``` ... ``` blocks
-    const match = text.match(/```(?:json)?\s*\n?([\s\S]*?)\n?```/);
-    if (match) {
-      try {
-        return JSON.parse(match[1]);
-      } catch { /* continue */ }
-    }
-    // Try to find anything that looks like a JSON object
-    const objMatch = text.match(/\{[\s\S]*\}/);
-    if (objMatch) {
-      try {
-        return JSON.parse(objMatch[0]);
-      } catch { /* continue */ }
-    }
+    return JSON.parse(cleaned);
+  } catch { /* continue */ }
+
+  // Try to fix unescaped newlines within JSON string values
+  // This handles the case where local models output actual newlines inside strings
+  try {
+    // Escape unescaped newlines within string values
+    const fixed = cleaned
+      .replace(/(?<=")([\s\S]*?)(?=")/g, (match) => {
+        // Only escape newlines that are inside string values
+        return match.replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/\t/g, '\\t');
+      });
+    return JSON.parse(fixed);
+  } catch { /* continue */ }
+
+  // Try to find anything that looks like a JSON object
+  const objMatch = cleaned.match(/\{[\s\S]*\}/);
+  if (objMatch) {
+    try {
+      return JSON.parse(objMatch[0]);
+    } catch { /* continue */ }
   }
-  throw new Error(`Could not extract valid JSON from AI response. Raw output (first 500 chars): ${text.slice(0, 500)}`);
+
+  throw new Error(`Could not extract valid JSON from AI response. Raw output (first 500 chars): ${cleaned.slice(0, 500)}`);
 }
 
 export const aiService = {
