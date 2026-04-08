@@ -22,7 +22,7 @@ function CVCard({ cv }: { cv: CV }) {
 
   return (
     <Card className="glass-card hover:shadow-lg hover:shadow-white/5 transition-all">
-      <Link href={`/dashboard/cvs/${cv.id}`} className="block">
+      <Link href={`/cvs/${cv.id}`} className="block">
         <CardHeader className="pb-3">
           <div className="flex justify-between items-start">
             <div className="space-y-1">
@@ -47,7 +47,7 @@ function CVCard({ cv }: { cv: CV }) {
               <DropdownMenu>
                 <DropdownMenuTrigger><Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:bg-white/10 hover:text-white" onClick={(e) => e.stopPropagation()}><MoreVertical className="h-4 w-4" /></Button></DropdownMenuTrigger>
                 <DropdownMenuContent className="bg-black/80 backdrop-blur-xl border-white/10" align="end">
-                  <DropdownMenuItem onClick={() => window.location.href = `/dashboard/cvs/${cv.id}`}><FileText className="mr-2 h-4 w-4 text-white" /><span className="text-white">Ver detalle</span></DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => window.location.href = `/cvs/${cv.id}`}><FileText className="mr-2 h-4 w-4 text-white" /><span className="text-white">Ver detalle</span></DropdownMenuItem>
                   <DropdownMenuItem><a href={cv.originalPdfUrl} target="_blank" rel="noopener noreferrer" className="text-white">PDF original</a></DropdownMenuItem>
                   {cv.improvedPdfUrl && <DropdownMenuItem><a href={cv.improvedPdfUrl} target="_blank" rel="noopener noreferrer" className="text-white">PDF mejorado</a></DropdownMenuItem>}
                 </DropdownMenuContent>

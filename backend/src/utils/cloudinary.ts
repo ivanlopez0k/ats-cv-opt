@@ -18,7 +18,7 @@ export const uploadToCloudinary = async (
       {
         folder,
         public_id: filename.replace(/\.[^/.]+$/, ''),
-        resource_type: 'auto',
+        resource_type: 'raw', // PDFs must be uploaded as 'raw' to avoid 401/signing issues
       },
       (error, result) => {
         if (error) return reject(error);

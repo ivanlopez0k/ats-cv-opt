@@ -103,7 +103,7 @@ async function callOllama(prompt: string): Promise<string> {
           'Content-Type': 'application/json',
           'Content-Length': Buffer.byteLength(body),
         },
-        timeout: 120_000, // 2 min timeout for local model
+        timeout: 300_000, // 5 min timeout for local models
       },
       (res) => {
         let data = '';
@@ -138,25 +138,22 @@ function extractJson(text: string): any {
   try {
     return JSON.parse(text);
   } catch {
-    // Try to extract from ```json ... ``` blocks
+    // Try to extract from ```json ... ``` or ``` ... ``` blocks
     const match = text.match(/```(?:json)?\s*\n?([\s\S]*?)\n?```/);
     if (match) {
       try {
         return JSON.parse(match[1]);
-      } catch {
-        // Try to find anything that looks like a JSON object
-        const objMatch = text.match(/\{[\s\S]*\}/);
-        if (objMatch) {
-          try {
-            return JSON.parse(objMatch[0]);
-          } catch {
-            // Last resort: find the largest balanced brace block
-          }
-        }
-      }
+      } catch { /* continue */ }
+    }
+    // Try to find anything that looks like a JSON object
+    const objMatch = text.match(/\{[\s\S]*\}/);
+    if (objMatch) {
+      try {
+        return JSON.parse(objMatch[0]);
+      } catch { /* continue */ }
     }
   }
-  throw new Error('Could not extract valid JSON from AI response');
+  throw new Error(`Could not extract valid JSON from AI response. Raw output (first 500 chars): ${text.slice(0, 500)}`);
 }
 
 export const aiService = {
