@@ -22,6 +22,44 @@ Retorna un JSON con:
  * Generate mock analysis/improvement for development without OpenAI credits.
  */
 function generateMockAnalysis(cvText: string, targetJob?: string, targetIndustry?: string): CVImprovementResult {
+  const score = Math.floor(Math.random() * 60) + 40; // Random 40-99
+
+  const allIssues = [
+    'Falta cuantificar logros con métricas específicas',
+    'Sección de skills poco detallada',
+    'Formato no optimizado para ATS',
+    'Faltan palabras clave del sector',
+    'Experiencia sin verbos de acción',
+    'Resumen profesional demasiado genérico',
+    'Falta sección de certificaciones',
+    'Orden cronológico inconsistente',
+  ];
+
+  const allKeywords = [
+    'Liderazgo', 'Gestión de proyectos', 'Comunicación efectiva',
+    'Trabajo en equipo', 'Resolución de problemas', 'Pensamiento crítico',
+    'Adaptabilidad', 'Gestión del tiempo', 'Negociación',
+    'Análisis de datos', 'Metodologías ágiles', 'Inglés avanzado',
+  ];
+
+  const allSuggestions = [
+    'Agregar métricas y números a los logros',
+    'Incluir certificaciones relevantes',
+    'Usar verbos de acción al inicio de cada bullet point',
+    'Optimizar el formato para compatibilidad ATS',
+    'Personalizar el resumen para el puesto objetivo',
+    'Agregar sección de proyectos o portfolio',
+    'Incluir habilidades blandas con ejemplos concretos',
+  ];
+
+  // Pick 2-4 random issues
+  const issues = allIssues.sort(() => Math.random() - 0.5).slice(0, Math.floor(Math.random() * 3) + 2);
+  // Pick 3-5 random missing keywords
+  const missingKeywords = allKeywords.sort(() => Math.random() - 0.5).slice(0, Math.floor(Math.random() * 3) + 3);
+  if (targetJob && !missingKeywords.includes(targetJob)) missingKeywords.unshift(targetJob);
+  // Pick 2-3 random suggestions
+  const suggestions = allSuggestions.sort(() => Math.random() - 0.5).slice(0, Math.floor(Math.random() * 2) + 2);
+
   return {
     improvedText: `# CV Optimizado para ATS - ${targetJob || 'Profesional'}\n\n${cvText}\n\n---\n*Versión mejorada por CVMaster AI (modo desarrollo)*`,
     structuredCV: {
@@ -31,12 +69,7 @@ function generateMockAnalysis(cvText: string, targetJob?: string, targetIndustry
       education: [{ degree: 'Título', institution: 'Universidad', year: '2020' }],
       skills: ['Habilidad 1', 'Habilidad 2', targetJob || 'General'].filter(Boolean),
     },
-    analysis: {
-      score: 72,
-      issues: ['Falta cuantificar logros', 'Sección de skills poco detallada'],
-      missingKeywords: ['Liderazgo', 'Gestión de proyectos', 'Comunicación', ...(targetJob ? [targetJob] : [])],
-      suggestions: ['Agregar métricas a los logros', 'Incluir certificaciones relevantes', 'Usar verbos de acción'],
-    },
+    analysis: { score, issues, missingKeywords, suggestions },
   };
 }
 
