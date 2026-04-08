@@ -2,9 +2,10 @@ import { Worker } from 'bullmq';
 import IORedis from 'ioredis';
 import { config } from '../config/index.js';
 import { prisma } from '../services/userService.js';
-import { extractTextFromPDF, createPDFFromText } from '../utils/pdf.js';
-import { uploadToCloudinary, getPublicIdFromUrl } from '../utils/cloudinary.js';
+import { extractTextFromPDF } from '../utils/pdf.js';
 import { aiService } from '../services/index.js';
+import { renderCVToHTML } from '../services/htmlTemplateService.js';
+import { renderHTMLToPDF } from '../services/pdfRenderer.js';
 import https from 'https';
 import http from 'http';
 import fs from 'fs';
@@ -52,7 +53,6 @@ const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 /**
  * Retry a function with exponential backoff for rate limit errors (429).
- * Retries up to `maxRetries` times, waiting 2^attempt * 1000ms between retries.
  */
 async function withRetry<T>(fn: () => Promise<T>, maxRetries = 3): Promise<T> {
   let lastError: Error | undefined;
@@ -66,10 +66,10 @@ async function withRetry<T>(fn: () => Promise<T>, maxRetries = 3): Promise<T> {
 
       if (isRateLimit && attempt < maxRetries - 1) {
         const waitMs = Math.pow(2, attempt) * 1000;
-        console.warn(`⚠️ OpenAI rate limit hit. Retrying in ${waitMs / 1000}s (attempt ${attempt + 1}/${maxRetries})`);
+        console.warn(`⚠️ Rate limit hit. Retrying in ${waitMs / 1000}s (attempt ${attempt + 1}/${maxRetries})`);
         await sleep(waitMs);
       } else if (isRateLimit && attempt >= maxRetries - 1) {
-        throw new Error(`OpenAI quota exceeded. Check your billing details at https://platform.openai.com/account/billing`);
+        throw new Error(`Quota exceeded. Check your API credits.`);
       } else {
         throw error;
       }
@@ -82,7 +82,7 @@ async function withRetry<T>(fn: () => Promise<T>, maxRetries = 3): Promise<T> {
 const aiWorker = new Worker(
   'ai-processing',
   async (job) => {
-    const { cvId, targetJob, targetIndustry } = job.data;
+    const { cvId, userId, targetJob, targetIndustry } = job.data;
 
     console.log(`Processing CV ${cvId}...`);
 
@@ -99,7 +99,7 @@ const aiWorker = new Worker(
 
       console.log(`Extracted ${extracted.text.length} characters from PDF`);
 
-      // Retry with exponential backoff for rate limit errors
+      // Step 1: AI analysis and improvement (structured data)
       let improvement;
       try {
         improvement = await withRetry(
@@ -117,24 +117,44 @@ const aiWorker = new Worker(
         }
       }
 
-      const improvedPdfBuffer = await createPDFFromText(improvement.improvedText);
+      console.log(`✅ AI analysis complete. Score: ${improvement.analysis.score}/100`);
 
-      // Save improved PDF locally (Cloudinary raw gives 401 for dev)
-      const uploadsDir = path.join(process.cwd(), 'uploads', cv.userId);
+      // Step 2: Render CV to HTML with professional template
+      console.log(`🎨 Rendering CV to HTML with modern template...`);
+      const htmlContent = renderCVToHTML(improvement, {
+        template: 'modern',
+        accentColor: '#2563eb',
+      });
+
+      // Step 3: Render HTML to PDF using Puppeteer
+      console.log(`📄 Generating PDF from HTML...`);
+      const improvedPdfBuffer = await renderHTMLToPDF(htmlContent);
+
+      // Save improved PDF locally
+      const uploadsDir = path.join(process.cwd(), 'uploads', userId);
       if (!fs.existsSync(uploadsDir)) {
         fs.mkdirSync(uploadsDir, { recursive: true });
       }
       const filename = `improved-${cvId}.pdf`;
       const localPath = path.join(uploadsDir, filename);
       fs.writeFileSync(localPath, improvedPdfBuffer);
-      const improvedPdfUrl = `http://localhost:${config.port}/uploads/${cv.userId}/${filename}`;
+      const improvedPdfUrl = `http://localhost:${config.port}/uploads/${userId}/${filename}`;
+
+      // Also save the HTML for preview
+      const htmlFilename = `improved-${cvId}.html`;
+      const htmlLocalPath = path.join(uploadsDir, htmlFilename);
+      fs.writeFileSync(htmlLocalPath, htmlContent);
+      const improvedHtmlUrl = `http://localhost:${config.port}/uploads/${userId}/${htmlFilename}`;
 
       await prisma.cV.update({
         where: { id: cvId },
         data: {
           status: 'COMPLETED' as const,
           improvedPdfUrl,
-          improvedJson: improvement.structuredCV as any,
+          improvedJson: {
+            ...improvement.structuredCV,
+            htmlUrl: improvedHtmlUrl,
+          } as any,
           analysisResult: improvement.analysis as any,
         },
       });
@@ -158,7 +178,7 @@ const aiWorker = new Worker(
   },
   {
     connection,
-    concurrency: 1, // Single job at a time to avoid hitting rate limits
+    concurrency: 1, // Single job at a time to avoid rate limits and memory issues
   }
 );
 

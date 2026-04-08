@@ -10,73 +10,283 @@ import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Clock, CheckCircle, XCircle, FileText, Download, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import { CVPreview } from '@/components/features/cv/CVPreview';
 import apiClient from '@/lib/api';
 import type { CV } from '@/lib/types';
+import { useAuthStore } from '@/lib/stores/authStore';
 
 export default function CVDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const { user } = useAuthStore();
 
-  const { data: cv, isLoading } = useQuery({ queryKey: ['cv', id], queryFn: async () => { const r = await apiClient.get(`/cvs/${id}`); return r.data.data as CV; } });
+  const { data: cv, isLoading } = useQuery({
+    queryKey: ['cv', id],
+    queryFn: async () => {
+      const r = await apiClient.get(`/cvs/${id}`);
+      return r.data.data as CV;
+    },
+  });
 
-  if (isLoading) return <div className="min-h-screen bg-black"><DashboardHeader /><main className="container mx-auto px-4 py-8"><Skeleton className="h-48 bg-white/5" /></main></div>;
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-black">
+        <DashboardHeader />
+        <main className="container mx-auto px-4 py-8">
+          <Skeleton className="h-48 bg-white/5" />
+        </main>
+      </div>
+    );
+  }
 
-  if (!cv) return <div className="min-h-screen bg-black"><DashboardHeader /><main className="container mx-auto px-4 py-8"><Card className="glass-card"><CardContent className="py-12 text-center text-gray-400">Error</CardContent></Card></main></div>;
+  if (!cv) {
+    return (
+      <div className="min-h-screen bg-black">
+        <DashboardHeader />
+        <main className="container mx-auto px-4 py-8">
+          <Card className="glass-card">
+            <CardContent className="py-12 text-center text-gray-400">CV no encontrado</CardContent>
+          </Card>
+        </main>
+      </div>
+    );
+  }
 
-  const statusConfig = { PROCESSING: { icon: Clock, color: 'text-yellow-400', bg: 'bg-yellow-500/10', text: 'Procesando...' }, COMPLETED: { icon: CheckCircle, color: 'text-green-400', bg: 'bg-green-500/10', text: 'Completado' }, FAILED: { icon: XCircle, color: 'text-red-400', bg: 'bg-red-500/10', text: 'Fallido' } };
-  const status = statusConfig[cv.status];
+  const statusConfig = {
+    PROCESSING: { icon: Clock, color: 'text-yellow-400', bg: 'bg-yellow-500/10', text: 'Procesando...' },
+    COMPLETED: { icon: CheckCircle, color: 'text-green-400', bg: 'bg-green-500/10', text: 'Completado' },
+    FAILED: { icon: XCircle, color: 'text-red-400', bg: 'bg-red-500/10', text: 'Fallido' },
+  };
+  const status = statusConfig[cv.status as keyof typeof statusConfig];
+
+  // Extract HTML URL from improvedJson
+  const improvedHtmlUrl = (cv as any).improvedJson?.htmlUrl;
+  const improvedPdfUrl = cv.improvedPdfUrl;
 
   return (
     <div className="min-h-screen bg-black">
       <DashboardHeader />
       <main className="container mx-auto px-4 py-8">
-        <a href="/dashboard" className="inline-flex items-center text-gray-400 hover:text-white mb-6 transition-colors"><ArrowLeft className="mr-2 h-4 w-4" />Volver</a>
+        <Link href="/dashboard" className="inline-flex items-center text-gray-400 hover:text-white mb-6 transition-colors">
+          <ArrowLeft className="mr-2 h-4 w-4" /> Volver
+        </Link>
+
+        {/* Header */}
         <div className="flex items-start justify-between mb-8">
-          <div><h1 className="text-3xl font-bold mb-2 text-white">{cv.title}</h1><div className="flex items-center gap-4 text-gray-400">{cv.targetJob && <span>{cv.targetJob}</span>}{cv.targetIndustry && <span>· {cv.targetIndustry}</span>}<span className={`flex items-center gap-1 ${status.color}`}><status.icon className="h-4 w-4" />{status.text}</span></div></div>
+          <div>
+            <h1 className="text-3xl font-bold mb-2 text-white">{cv.title}</h1>
+            <div className="flex items-center gap-4 text-gray-400">
+              {cv.targetJob && <span>{cv.targetJob}</span>}
+              {cv.targetIndustry && <span>· {cv.targetIndustry}</span>}
+              <span className={`flex items-center gap-1 ${status.color}`}>
+                <status.icon className="h-4 w-4" />
+                {status.text}
+              </span>
+            </div>
+          </div>
           <div className="flex gap-2">
-            <a href={cv.originalPdfUrl} target="_blank" className="inline-flex items-center px-3 py-2 text-sm font-medium text-white border border-white/20 rounded-lg hover:bg-white/10 transition-colors"><FileText className="mr-2 h-4 w-4" />Original</a>
-            {cv.improvedPdfUrl && <a href={cv.improvedPdfUrl} target="_blank" className="inline-flex items-center px-3 py-2 text-sm font-medium text-black bg-white rounded-lg hover:bg-gray-200 shadow-lg shadow-white/10 transition-all"><Download className="mr-2 h-4 w-4" />Mejorado</a>}
+            <a
+              href={cv.originalPdfUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center px-3 py-2 text-sm font-medium text-white border border-white/20 rounded-lg hover:bg-white/10 transition-colors"
+            >
+              <FileText className="mr-2 h-4 w-4" /> Original
+            </a>
+            {improvedPdfUrl && (
+              <a
+                href={improvedPdfUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center px-3 py-2 text-sm font-medium text-black bg-white rounded-lg hover:bg-gray-200 shadow-lg shadow-white/10 transition-all"
+              >
+                <Download className="mr-2 h-4 w-4" /> Mejorado
+              </a>
+            )}
           </div>
         </div>
-        {cv.status === 'PROCESSING' && <Card className="glass-card"><CardContent className="py-12 text-center"><div className={`inline-flex items-center justify-center w-16 h-16 rounded-full ${status.bg} mb-4`}><Clock className={`h-8 w-8 ${status.color}`} /></div><h2 className="text-xl font-semibold mb-2 text-white">Procesando</h2><p className="text-gray-400">La IA está analizando tu CV...</p><Progress value={66} className="max-w-md mx-auto mt-4" /></CardContent></Card>}
+
+        {/* Processing state */}
+        {cv.status === 'PROCESSING' && (
+          <Card className="glass-card">
+            <CardContent className="py-12 text-center">
+              <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full ${status.bg} mb-4`}>
+                <Clock className={`h-8 w-8 ${status.color}`} />
+              </div>
+              <h2 className="text-xl font-semibold mb-2 text-white">Procesando</h2>
+              <p className="text-gray-400">La IA está analizando y optimizando tu CV...</p>
+              <Progress value={66} className="max-w-md mx-auto mt-4" />
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Completed state */}
         {cv.status === 'COMPLETED' && cv.analysisResult && (
-          <Tabs defaultValue="analysis" className="space-y-6">
-            <TabsList className="bg-black/40 border border-white/10"><TabsTrigger value="context" className="text-white data-[state=active]:bg-white data-[state=active]:text-black">Contexto</TabsTrigger><TabsTrigger value="analysis" className="text-white data-[state=active]:bg-white data-[state=active]:text-black">Análisis</TabsTrigger><TabsTrigger value="suggestions" className="text-white data-[state=active]:bg-white data-[state=active]:text-black">Sugerencias</TabsTrigger></TabsList>
-            <TabsContent value="context">
-              <Card className="glass-card">
-                <CardHeader><CardTitle className="text-white">Contexto de la IA</CardTitle><CardDescription className="text-gray-400">Respuestas que usó la IA para optimizar tu CV</CardDescription></CardHeader>
-                <CardContent>
-                  {(cv as any).contextAnswers ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {Object.entries((cv as any).contextAnswers).map(([key, value]) => {
-                        if (!value || key === 'targetJob' || key === 'targetIndustry') return null;
-                        const labels: Record<string, string> = {
-                          targetCompany: 'Empresa objetivo',
-                          experienceLevel: 'Nivel de experiencia',
-                          optimizationFocus: 'Enfoque de optimización',
-                          additionalNotes: 'Notas adicionales',
-                        };
-                        const levelLabels: Record<string, string> = { junior: 'Junior / Trainee', mid: 'Semi-Senior', senior: 'Senior', lead: 'Lead / Manager' };
-                        const focusLabels: Record<string, string> = { technical: 'Experiencia técnica', soft: 'Habilidades blandas', both: 'Ambas', 'career-change': 'Cambio de carrera' };
-                        let displayValue = value as string;
-                        if (key === 'experienceLevel') displayValue = levelLabels[displayValue] || displayValue;
-                        if (key === 'optimizationFocus') displayValue = focusLabels[displayValue] || displayValue;
-                        return (
-                          <div key={key} className="p-3 rounded-lg bg-white/5 border border-white/10">
-                            <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">{labels[key] || key}</p>
-                            <p className="text-white">{displayValue}</p>
-                          </div>
-                        );
-                      })}
+          <div className="space-y-6">
+            {/* Preview section */}
+            {improvedHtmlUrl && user && (
+              <CVPreview
+                cvId={cv.id}
+                userId={user.id}
+                improvedHtmlUrl={improvedHtmlUrl}
+                improvedPdfUrl={improvedPdfUrl}
+              />
+            )}
+
+            {/* Analysis tabs */}
+            <Tabs defaultValue="analysis" className="space-y-6">
+              <TabsList className="bg-black/40 border border-white/10">
+                <TabsTrigger value="context" className="text-white data-[state=active]:bg-white data-[state=active]:text-black">
+                  Contexto
+                </TabsTrigger>
+                <TabsTrigger value="analysis" className="text-white data-[state=active]:bg-white data-[state=active]:text-black">
+                  Análisis ATS
+                </TabsTrigger>
+                <TabsTrigger value="suggestions" className="text-white data-[state=active]:bg-white data-[state=active]:text-black">
+                  Sugerencias
+                </TabsTrigger>
+              </TabsList>
+
+              {/* Context tab */}
+              <TabsContent value="context">
+                <Card className="glass-card">
+                  <CardHeader>
+                    <CardTitle className="text-white">Contexto de la IA</CardTitle>
+                    <CardDescription className="text-gray-400">
+                      Respuestas que usó la IA para optimizar tu CV
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {(cv as any).contextAnswers ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {Object.entries((cv as any).contextAnswers).map(([key, value]) => {
+                          if (!value || key === 'targetJob' || key === 'targetIndustry') return null;
+                          const labels: Record<string, string> = {
+                            targetCompany: 'Empresa objetivo',
+                            experienceLevel: 'Nivel de experiencia',
+                            optimizationFocus: 'Enfoque de optimización',
+                            additionalNotes: 'Notas adicionales',
+                          };
+                          const levelLabels: Record<string, string> = {
+                            junior: 'Junior / Trainee',
+                            mid: 'Semi-Senior',
+                            senior: 'Senior',
+                            lead: 'Lead / Manager',
+                          };
+                          const focusLabels: Record<string, string> = {
+                            technical: 'Experiencia técnica',
+                            soft: 'Habilidades blandas',
+                            both: 'Ambas',
+                            'career-change': 'Cambio de carrera',
+                          };
+                          let displayValue = value as string;
+                          if (key === 'experienceLevel') displayValue = levelLabels[displayValue] || displayValue;
+                          if (key === 'optimizationFocus') displayValue = focusLabels[displayValue] || displayValue;
+                          return (
+                            <div key={key} className="p-3 rounded-lg bg-white/5 border border-white/10">
+                              <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">
+                                {labels[key] || key}
+                              </p>
+                              <p className="text-white">{displayValue}</p>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <p className="text-gray-400">No se proporcionó contexto adicional para este CV.</p>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* Analysis tab */}
+              <TabsContent value="analysis">
+                <Card className="glass-card">
+                  <CardHeader>
+                    <CardTitle className="text-white">Puntuación ATS</CardTitle>
+                    <CardDescription className="text-gray-400">
+                      Qué tan bien está optimizado tu CV para sistemas ATS
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center gap-4">
+                      <div
+                        className={`text-6xl font-bold ${
+                          cv.analysisResult.score >= 70
+                            ? 'text-green-400'
+                            : cv.analysisResult.score >= 40
+                            ? 'text-yellow-400'
+                            : 'text-red-400'
+                        }`}
+                      >
+                        {cv.analysisResult.score}
+                      </div>
+                      <div className="flex-1">
+                        <Progress value={cv.analysisResult.score} className="h-4" />
+                      </div>
                     </div>
-                  ) : (
-                    <p className="text-gray-400">No se proporcionó contexto adicional para este CV.</p>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-            <TabsContent value="analysis"><Card className="glass-card"><CardHeader><CardTitle className="text-white">Puntuación ATS</CardTitle><CardDescription className="text-gray-400">Qué tan bien está optimizado</CardDescription></CardHeader><CardContent><div className="flex items-center gap-4"><div className={`text-6xl font-bold ${cv.analysisResult.score >= 70 ? 'text-green-400' : cv.analysisResult.score >= 40 ? 'text-yellow-400' : 'text-red-400'}`}>{cv.analysisResult.score}</div><div className="flex-1"><Progress value={cv.analysisResult.score} className="h-4" /></div></div>{cv.analysisResult.missingKeywords.length > 0 && <div className="mt-4"><h3 className="font-semibold mb-2 text-white">Keywords faltantes</h3><div className="flex flex-wrap gap-2">{cv.analysisResult.missingKeywords.map((kw, i) => <Badge key={i} variant="outline" className="border-white/20 text-white">{kw}</Badge>)}</div></div>}</CardContent></Card></TabsContent>
-            <TabsContent value="suggestions"><Card className="glass-card"><CardHeader><CardTitle className="text-white">Sugerencias</CardTitle></CardHeader><CardContent><div className="space-y-4">{cv.analysisResult.issues.map((issue, i) => <div key={i} className="flex items-start gap-3 p-3 rounded-lg bg-red-500/10 border border-red-500/20"><XCircle className="h-5 w-5 text-red-400 mt-0.5" /><span className="text-gray-300">{issue}</span></div>)}{cv.analysisResult.suggestions.map((s, i) => <div key={i} className="flex items-start gap-3 p-3 rounded-lg bg-green-500/10 border border-green-500/20"><CheckCircle className="h-5 w-5 text-green-400 mt-0.5" /><span className="text-gray-300">{s}</span></div>)}</div></CardContent></Card></TabsContent>
-          </Tabs>
+                    {cv.analysisResult.missingKeywords.length > 0 && (
+                      <div className="mt-4">
+                        <h3 className="font-semibold mb-2 text-white">Keywords faltantes</h3>
+                        <div className="flex flex-wrap gap-2">
+                          {cv.analysisResult.missingKeywords.map((kw, i) => (
+                            <Badge key={i} variant="outline" className="border-white/20 text-white">
+                              {kw}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* Suggestions tab */}
+              <TabsContent value="suggestions">
+                <Card className="glass-card">
+                  <CardHeader>
+                    <CardTitle className="text-white">Sugerencias de mejora</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {cv.analysisResult.issues.map((issue, i) => (
+                        <div
+                          key={i}
+                          className="flex items-start gap-3 p-3 rounded-lg bg-red-500/10 border border-red-500/20"
+                        >
+                          <XCircle className="h-5 w-5 text-red-400 mt-0.5 shrink-0" />
+                          <span className="text-gray-300">{issue}</span>
+                        </div>
+                      ))}
+                      {cv.analysisResult.suggestions.map((s, i) => (
+                        <div
+                          key={i}
+                          className="flex items-start gap-3 p-3 rounded-lg bg-green-500/10 border border-green-500/20"
+                        >
+                          <CheckCircle className="h-5 w-5 text-green-400 mt-0.5 shrink-0" />
+                          <span className="text-gray-300">{s}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+          </div>
+        )}
+
+        {/* Failed state */}
+        {cv.status === 'FAILED' && (
+          <Card className="glass-card">
+            <CardContent className="py-12 text-center">
+              <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full ${status.bg} mb-4`}>
+                <XCircle className={`h-8 w-8 ${status.color}`} />
+              </div>
+              <h2 className="text-xl font-semibold mb-2 text-white">Error al procesar</h2>
+              <p className="text-gray-400">
+                {(cv.analysisResult as any)?.error || 'Ocurrió un error al procesar tu CV'}
+              </p>
+            </CardContent>
+          </Card>
         )}
       </main>
     </div>
