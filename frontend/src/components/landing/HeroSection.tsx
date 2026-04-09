@@ -93,7 +93,7 @@ export function HeroSection() {
         </div>
         <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight text-white">
           Tu CV listo para{' '}
-          <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+          <span className="text-gray-300">
             pasar los filtros ATS
           </span>
         </h1>

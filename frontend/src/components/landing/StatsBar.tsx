@@ -7,7 +7,7 @@ const STATS = [
 
 export function StatsBar() {
   return (
-    <section className="py-12 px-4 border-y border-white/5 bg-white/[0.02]">
+    <section className="py-12 px-4">
       <div className="container mx-auto max-w-5xl">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {STATS.map((stat, i) => (

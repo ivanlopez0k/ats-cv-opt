@@ -24,7 +24,7 @@ const STEPS = [
 
 export function HowItWorksSection() {
   return (
-    <section id="como-funciona" className="py-20 px-4 bg-white/[0.02]">
+    <section id="como-funciona" className="py-20 px-4">
       <div className="container mx-auto max-w-5xl">
         <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-white">
           ¿Cómo funciona?
@@ -33,7 +33,7 @@ export function HowItWorksSection() {
           {STEPS.map((item, i) => (
             <Card key={i} className="glass-card text-center">
               <CardHeader>
-                <div className="w-14 h-14 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-xl flex items-center justify-center mx-auto mb-4 border border-white/10">
+                <div className="w-14 h-14 bg-white/10 rounded-xl flex items-center justify-center mx-auto mb-4 border border-white/10">
                   <item.icon className="h-7 w-7 text-white" />
                 </div>
                 <div className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/10 text-white text-sm font-bold mx-auto mb-2">

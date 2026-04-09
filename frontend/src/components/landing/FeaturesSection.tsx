@@ -41,7 +41,7 @@ export function FeaturesSection() {
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
             Todo lo que necesitás para{' '}
-            <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+            <span className="text-gray-300">
               destacar
             </span>
           </h2>
@@ -53,7 +53,7 @@ export function FeaturesSection() {
           {FEATURES.map((feature, i) => (
             <Card key={i} className="glass-card group hover:shadow-lg hover:shadow-white/5 transition-all duration-300">
               <CardHeader>
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-xl flex items-center justify-center mb-4 border border-white/10 group-hover:scale-110 transition-transform">
+                <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mb-4 border border-white/10 group-hover:scale-110 transition-transform">
                   <feature.icon className="h-6 w-6 text-white" />
                 </div>
                 <CardTitle className="text-white text-lg">{feature.title}</CardTitle>

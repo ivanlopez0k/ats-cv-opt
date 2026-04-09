@@ -10,7 +10,7 @@ import { LandingFooter } from '@/components/landing/LandingFooter';
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-gray-950 to-black">
+    <div className="min-h-screen bg-black text-white">
       <LandingHeader />
       <main>
         <HeroSection />
