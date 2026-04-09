@@ -3,6 +3,34 @@
 import Link from 'next/link';
 import { ArrowRight, FileText, BarChart3, Sparkles } from 'lucide-react';
 import { useAuthStore } from '@/lib/stores/authStore';
+import { motion } from 'framer-motion';
+
+const TITLE_LINE_1 = ['Tu', 'CV', 'listo', 'para', 'pasar'];
+const TITLE_LINE_2 = ['los', 'filtros', 'ATS'];
+
+function TypewriterTitle() {
+  const words = [...TITLE_LINE_1, null, ...TITLE_LINE_2];
+
+  return (
+    <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight text-foreground">
+      {words.map((word, i) =>
+        word === null ? (
+          <br key={`br-${i}`} />
+        ) : (
+          <motion.span
+            key={i}
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.08, delay: 0.15 + i * 0.08, ease: [0.25, 0.1, 0.25, 1] }}
+            className="inline-block mr-[0.25em]"
+          >
+            {word}
+          </motion.span>
+        )
+      )}
+    </h1>
+  );
+}
 
 function DashboardMockup() {
   return (
@@ -88,21 +116,35 @@ export function HeroSection() {
   return (
     <section className="py-16 md:py-24 px-4">
       <div className="container mx-auto text-center max-w-4xl">
-        <div className="inline-flex items-center gap-2 bg-secondary text-foreground px-4 py-2 rounded-full text-sm font-medium mb-6 border border-border">
-          <Sparkles className="h-4 w-4" />
-          Optimizado con IA GPT-4
-        </div>
-        <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight text-foreground">
-          Tu CV listo para{' '}
-          <span className="text-foreground/70">
-            pasar los filtros ATS
-          </span>
-        </h1>
-        <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4 }}
+        >
+          <div className="inline-flex items-center gap-2 bg-secondary text-foreground px-4 py-2 rounded-full text-sm font-medium mb-6 border border-border">
+            <Sparkles className="h-4 w-4" />
+            Optimizado con IA GPT-4
+          </div>
+        </motion.div>
+
+        <TypewriterTitle />
+
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4, delay: 0.7 }}
+          className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto"
+        >
           Sube tu CV, indicá el puesto y nuestra IA lo optimizará para superar
           los sistemas de seguimiento de candidatos que usan el 98% de las empresas.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        </motion.p>
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4, delay: 0.9 }}
+          className="flex flex-col sm:flex-row gap-4 justify-center"
+        >
           {isAuthenticated ? (
             <Link
               href="/dashboard"
@@ -126,9 +168,15 @@ export function HeroSection() {
           >
             Cómo funciona
           </a>
-        </div>
+        </motion.div>
 
-        <DashboardMockup />
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 1.1, ease: 'easeOut' }}
+        >
+          <DashboardMockup />
+        </motion.div>
       </div>
     </section>
   );
