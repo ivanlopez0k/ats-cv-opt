@@ -33,3 +33,5 @@ coverage/
 
 # Uploads (backend)
 backend/uploads/
+
+qwen-code-export-*

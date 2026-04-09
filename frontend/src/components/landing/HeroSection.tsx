@@ -7,16 +7,15 @@ import { useAuthStore } from '@/lib/stores/authStore';
 function DashboardMockup() {
   return (
     <div className="relative max-w-3xl mx-auto mt-16">
-      <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-blue-500/20 rounded-2xl blur-xl" />
-      <div className="relative bg-gray-900 rounded-xl border border-white/10 overflow-hidden shadow-2xl">
-        <div className="flex items-center gap-2 px-4 py-3 bg-gray-800/50 border-b border-white/5">
+      <div className="relative bg-zinc-900 rounded-xl border border-zinc-700/50 overflow-hidden shadow-xl">
+        <div className="flex items-center gap-2 px-4 py-3 bg-zinc-800/50 border-b border-zinc-700/50">
           <div className="flex gap-1.5">
-            <div className="w-3 h-3 rounded-full bg-red-500/80" />
-            <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
-            <div className="w-3 h-3 rounded-full bg-green-500/80" />
+            <div className="w-3 h-3 rounded-full bg-zinc-600" />
+            <div className="w-3 h-3 rounded-full bg-zinc-500" />
+            <div className="w-3 h-3 rounded-full bg-zinc-400" />
           </div>
           <div className="flex-1 mx-4">
-            <div className="bg-gray-700/50 rounded-md px-3 py-1 text-xs text-gray-400 text-center">
+            <div className="bg-zinc-700/50 rounded-md px-3 py-1 text-xs text-zinc-400 text-center">
               localhost:3000/dashboard
             </div>
           </div>
@@ -24,32 +23,32 @@ function DashboardMockup() {
         <div className="p-6 space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <FileText className="h-5 w-5 text-blue-400" />
+              <FileText className="h-5 w-5 text-zinc-300" />
               <span className="text-white font-semibold">Mis CVs</span>
             </div>
-            <div className="px-3 py-1.5 bg-blue-500 text-white text-xs rounded-lg font-medium">
+            <div className="px-3 py-1.5 bg-zinc-700 text-white text-xs rounded-lg font-medium border border-zinc-600/50">
               + Nuevo CV
             </div>
           </div>
           <div className="grid grid-cols-3 gap-3">
             {[
-              { title: 'Frontend Dev', score: 87, status: 'green' },
-              { title: 'Backend Dev', score: 72, status: 'yellow' },
-              { title: 'Full Stack', score: 91, status: 'green' },
+              { title: 'Frontend Dev', score: 87, status: 'good' },
+              { title: 'Backend Dev', score: 72, status: 'mid' },
+              { title: 'Full Stack', score: 91, status: 'good' },
             ].map((cv, i) => (
-              <div key={i} className="bg-gray-800/50 rounded-lg p-4 border border-white/5">
+              <div key={i} className="bg-zinc-800/50 rounded-lg p-4 border border-zinc-700/50">
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-white text-sm font-medium truncate">{cv.title}</span>
                   <span className={`text-xs px-1.5 py-0.5 rounded ${
-                    cv.status === 'green' ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'
+                    cv.status === 'good' ? 'bg-zinc-600/30 text-zinc-300' : 'bg-zinc-500/30 text-zinc-400'
                   }`}>
                     {cv.score}
                   </span>
                 </div>
-                <div className="w-full bg-gray-700 rounded-full h-1.5">
+                <div className="w-full bg-zinc-700 rounded-full h-1.5">
                   <div
                     className={`h-1.5 rounded-full ${
-                      cv.status === 'green' ? 'bg-green-500' : 'bg-yellow-500'
+                      cv.status === 'good' ? 'bg-zinc-400' : 'bg-zinc-500'
                     }`}
                     style={{ width: `${cv.score}%` }}
                   />
@@ -57,17 +56,17 @@ function DashboardMockup() {
               </div>
             ))}
           </div>
-          <div className="bg-gray-800/30 rounded-lg p-4 border border-white/5">
+          <div className="bg-zinc-800/30 rounded-lg p-4 border border-zinc-700/50">
             <div className="flex items-center gap-2 mb-3">
-              <BarChart3 className="h-4 w-4 text-blue-400" />
+              <BarChart3 className="h-4 w-4 text-zinc-300" />
               <span className="text-white text-sm font-medium">Análisis ATS — Full Stack Dev</span>
             </div>
             <div className="flex items-center gap-4">
-              <div className="text-3xl font-bold text-green-400">91</div>
+              <div className="text-3xl font-bold text-zinc-200">91</div>
               <div className="flex-1">
                 <div className="flex gap-1.5 flex-wrap">
                   {['React', 'Node.js', 'TypeScript', 'AWS'].map((kw) => (
-                    <span key={kw} className="text-xs bg-white/5 text-gray-300 px-2 py-1 rounded">
+                    <span key={kw} className="text-xs bg-zinc-700/50 text-zinc-300 px-2 py-1 rounded border border-zinc-600/30">
                       {kw}
                     </span>
                   ))}
@@ -77,8 +76,8 @@ function DashboardMockup() {
           </div>
         </div>
       </div>
-      {/* Fade to black at the bottom */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black to-transparent pointer-events-none" />
+      {/* Fade to transparent at the bottom */}
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-zinc-900/50 to-transparent pointer-events-none" />
     </div>
   );
 }
