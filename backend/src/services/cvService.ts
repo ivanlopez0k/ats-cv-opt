@@ -15,6 +15,7 @@ export const cvService = {
       title: string;
       targetJob?: string;
       targetIndustry?: string;
+      isPublic?: boolean;
     },
     pdfBuffer: Buffer,
     filename: string
@@ -37,6 +38,7 @@ export const cvService = {
         originalPdfUrl,
         targetJob: data.targetJob,
         targetIndustry: data.targetIndustry,
+        isPublic: data.isPublic || false,
         status: 'PROCESSING',
       },
     });

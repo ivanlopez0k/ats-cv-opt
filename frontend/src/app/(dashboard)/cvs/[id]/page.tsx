@@ -1,6 +1,6 @@
 'use client';
 import { use } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { DashboardHeader } from '@/components/features/dashboard/DashboardHeader';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,16 +8,18 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Clock, CheckCircle, XCircle, FileText, Download, ArrowLeft } from 'lucide-react';
+import { Clock, CheckCircle, XCircle, FileText, Download, ArrowLeft, Globe, Lock } from 'lucide-react';
 import Link from 'next/link';
 import { CVPreview } from '@/components/features/cv/CVPreview';
 import apiClient from '@/lib/api';
+import { toast } from 'sonner';
 import type { CV } from '@/lib/types';
 import { useAuthStore } from '@/lib/stores/authStore';
 
 export default function CVDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const { user } = useAuthStore();
+  const queryClient = useQueryClient();
 
   const { data: cv, isLoading } = useQuery({
     queryKey: ['cv', id],
@@ -25,6 +27,17 @@ export default function CVDetailPage({ params }: { params: Promise<{ id: string 
       const r = await apiClient.get(`/cvs/${id}`);
       return r.data.data as CV;
     },
+  });
+
+  const togglePublicMutation = useMutation({
+    mutationFn: async () => {
+      return apiClient.patch(`/cvs/${id}`, { isPublic: !cv?.isPublic });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cv', id] });
+      toast.success(cv?.isPublic ? 'CV vuelto privado' : 'CV compartido con la comunidad');
+    },
+    onError: () => toast.error('Error al actualizar'),
   });
 
   if (isLoading) {
@@ -84,6 +97,21 @@ export default function CVDetailPage({ params }: { params: Promise<{ id: string 
             </div>
           </div>
           <div className="flex gap-2">
+            {cv.status === 'COMPLETED' && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-border text-foreground hover:bg-secondary"
+                onClick={() => togglePublicMutation.mutate()}
+                disabled={togglePublicMutation.isPending}
+              >
+                {cv.isPublic ? (
+                  <><Lock className="mr-1 h-3 w-3" /> Volver privado</>
+                ) : (
+                  <><Globe className="mr-1 h-3 w-3" /> Compartir</>
+                )}
+              </Button>
+            )}
             <a
               href={cv.originalPdfUrl}
               target="_blank"

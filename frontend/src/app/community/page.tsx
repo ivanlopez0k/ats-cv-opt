@@ -1,6 +1,6 @@
 'use client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ThumbsUp, Search, User } from 'lucide-react';
+import { ThumbsUp, Search, User, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -15,6 +15,8 @@ import { toast } from 'sonner';
 import Link from 'next/link';
 import { useState } from 'react';
 
+const PAGE_SIZE = 9;
+
 function CommunityCard({ cv }: { cv: CV }) {
   const queryClient = useQueryClient();
   const { isAuthenticated } = useAuthStore();
@@ -24,17 +26,19 @@ function CommunityCard({ cv }: { cv: CV }) {
   return (
     <Card className="bg-card hover:shadow-lg transition-all">
       <CardHeader className="pb-3">
-        <div className="flex justify-between items-start">
-          <div className="flex items-center gap-3"><Avatar className="h-10 w-10"><AvatarFallback className="bg-secondary text-foreground">{initials || <User className="h-5 w-5" />}</AvatarFallback></Avatar><div><CardTitle className="text-lg text-foreground">{cv.user?.name}</CardTitle><CardDescription className="text-muted-foreground">{cv.targetJob && <span>{cv.targetJob}</span>}{cv.targetJob && cv.targetIndustry && <span> · </span>}{cv.targetIndustry && <span>{cv.targetIndustry}</span>}</CardDescription></div></div>
-          <Badge variant="secondary" className="bg-secondary text-foreground border-border">{cv.analysisResult?.score || 0}/100</Badge>
-        </div>
+        <Link href={`/cvs/${cv.id}`} className="block">
+          <div className="flex justify-between items-start">
+            <div className="flex items-center gap-3"><Avatar className="h-10 w-10"><AvatarFallback className="bg-secondary text-foreground">{initials || <User className="h-5 w-5" />}</AvatarFallback></Avatar><div><CardTitle className="text-lg text-foreground">{cv.user?.name}</CardTitle><CardDescription className="text-muted-foreground">{cv.targetJob && <span>{cv.targetJob}</span>}{cv.targetJob && cv.targetIndustry && <span> · </span>}{cv.targetIndustry && <span>{cv.targetIndustry}</span>}</CardDescription></div></div>
+            <Badge variant="secondary" className="bg-secondary text-foreground border-border">{cv.analysisResult?.score || 0}/100</Badge>
+          </div>
+        </Link>
       </CardHeader>
       <CardContent>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-sm text-muted-foreground"><ThumbsUp className="h-4 w-4" /><span>{cv.upvotes} votos</span></div>
           <div className="flex gap-2">
             {isAuthenticated && <Button variant={cv.hasVoted ? 'default' : 'outline'} size="sm" onClick={() => voteMutation.mutate()} disabled={voteMutation.isPending} className={cv.hasVoted ? 'bg-foreground text-background hover:bg-foreground/90' : 'border-border text-foreground hover:bg-secondary'}><ThumbsUp className={`h-4 w-4 mr-1 ${cv.hasVoted ? 'fill-current' : ''}`} />{cv.hasVoted ? 'Votado' : 'Votar'}</Button>}
-            <a href={cv.improvedPdfUrl} target="_blank" className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-foreground border border-border rounded-lg hover:bg-secondary transition-colors">Ver CV</a>
+            <Link href={`/cvs/${cv.id}`} className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-foreground border border-border rounded-lg hover:bg-secondary transition-colors">Ver CV</Link>
           </div>
         </div>
       </CardContent>
@@ -44,19 +48,43 @@ function CommunityCard({ cv }: { cv: CV }) {
 
 export default function CommunityPage() {
   const [searchTerm, setSearchTerm] = useState('');
-  const { data: cvs, isLoading } = useQuery({ queryKey: ['community-cvs'], queryFn: async () => { const r = await apiClient.get(`/community/cvs?${new URLSearchParams(searchTerm ? { targetJob: searchTerm } : {})}`); return r.data.data as CV[]; } });
+  const [page, setPage] = useState(1);
+
+  const { data, isLoading } = useQuery({
+    queryKey: ['community-cvs', page, searchTerm],
+    queryFn: async () => {
+      const params: Record<string, string> = { page: String(page), limit: String(PAGE_SIZE) };
+      if (searchTerm) params.targetJob = searchTerm;
+      const r = await apiClient.get('/community/cvs', { params });
+      return r.data;
+    },
+  });
+
   const { data: topCVs } = useQuery({ queryKey: ['top-cvs'], queryFn: async () => { const r = await apiClient.get('/community/top'); return r.data.data as CV[]; } });
+
+  const cvs = data?.data as CV[] | undefined;
+  const total = data?.pagination?.total || 0;
+  const totalPages = Math.ceil(total / PAGE_SIZE);
 
   return (
     <div className="min-h-screen">
-      <header className="bg-background/50 backdrop-blur-md border-b border-border/50"><div className="container mx-auto px-4 h-16 flex items-center justify-between"><Link href="/dashboard" className="font-bold text-xl text-foreground">CVMaster</Link><nav className="flex items-center gap-4"><Link href="/dashboard" className="inline-flex items-center px-3 py-2 text-sm font-medium text-foreground rounded-lg hover:bg-secondary transition-colors">Mi Dashboard</Link></nav></div></header>
+      <header className="bg-background/50 backdrop-blur-md border-b border-border/50"><div className="container mx-auto px-4 h-16 flex items-center justify-between"><Link href="/" className="font-bold text-xl text-foreground">CVMaster</Link><nav className="flex items-center gap-4"><Link href="/dashboard" className="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg hover:bg-secondary transition-colors">Mi Dashboard</Link></nav></div></header>
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8"><h1 className="text-3xl font-bold mb-2 text-foreground">Comunidad</h1><p className="text-muted-foreground">Descubre los mejores CVs</p></div>
         <Tabs defaultValue="explore" className="space-y-6">
           <TabsList className="bg-card border-border"><TabsTrigger value="explore" className="text-foreground data-[state=active]:bg-foreground data-[state=active]:text-background">Explorar</TabsTrigger><TabsTrigger value="top" className="text-foreground data-[state=active]:bg-foreground data-[state=active]:text-background">Top CVs</TabsTrigger></TabsList>
           <TabsContent value="explore">
-            <div className="relative mb-6"><Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground/70" /><Input placeholder="Buscar..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10 bg-muted/50 border-border text-foreground placeholder:text-muted-foreground" /></div>
-            {isLoading ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-48 bg-secondary" />)}</div> : !cvs?.length ? <Card className="bg-card"><CardContent className="py-12 text-center text-muted-foreground">No hay CVs públicos</CardContent></Card> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{cvs.map((cv) => <CommunityCard key={cv.id} cv={cv} />)}</div>}
+            <div className="relative mb-6"><Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground/70" /><Input placeholder="Buscar por puesto..." value={searchTerm} onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }} className="pl-10 bg-muted/50 border-border text-foreground placeholder:text-muted-foreground" /></div>
+            {isLoading ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{[1, 2, 3, 4, 5, 6].map((i) => <Skeleton key={i} className="h-48 bg-secondary" />)}</div> : !cvs?.length ? <Card className="bg-card"><CardContent className="py-12 text-center text-muted-foreground">No hay CVs públicos</CardContent></Card> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{cvs.map((cv) => <CommunityCard key={cv.id} cv={cv} />)}</div>}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-2 mt-8">
+                <Button variant="outline" size="icon" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}><ChevronLeft className="h-4 w-4" /></Button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                  <Button key={p} variant={p === page ? 'default' : 'outline'} size="sm" onClick={() => setPage(p)} className={p === page ? '' : ''}>{p}</Button>
+                ))}
+                <Button variant="outline" size="icon" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}><ChevronRight className="h-4 w-4" /></Button>
+              </div>
+            )}
           </TabsContent>
           <TabsContent value="top">
             {isLoading ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{[1, 2, 3].map((i) => <Skeleton key={i} className="h-48 bg-secondary" />)}</div> : !topCVs?.length ? <Card className="bg-card"><CardContent className="py-12 text-center text-muted-foreground">No hay CVs votados</CardContent></Card> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{topCVs.map((cv) => <CommunityCard key={cv.id} cv={cv} />)}</div>}

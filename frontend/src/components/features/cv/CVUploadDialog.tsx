@@ -59,6 +59,7 @@ export function CVUploadDialog({ trigger }: { trigger?: React.ReactNode }) {
   const [title, setTitle] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [isPublic, setIsPublic] = useState(false);
 
   const [context, setContext] = useState<ContextAnswers>({
     targetJob: '',
@@ -92,6 +93,7 @@ export function CVUploadDialog({ trigger }: { trigger?: React.ReactNode }) {
     formData.append('targetJob', context.targetJob);
     formData.append('targetIndustry', context.targetIndustry);
     formData.append('contextAnswers', JSON.stringify(context));
+    formData.append('isPublic', String(isPublic));
 
     try {
       await apiClient.post('/cvs/upload', formData, {
@@ -116,6 +118,7 @@ export function CVUploadDialog({ trigger }: { trigger?: React.ReactNode }) {
       setOpen(newOpen);
       if (!newOpen) {
         setStep(1);
+        setIsPublic(false);
       }
     }
   };
@@ -336,6 +339,20 @@ export function CVUploadDialog({ trigger }: { trigger?: React.ReactNode }) {
                 rows={2}
                 className="flex w-full rounded-md border border-border bg-muted/50 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none"
               />
+            </div>
+
+            {/* Share with community */}
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 border border-border">
+              <input
+                type="checkbox"
+                id="share-community"
+                checked={isPublic}
+                onChange={(e) => setIsPublic(e.target.checked)}
+                className="h-4 w-4 rounded border-border text-foreground focus:ring-ring focus:ring-offset-0"
+              />
+              <Label htmlFor="share-community" className="text-foreground text-sm cursor-pointer">
+                Compartir en la comunidad
+              </Label>
             </div>
 
             <div className="flex gap-3 pt-2">

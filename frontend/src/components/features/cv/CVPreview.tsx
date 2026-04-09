@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Download, Eye, FileText } from 'lucide-react';
+import { Download, Eye, FileText, Loader2 } from 'lucide-react';
 
 interface CVPreviewProps {
   cvId: string;
@@ -14,6 +14,23 @@ interface CVPreviewProps {
 
 export function CVPreview({ cvId, userId, improvedHtmlUrl, improvedPdfUrl }: CVPreviewProps) {
   const [showPreview, setShowPreview] = useState(false);
+  const [htmlContent, setHtmlContent] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (showPreview && improvedHtmlUrl && !htmlContent) {
+      setLoading(true);
+      fetch(improvedHtmlUrl)
+        .then((res) => res.text())
+        .then((html) => {
+          setHtmlContent(html);
+          setLoading(false);
+        })
+        .catch(() => {
+          setLoading(false);
+        });
+    }
+  }, [showPreview, improvedHtmlUrl, htmlContent]);
 
   if (!improvedHtmlUrl && !improvedPdfUrl) {
     return null;
@@ -54,14 +71,27 @@ export function CVPreview({ cvId, userId, improvedHtmlUrl, improvedPdfUrl }: CVP
             </CardDescription>
           </CardHeader>
           <CardContent className="p-0">
-            <div className="w-full h-[800px] bg-white">
-              <iframe
-                src={improvedHtmlUrl}
-                className="w-full h-full border-0"
-                title="CV Preview"
-                sandbox="allow-same-origin"
-              />
-            </div>
+            {loading ? (
+              <div className="flex items-center justify-center h-[800px]">
+                <div className="text-center">
+                  <Loader2 className="h-8 w-8 text-muted-foreground animate-spin mx-auto mb-3" />
+                  <p className="text-muted-foreground text-sm">Cargando preview...</p>
+                </div>
+              </div>
+            ) : htmlContent ? (
+              <div className="w-full h-[800px] bg-white">
+                <iframe
+                  srcDoc={htmlContent}
+                  className="w-full h-full border-0"
+                  title="CV Preview"
+                  sandbox="allow-same-origin"
+                />
+              </div>
+            ) : (
+              <div className="flex items-center justify-center h-[800px]">
+                <p className="text-muted-foreground text-sm">No se pudo cargar el preview</p>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}

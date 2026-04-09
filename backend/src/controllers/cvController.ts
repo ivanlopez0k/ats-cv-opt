@@ -7,6 +7,7 @@ export const createCVSchema = z.object({
   title: z.string().min(1, 'Título requerido'),
   targetJob: z.string().optional(),
   targetIndustry: z.string().optional(),
+  isPublic: z.coerce.boolean().default(false).optional(),
 });
 
 export const updateCVSchema = z.object({
@@ -41,12 +42,12 @@ export const cvController = {
       return;
     }
 
-    const { title, targetJob, targetIndustry } = req.body;
+    const { title, targetJob, targetIndustry, isPublic } = req.body;
 
     try {
       const cv = await cvService.create(
         userId,
-        { title, targetJob, targetIndustry },
+        { title, targetJob, targetIndustry, isPublic },
         file.buffer,
         file.originalname
       );

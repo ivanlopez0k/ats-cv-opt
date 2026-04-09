@@ -1,6 +1,6 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { FileText, Clock, CheckCircle, XCircle, MoreVertical, Globe, Lock, ExternalLink } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -10,6 +10,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { CVUploadDialog } from './CVUploadDialog';
 import Link from 'next/link';
 import apiClient from '@/lib/api';
+import { toast } from 'sonner';
 import type { CV } from '@/lib/types';
 
 function CVCardSkeleton() {
@@ -17,8 +18,22 @@ function CVCardSkeleton() {
 }
 
 function CVCard({ cv }: { cv: CV }) {
+  const queryClient = useQueryClient();
   const statusConfig = { PROCESSING: { icon: Clock, variant: 'secondary' as const, text: 'Procesando' }, COMPLETED: { icon: CheckCircle, variant: 'default' as const, text: 'Listo' }, FAILED: { icon: XCircle, variant: 'destructive' as const, text: 'Fallido' } };
   const status = statusConfig[cv.status];
+
+  const togglePublicMutation = useMutation({
+    mutationFn: async () => {
+      return apiClient.patch(`/cvs/${cv.id}`, { isPublic: !cv.isPublic });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cvs'] });
+      toast.success(cv.isPublic ? 'CV vuelto privado' : 'CV compartido con la comunidad');
+    },
+    onError: () => {
+      toast.error('Error al actualizar');
+    },
+  });
 
   return (
     <Card className="bg-card hover:shadow-lg transition-all">
@@ -50,6 +65,21 @@ function CVCard({ cv }: { cv: CV }) {
                   <DropdownMenuItem onClick={() => window.location.href = `/cvs/${cv.id}`}><FileText className="mr-2 h-4 w-4" /><span className="text-foreground">Ver detalle</span></DropdownMenuItem>
                   <DropdownMenuItem><a href={cv.originalPdfUrl} target="_blank" rel="noopener noreferrer" className="text-foreground">PDF original</a></DropdownMenuItem>
                   {cv.improvedPdfUrl && <DropdownMenuItem><a href={cv.improvedPdfUrl} target="_blank" rel="noopener noreferrer" className="text-foreground">PDF mejorado</a></DropdownMenuItem>}
+                  {cv.status === 'COMPLETED' && (
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.preventDefault();
+                        togglePublicMutation.mutate();
+                      }}
+                      disabled={togglePublicMutation.isPending}
+                    >
+                      {cv.isPublic ? (
+                        <><Lock className="mr-2 h-4 w-4" /><span className="text-foreground">Volver privado</span></>
+                      ) : (
+                        <><Globe className="mr-2 h-4 w-4" /><span className="text-foreground">Compartir en la comunidad</span></>
+                      )}
+                    </DropdownMenuItem>
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
