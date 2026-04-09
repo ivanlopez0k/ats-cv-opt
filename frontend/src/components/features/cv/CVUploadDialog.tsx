@@ -126,17 +126,17 @@ export function CVUploadDialog({ trigger }: { trigger?: React.ReactNode }) {
         <div onClick={() => !isUploading && setOpen(true)}>{trigger}</div>
       ) : (
         <DialogTrigger>
-          <Button className="bg-white text-black font-medium hover:bg-gray-200 shadow-lg shadow-white/10">
+          <Button className="text-background bg-foreground font-medium hover:bg-foreground/90">
             <Upload className="mr-2 h-4 w-4" /> Subir CV
           </Button>
         </DialogTrigger>
       )}
-      <DialogContent className="max-w-xl bg-black/90 backdrop-blur-xl border-white/10 text-white" showCloseButton={!isUploading}>
+      <DialogContent className="max-w-xl bg-card border-border text-foreground" showCloseButton={!isUploading}>
         <DialogHeader>
-          <DialogTitle className="text-xl text-white">
+          <DialogTitle className="text-xl text-foreground">
             {isUploading ? 'Procesando tu CV...' : step === 1 ? 'Subí tu CV' : 'Contexto para la IA'}
           </DialogTitle>
-          <DialogDescription className="text-gray-400">
+          <DialogDescription className="text-muted-foreground">
             {isUploading
               ? 'La IA está analizando y optimizando tu CV'
               : step === 1
@@ -147,17 +147,17 @@ export function CVUploadDialog({ trigger }: { trigger?: React.ReactNode }) {
 
         {isUploading ? (
           <div className="py-8 text-center">
-            <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center mx-auto mb-4">
-              <Loader2 className="h-8 w-8 text-white animate-spin" />
+            <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mx-auto mb-4">
+              <Loader2 className="h-8 w-8 text-foreground animate-spin" />
             </div>
             <Progress value={uploadProgress} className="h-2 max-w-xs mx-auto" />
-            <p className="text-sm text-gray-400 mt-3">{uploadProgress}%</p>
+            <p className="text-sm text-muted-foreground mt-3">{uploadProgress}%</p>
           </div>
         ) : step === 1 ? (
           <div className="space-y-4">
             {/* Drop Zone / File Input */}
             <div
-              className="border-2 border-dashed border-white/20 rounded-lg p-8 text-center hover:border-white/40 hover:bg-white/5 transition-all cursor-pointer"
+              className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-border hover:bg-muted transition-all cursor-pointer"
               onClick={() => document.getElementById('modal-file-upload')?.click()}
             >
               <input
@@ -171,14 +171,14 @@ export function CVUploadDialog({ trigger }: { trigger?: React.ReactNode }) {
                 <div className="flex items-center justify-center gap-3">
                   <FileText className="h-8 w-8 text-green-400" />
                   <div className="text-left">
-                    <p className="font-medium text-white">{file.name}</p>
-                    <p className="text-sm text-gray-400">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                    <p className="font-medium text-foreground">{file.name}</p>
+                    <p className="text-sm text-muted-foreground">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
                   </div>
                   <Button
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="text-gray-400 hover:text-white shrink-0"
+                    className="text-muted-foreground hover:text-foreground shrink-0"
                     onClick={(e) => { e.stopPropagation(); setFile(null); }}
                   >
                     <X className="h-4 w-4" />
@@ -186,29 +186,29 @@ export function CVUploadDialog({ trigger }: { trigger?: React.ReactNode }) {
                 </div>
               ) : (
                 <div>
-                  <Upload className="h-8 w-8 mx-auto text-gray-500 mb-2" />
-                  <p className="text-sm text-gray-400">
-                    Hacé click para <span className="text-white font-medium">seleccionar tu PDF</span>
+                  <Upload className="h-8 w-8 mx-auto text-muted-foreground/70 mb-2" />
+                  <p className="text-sm text-muted-foreground">
+                    Hacé click para <span className="text-foreground font-medium">seleccionar tu PDF</span>
                   </p>
-                  <p className="text-xs text-gray-500 mt-1">Máximo 10MB</p>
+                  <p className="text-xs text-muted-foreground/70 mt-1">Máximo 10MB</p>
                 </div>
               )}
             </div>
 
             {/* Title */}
             <div className="space-y-2">
-              <Label htmlFor="modal-title" className="text-white">Título *</Label>
+              <Label htmlFor="modal-title" className="text-foreground">Título *</Label>
               <Input
                 id="modal-title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Ej: Mi CV — Desarrollador Full Stack"
-                className="bg-black/40 border-white/10 text-white placeholder:text-gray-500"
+                className="bg-muted/50 border-border text-foreground placeholder:text-muted-foreground"
               />
             </div>
 
             <Button
-              className="w-full bg-white text-black font-semibold hover:bg-gray-200 shadow-lg shadow-white/10"
+              className="w-full text-background bg-foreground font-semibold hover:bg-foreground/90"
               disabled={!file || !title.trim()}
               onClick={() => setStep(2)}
             >
@@ -218,67 +218,67 @@ export function CVUploadDialog({ trigger }: { trigger?: React.ReactNode }) {
         ) : (
           <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
             {/* File info */}
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-white/5 border border-white/10">
-              <FileText className="h-5 w-5 text-gray-400 shrink-0" />
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 border border-border">
+              <FileText className="h-5 w-5 text-muted-foreground shrink-0" />
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-white truncate">{file?.name}</p>
-                <p className="text-xs text-gray-500">{file ? (file.size / 1024 / 1024).toFixed(2) : '0'} MB</p>
+                <p className="text-sm text-foreground truncate">{file?.name}</p>
+                <p className="text-xs text-muted-foreground/70">{file ? (file.size / 1024 / 1024).toFixed(2) : '0'} MB</p>
               </div>
-              <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white shrink-0" onClick={() => setStep(1)}>
+              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground shrink-0" onClick={() => setStep(1)}>
                 Cambiar
               </Button>
             </div>
 
             {/* Puesto */}
             <div className="space-y-2">
-              <Label className="text-white flex items-center gap-2">
-                <Briefcase className="h-4 w-4 text-gray-400" />
+              <Label className="text-foreground flex items-center gap-2">
+                <Briefcase className="h-4 w-4 text-muted-foreground" />
                 ¿A qué puesto querés aplicar? *
               </Label>
               <Input
                 value={context.targetJob}
                 onChange={(e) => setContext(prev => ({ ...prev, targetJob: e.target.value }))}
                 placeholder="Ej: Desarrollador Full Stack"
-                className="bg-black/40 border-white/10 text-white placeholder:text-gray-500"
+                className="bg-muted/50 border-border text-foreground placeholder:text-muted-foreground"
               />
             </div>
 
             {/* Empresa */}
             <div className="space-y-2">
-              <Label className="text-white flex items-center gap-2">
-                <Building2 className="h-4 w-4 text-gray-400" />
-                ¿A qué empresa? <span className="text-gray-500 font-normal">(opcional)</span>
+              <Label className="text-foreground flex items-center gap-2">
+                <Building2 className="h-4 w-4 text-muted-foreground" />
+                ¿A qué empresa? <span className="text-muted-foreground/70 font-normal">(opcional)</span>
               </Label>
               <Input
                 value={context.targetCompany}
                 onChange={(e) => setContext(prev => ({ ...prev, targetCompany: e.target.value }))}
                 placeholder="Ej: Google, MercadoLibre"
-                className="bg-black/40 border-white/10 text-white placeholder:text-gray-500"
+                className="bg-muted/50 border-border text-foreground placeholder:text-muted-foreground"
               />
             </div>
 
             {/* Industria */}
             <div className="space-y-2">
-              <Label className="text-white flex items-center gap-2">
-                <Target className="h-4 w-4 text-gray-400" />
-                Industria <span className="text-gray-500 font-normal">(opcional)</span>
+              <Label className="text-foreground flex items-center gap-2">
+                <Target className="h-4 w-4 text-muted-foreground" />
+                Industria <span className="text-muted-foreground/70 font-normal">(opcional)</span>
               </Label>
               <select
                 value={context.targetIndustry}
                 onChange={(e) => setContext(prev => ({ ...prev, targetIndustry: e.target.value }))}
-                className="flex h-9 w-full rounded-md border border-white/10 bg-black/40 px-3 py-1 text-sm text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30"
+                className="flex h-9 w-full rounded-md border border-border bg-muted/50 px-3 py-1 text-sm text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               >
-                <option value="" className="bg-black">Seleccionar...</option>
+                <option value="" className="bg-background">Seleccionar...</option>
                 {INDUSTRIES.map((ind) => (
-                  <option key={ind} value={ind} className="bg-black">{ind}</option>
+                  <option key={ind} value={ind} className="bg-background">{ind}</option>
                 ))}
               </select>
             </div>
 
             {/* Nivel */}
             <div className="space-y-2">
-              <Label className="text-white flex items-center gap-2">
-                <FileQuestion className="h-4 w-4 text-gray-400" />
+              <Label className="text-foreground flex items-center gap-2">
+                <FileQuestion className="h-4 w-4 text-muted-foreground" />
                 Nivel de experiencia *
               </Label>
               <div className="grid grid-cols-2 gap-2">
@@ -289,11 +289,11 @@ export function CVUploadDialog({ trigger }: { trigger?: React.ReactNode }) {
                     onClick={() => setContext(prev => ({ ...prev, experienceLevel: level.value }))}
                     className={`p-2 rounded-lg border text-center text-sm transition-all ${
                       context.experienceLevel === level.value
-                        ? 'border-white/40 bg-white/10'
-                        : 'border-white/10 bg-black/20 hover:bg-white/5'
+                        ? 'border-border/80 bg-secondary'
+                        : 'border-border bg-muted hover:bg-muted'
                     }`}
                   >
-                    <span className="text-white">{level.label}</span>
+                    <span className="text-foreground">{level.label}</span>
                   </button>
                 ))}
               </div>
@@ -301,8 +301,8 @@ export function CVUploadDialog({ trigger }: { trigger?: React.ReactNode }) {
 
             {/* Enfoque */}
             <div className="space-y-2">
-              <Label className="text-white flex items-center gap-2">
-                <Lightbulb className="h-4 w-4 text-gray-400" />
+              <Label className="text-foreground flex items-center gap-2">
+                <Lightbulb className="h-4 w-4 text-muted-foreground" />
                 Enfoque de optimización
               </Label>
               <div className="grid grid-cols-2 gap-2">
@@ -313,11 +313,11 @@ export function CVUploadDialog({ trigger }: { trigger?: React.ReactNode }) {
                     onClick={() => setContext(prev => ({ ...prev, optimizationFocus: focus.value }))}
                     className={`p-2 rounded-lg border text-center text-sm transition-all ${
                       context.optimizationFocus === focus.value
-                        ? 'border-white/40 bg-white/10'
-                        : 'border-white/10 bg-black/20 hover:bg-white/5'
+                        ? 'border-border/80 bg-secondary'
+                        : 'border-border bg-muted hover:bg-muted'
                     }`}
                   >
-                    <span className="text-white">{focus.icon} {focus.label}</span>
+                    <span className="text-foreground">{focus.icon} {focus.label}</span>
                   </button>
                 ))}
               </div>
@@ -325,25 +325,25 @@ export function CVUploadDialog({ trigger }: { trigger?: React.ReactNode }) {
 
             {/* Notas */}
             <div className="space-y-2">
-              <Label className="text-white flex items-center gap-2">
-                <FileQuestion className="h-4 w-4 text-gray-400" />
-                Notas adicionales <span className="text-gray-500 font-normal">(opcional)</span>
+              <Label className="text-foreground flex items-center gap-2">
+                <FileQuestion className="h-4 w-4 text-muted-foreground" />
+                Notas adicionales <span className="text-muted-foreground/70 font-normal">(opcional)</span>
               </Label>
               <textarea
                 value={context.additionalNotes}
                 onChange={(e) => setContext(prev => ({ ...prev, additionalNotes: e.target.value }))}
                 placeholder="Ej: Destacar experiencia en React..."
                 rows={2}
-                className="flex w-full rounded-md border border-white/10 bg-black/40 px-3 py-2 text-sm text-white placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30 resize-none"
+                className="flex w-full rounded-md border border-border bg-muted/50 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none"
               />
             </div>
 
             <div className="flex gap-3 pt-2">
-              <Button variant="ghost" className="flex-1 text-white hover:bg-white/10" onClick={() => setStep(1)}>
+              <Button variant="ghost" className="flex-1 text-foreground hover:bg-muted" onClick={() => setStep(1)}>
                 Volver
               </Button>
               <Button
-                className="flex-[2] bg-white text-black font-semibold hover:bg-gray-200 shadow-lg shadow-white/10"
+                className="flex-[2] text-background bg-foreground font-semibold hover:bg-foreground/90"
                 disabled={!context.targetJob.trim() || !context.experienceLevel}
                 onClick={handleSubmit}
               >
@@ -359,9 +359,9 @@ export function CVUploadDialog({ trigger }: { trigger?: React.ReactNode }) {
 
 function Progress({ value, className = '' }: { value: number; className?: string }) {
   return (
-    <div className={`w-full bg-white/10 rounded-full h-2 overflow-hidden ${className}`}>
+    <div className={`w-full bg-secondary rounded-full h-2 overflow-hidden ${className}`}>
       <div
-        className="h-full bg-white rounded-full transition-all duration-300"
+        className="h-full bg-foreground rounded-full transition-all duration-300"
         style={{ width: `${Math.min(100, Math.max(0, value))}%` }}
       />
     </div>

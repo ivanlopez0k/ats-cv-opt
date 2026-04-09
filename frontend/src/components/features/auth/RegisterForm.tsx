@@ -85,98 +85,98 @@ export function RegisterForm() {
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto glass-card">
+    <Card className="w-full max-w-md mx-auto bg-card">
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold text-center text-white">Crear Cuenta</CardTitle>
-        <CardDescription className="text-center text-gray-400">Completá tus datos para empezar</CardDescription>
+        <CardTitle className="text-2xl font-bold text-center text-foreground">Crear Cuenta</CardTitle>
+        <CardDescription className="text-center text-muted-foreground">Completá tus datos para empezar</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {/* Username */}
           <div className="space-y-2">
-            <Label htmlFor="username" className="text-white">Username *</Label>
+            <Label htmlFor="username" className="text-foreground">Username *</Label>
             <div className="relative">
               <Input
                 id="username"
                 placeholder="tu_nombre"
                 {...register('username')}
                 onChange={handleUsernameChange}
-                className={`bg-black/40 border-white/10 text-white placeholder:text-gray-500 pr-10 ${
-                  usernameStatus === 'available' ? 'border-green-500/50' :
-                  usernameStatus === 'taken' ? 'border-red-500/50' : ''
+                className={`bg-muted/50 border-border text-foreground placeholder:text-muted-foreground pr-10 ${
+                  usernameStatus === 'available' ? 'border-emerald-500/50' :
+                  usernameStatus === 'taken' ? 'border-destructive/50' : ''
                 }`}
               />
               <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                {usernameStatus === 'checking' && <Loader2 className="h-4 w-4 text-gray-400 animate-spin" />}
-                {usernameStatus === 'available' && <Check className="h-4 w-4 text-green-400" />}
-                {usernameStatus === 'taken' && <X className="h-4 w-4 text-red-400" />}
+                {usernameStatus === 'checking' && <Loader2 className="h-4 w-4 text-muted-foreground animate-spin" />}
+                {usernameStatus === 'available' && <Check className="h-4 w-4 text-emerald-500" />}
+                {usernameStatus === 'taken' && <X className="h-4 w-4 text-destructive" />}
               </div>
             </div>
-            {errors.username && <p className="text-sm text-red-400">{errors.username.message}</p>}
-            {usernameStatus === 'available' && <p className="text-sm text-green-400">Username disponible</p>}
-            {usernameStatus === 'taken' && <p className="text-sm text-red-400">{usernameError}</p>}
-            {usernameStatus === 'error' && <p className="text-sm text-yellow-400">{usernameError}</p>}
+            {errors.username && <p className="text-sm text-destructive">{errors.username.message}</p>}
+            {usernameStatus === 'available' && <p className="text-sm text-emerald-500">Username disponible</p>}
+            {usernameStatus === 'taken' && <p className="text-sm text-destructive">{usernameError}</p>}
+            {usernameStatus === 'error' && <p className="text-sm text-yellow-500">{usernameError}</p>}
           </div>
 
           {/* Name */}
           <div className="space-y-2">
-            <Label htmlFor="name" className="text-white">Nombre *</Label>
-            <Input id="name" type="text" placeholder="Juan Pérez" {...register('name')} className="bg-black/40 border-white/10 text-white placeholder:text-gray-500" />
-            {errors.name && <p className="text-sm text-red-400">{errors.name.message}</p>}
+            <Label htmlFor="name" className="text-foreground">Nombre *</Label>
+            <Input id="name" type="text" placeholder="Juan Pérez" {...register('name')} className="bg-muted/50 border-border text-foreground placeholder:text-muted-foreground" />
+            {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
           </div>
 
           {/* Email */}
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-white">Email *</Label>
-            <Input id="email" type="email" placeholder="tu@email.com" {...register('email')} className="bg-black/40 border-white/10 text-white placeholder:text-gray-500" />
-            {errors.email && <p className="text-sm text-red-400">{errors.email.message}</p>}
+            <Label htmlFor="email" className="text-foreground">Email *</Label>
+            <Input id="email" type="email" placeholder="tu@email.com" {...register('email')} className="bg-muted/50 border-border text-foreground placeholder:text-muted-foreground" />
+            {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
           </div>
 
           {/* Password */}
           <div className="space-y-2">
-            <Label htmlFor="password" className="text-white">Contraseña *</Label>
+            <Label htmlFor="password" className="text-foreground">Contraseña *</Label>
             <div className="relative">
-              <Input id="password" type={showPassword ? 'text' : 'password'} placeholder="••••••••" {...register('password')} className="bg-black/40 border-white/10 text-white placeholder:text-gray-500 pr-10" />
-              <Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-full px-3 text-gray-400 hover:text-white" onClick={() => setShowPassword(!showPassword)}>
+              <Input id="password" type={showPassword ? 'text' : 'password'} placeholder="••••••••" {...register('password')} className="bg-muted/50 border-border text-foreground placeholder:text-muted-foreground pr-10" />
+              <Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-full px-3 text-muted-foreground hover:text-foreground" onClick={() => setShowPassword(!showPassword)}>
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </Button>
             </div>
-            {errors.password && <p className="text-sm text-red-400">{errors.password.message}</p>}
+            {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
           </div>
 
           {/* Nationality (optional) */}
           <div className="space-y-2">
-            <Label htmlFor="nationality" className="text-white">Nacionalidad <span className="text-gray-500">(opcional)</span></Label>
+            <Label htmlFor="nationality" className="text-foreground">Nacionalidad <span className="text-muted-foreground/70">(opcional)</span></Label>
             <select
               id="nationality"
               {...register('nationality')}
-              className="flex h-9 w-full rounded-md border border-white/10 bg-black/40 px-3 py-1 text-sm text-white shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30"
+              className="flex h-9 w-full rounded-md border border-border bg-muted/50 px-3 py-1 text-sm text-foreground shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             >
-              <option value="" className="bg-black">Seleccionar...</option>
+              <option value="">Seleccionar...</option>
               {NATIONALITIES.map((n) => (
-                <option key={n} value={n} className="bg-black">{n}</option>
+                <option key={n} value={n}>{n}</option>
               ))}
             </select>
           </div>
 
           {/* Default Target Job (optional) */}
           <div className="space-y-2">
-            <Label htmlFor="defaultTargetJob" className="text-white">Puesto objetivo <span className="text-gray-500">(opcional)</span></Label>
-            <Input id="defaultTargetJob" placeholder="Ej: Desarrollador Full Stack" {...register('defaultTargetJob')} className="bg-black/40 border-white/10 text-white placeholder:text-gray-500" />
+            <Label htmlFor="defaultTargetJob" className="text-foreground">Puesto objetivo <span className="text-muted-foreground/70">(opcional)</span></Label>
+            <Input id="defaultTargetJob" placeholder="Ej: Desarrollador Full Stack" {...register('defaultTargetJob')} className="bg-muted/50 border-border text-foreground placeholder:text-muted-foreground" />
           </div>
 
           {/* Default Target Industry (optional) */}
           <div className="space-y-2">
-            <Label htmlFor="defaultTargetIndustry" className="text-white">Industria <span className="text-gray-500">(opcional)</span></Label>
-            <Input id="defaultTargetIndustry" placeholder="Ej: Tecnología" {...register('defaultTargetIndustry')} className="bg-black/40 border-white/10 text-white placeholder:text-gray-500" />
+            <Label htmlFor="defaultTargetIndustry" className="text-foreground">Industria <span className="text-muted-foreground/70">(opcional)</span></Label>
+            <Input id="defaultTargetIndustry" placeholder="Ej: Tecnología" {...register('defaultTargetIndustry')} className="bg-muted/50 border-border text-foreground placeholder:text-muted-foreground" />
           </div>
 
-          <Button type="submit" className="w-full bg-white text-black font-semibold hover:bg-gray-200 shadow-lg shadow-white/10" disabled={isLoading}>
+          <Button type="submit" className="w-full bg-foreground text-background font-semibold hover:bg-foreground/90" disabled={isLoading}>
             {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Creando...</> : 'Crear Cuenta'}
           </Button>
         </form>
         <div className="mt-4 text-center text-sm">
-          <span className="text-gray-400">¿Ya tienes cuenta?</span> <a href="/login" className="text-white hover:underline font-medium">Inicia sesión</a>
+          <span className="text-muted-foreground">¿Ya tienes cuenta?</span> <a href="/login" className="text-foreground hover:underline font-medium">Inicia sesión</a>
         </div>
       </CardContent>
     </Card>

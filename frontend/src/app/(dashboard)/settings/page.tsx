@@ -25,23 +25,23 @@ export default function SettingsPage() {
   const initials = user?.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen">
       <DashboardHeader />
       <main className="container mx-auto px-4 py-8 max-w-2xl">
-        <h1 className="text-3xl font-bold mb-8 text-white">Configuración</h1>
+        <h1 className="text-3xl font-bold mb-8 text-foreground">Configuración</h1>
         <div className="space-y-6">
-          <Card className="glass-card">
-            <CardHeader><CardTitle className="text-white">Perfil</CardTitle><CardDescription className="text-gray-400">Tu información</CardDescription></CardHeader>
+          <Card className="bg-card">
+            <CardHeader><CardTitle className="text-foreground">Perfil</CardTitle><CardDescription className="text-muted-foreground">Tu información</CardDescription></CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                <div className="flex items-center gap-4 mb-6"><Avatar className="h-20 w-20"><AvatarFallback className="text-xl bg-white text-black">{initials}</AvatarFallback></Avatar></div>
-                <div className="space-y-2"><Label htmlFor="name" className="text-white">Nombre</Label><Input id="name" {...register('name')} className="bg-black/40 border-white/10 text-white" />{errors.name && <p className="text-sm text-red-400">{errors.name.message}</p>}</div>
-                <div className="space-y-2"><Label className="text-white">Email</Label><Input value={user?.email} disabled className="bg-black/40 border-white/10 text-gray-400" /><p className="text-sm text-gray-400">No se puede cambiar</p></div>
-                <Button type="submit" disabled={isLoading} className="bg-white text-black font-medium hover:bg-gray-200 shadow-lg shadow-white/10">{isLoading ? 'Guardando...' : 'Guardar'}</Button>
+                <div className="flex items-center gap-4 mb-6"><Avatar className="h-20 w-20"><AvatarFallback className="text-xl bg-foreground text-background">{initials}</AvatarFallback></Avatar></div>
+                <div className="space-y-2"><Label htmlFor="name" className="text-foreground">Nombre</Label><Input id="name" {...register('name')} className="bg-muted/50 border-border text-foreground" />{errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}</div>
+                <div className="space-y-2"><Label className="text-foreground">Email</Label><Input value={user?.email} disabled className="bg-muted/50 border-border text-muted-foreground" /><p className="text-sm text-muted-foreground">No se puede cambiar</p></div>
+                <Button type="submit" disabled={isLoading} className="bg-foreground text-background font-medium hover:bg-foreground/90">{isLoading ? 'Guardando...' : 'Guardar'}</Button>
               </form>
             </CardContent>
           </Card>
-          <Card className="glass-card border-red-500/30"><CardHeader><CardTitle className="text-red-400">Zona de peligro</CardTitle><CardDescription className="text-gray-400">Acciones irreversibles</CardDescription></CardHeader><CardContent><Button variant="destructive" onClick={() => { logout(); router.push('/login'); }}>Cerrar sesión</Button></CardContent></Card>
+          <Card className="bg-card border-destructive/30"><CardHeader><CardTitle className="text-destructive">Zona de peligro</CardTitle><CardDescription className="text-muted-foreground">Acciones irreversibles</CardDescription></CardHeader><CardContent><Button variant="destructive" onClick={() => { logout(); router.push('/login'); }}>Cerrar sesión</Button></CardContent></Card>
         </div>
       </main>
     </div>

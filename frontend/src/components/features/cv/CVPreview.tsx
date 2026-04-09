@@ -26,7 +26,7 @@ export function CVPreview({ cvId, userId, improvedHtmlUrl, improvedPdfUrl }: CVP
         {improvedHtmlUrl && (
           <Button
             variant="outline"
-            className="border-white/20 text-white hover:bg-white/10"
+            className="border-border text-foreground hover:bg-secondary"
             onClick={() => setShowPreview(!showPreview)}
           >
             <Eye className="mr-2 h-4 w-4" />
@@ -35,7 +35,7 @@ export function CVPreview({ cvId, userId, improvedHtmlUrl, improvedPdfUrl }: CVP
         )}
         {improvedPdfUrl && (
           <a href={improvedPdfUrl} target="_blank" rel="noopener noreferrer">
-            <Button className="bg-white text-black font-medium hover:bg-gray-200 shadow-lg shadow-white/10">
+            <Button className="bg-foreground text-background font-medium hover:bg-foreground/90">
               <Download className="mr-2 h-4 w-4" /> Descargar PDF
             </Button>
           </a>
@@ -44,12 +44,12 @@ export function CVPreview({ cvId, userId, improvedHtmlUrl, improvedPdfUrl }: CVP
 
       {/* HTML Preview */}
       {showPreview && improvedHtmlUrl && (
-        <Card className="glass-card overflow-hidden">
+        <Card className="bg-card overflow-hidden">
           <CardHeader className="pb-3">
-            <CardTitle className="text-white flex items-center gap-2">
+            <CardTitle className="text-foreground flex items-center gap-2">
               <FileText className="h-5 w-5" /> Vista previa del CV
             </CardTitle>
-            <CardDescription className="text-gray-400">
+            <CardDescription className="text-muted-foreground">
               Así se ve tu CV optimizado
             </CardDescription>
           </CardHeader>
