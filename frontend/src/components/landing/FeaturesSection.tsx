@@ -39,27 +39,27 @@ export function FeaturesSection() {
     <section className="py-20 px-4">
       <div className="container mx-auto max-w-6xl">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
             Todo lo que necesitás para{' '}
-            <span className="text-gray-300">
+            <span className="text-muted-foreground">
               destacar
             </span>
           </h2>
-          <p className="text-gray-400 max-w-xl mx-auto">
+          <p className="text-muted-foreground max-w-xl mx-auto">
             Herramientas poderosas para optimizar tu CV y conseguir más entrevistas
           </p>
         </div>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {FEATURES.map((feature, i) => (
-            <Card key={i} className="glass-card group hover:shadow-lg hover:shadow-white/5 transition-all duration-300">
+            <Card key={i} className="bg-card border-border hover:shadow-lg transition-all duration-300">
               <CardHeader>
-                <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mb-4 border border-white/10 group-hover:scale-110 transition-transform">
-                  <feature.icon className="h-6 w-6 text-white" />
+                <div className="w-12 h-12 bg-secondary rounded-xl flex items-center justify-center mb-4 border border-border group-hover:scale-110 transition-transform">
+                  <feature.icon className="h-6 w-6 text-foreground" />
                 </div>
-                <CardTitle className="text-white text-lg">{feature.title}</CardTitle>
+                <CardTitle className="text-foreground text-lg">{feature.title}</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-400 text-sm leading-relaxed">{feature.description}</p>
+                <p className="text-muted-foreground text-sm leading-relaxed">{feature.description}</p>
               </CardContent>
             </Card>
           ))}

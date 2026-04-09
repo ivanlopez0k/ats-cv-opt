@@ -26,23 +26,23 @@ export function HowItWorksSection() {
   return (
     <section id="como-funciona" className="py-20 px-4">
       <div className="container mx-auto max-w-5xl">
-        <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-white">
+        <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-foreground">
           ¿Cómo funciona?
         </h2>
         <div className="grid md:grid-cols-3 gap-8">
           {STEPS.map((item, i) => (
-            <Card key={i} className="glass-card text-center">
+            <Card key={i} className="bg-card border-border">
               <CardHeader>
-                <div className="w-14 h-14 bg-white/10 rounded-xl flex items-center justify-center mx-auto mb-4 border border-white/10">
-                  <item.icon className="h-7 w-7 text-white" />
+                <div className="w-14 h-14 bg-secondary rounded-xl flex items-center justify-center mx-auto mb-4 border border-border">
+                  <item.icon className="h-7 w-7 text-foreground" />
                 </div>
-                <div className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/10 text-white text-sm font-bold mx-auto mb-2">
+                <div className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-secondary text-foreground text-sm font-bold mx-auto mb-2">
                   {item.step}
                 </div>
-                <CardTitle className="text-white text-xl">{item.title}</CardTitle>
+                <CardTitle className="text-foreground text-xl">{item.title}</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-400">{item.description}</p>
+                <p className="text-muted-foreground">{item.description}</p>
               </CardContent>
             </Card>
           ))}

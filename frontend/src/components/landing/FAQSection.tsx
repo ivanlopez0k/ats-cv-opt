@@ -30,20 +30,20 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="border border-white/10 rounded-lg overflow-hidden">
+    <div className="border border-border rounded-lg overflow-hidden">
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between p-5 text-left hover:bg-white/5 transition-colors"
+        className="w-full flex items-center justify-between p-5 text-left hover:bg-secondary/50 transition-colors"
       >
-        <span className="text-white font-medium pr-4">{question}</span>
+        <span className="text-foreground font-medium pr-4">{question}</span>
         {open ? (
-          <ChevronUp className="h-5 w-5 text-gray-400 shrink-0" />
+          <ChevronUp className="h-5 w-5 text-muted-foreground shrink-0" />
         ) : (
-          <ChevronDown className="h-5 w-5 text-gray-400 shrink-0" />
+          <ChevronDown className="h-5 w-5 text-muted-foreground shrink-0" />
         )}
       </button>
       {open && (
-        <div className="px-5 pb-5 text-gray-400 text-sm leading-relaxed border-t border-white/5 pt-4">
+        <div className="px-5 pb-5 text-muted-foreground text-sm leading-relaxed border-t border-border/50 pt-4">
           {answer}
         </div>
       )}
@@ -56,10 +56,10 @@ export function FAQSection() {
     <section className="py-20 px-4">
       <div className="container mx-auto max-w-3xl">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
             Preguntas frecuentes
           </h2>
-          <p className="text-gray-400">
+          <p className="text-muted-foreground">
             Todo lo que necesitás saber sobre CVMaster y los ATS
           </p>
         </div>

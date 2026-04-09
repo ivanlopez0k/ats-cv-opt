@@ -1,3 +1,7 @@
+'use client';
+
+import { AnimatedCounter } from './AnimatedCounter';
+
 const STATS = [
   { value: '75%', label: 'de CVs son descartados por ATS antes de ser leídos' },
   { value: '40%', label: 'más entrevistas con un CV optimizado para ATS' },
@@ -12,8 +16,10 @@ export function StatsBar() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {STATS.map((stat, i) => (
             <div key={i} className="text-center">
-              <div className="text-3xl md:text-4xl font-bold text-white mb-2">{stat.value}</div>
-              <p className="text-sm text-gray-400">{stat.label}</p>
+              <div className="text-3xl md:text-4xl font-bold text-foreground mb-2">
+                <AnimatedCounter value={stat.value} />
+              </div>
+              <p className="text-sm text-muted-foreground">{stat.label}</p>
             </div>
           ))}
         </div>
