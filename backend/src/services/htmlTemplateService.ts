@@ -266,12 +266,6 @@ function modernTemplate(cv: CVImprovementResult, accentColor: string): string {
       
       <!-- Right column -->
       <div class="cv-right">
-        <!-- ATS Score -->
-        <div class="ats-badge">
-          <div class="label">ATS Score</div>
-          <div class="score">${analysis.score || 75}/100</div>
-        </div>
-        
         <!-- Skills -->
         ${structuredCV.skills && structuredCV.skills.length > 0 ? `
         <div class="section">
