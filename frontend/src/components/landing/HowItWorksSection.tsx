@@ -31,9 +31,9 @@ export function HowItWorksSection() {
         </h2>
         <div className="grid md:grid-cols-3 gap-8">
           {STEPS.map((item, i) => (
-            <Card key={i} className="bg-card border-border">
+            <Card key={i} className="bg-card border-border transition-all duration-300 hover:border-border/80 hover:shadow-lg hover:-translate-y-1">
               <CardHeader>
-                <div className="w-14 h-14 bg-secondary rounded-xl flex items-center justify-center mx-auto mb-4 border border-border">
+                <div className="w-14 h-14 bg-secondary rounded-xl flex items-center justify-center mx-auto mb-4 border border-border transition-transform duration-300 hover:scale-110">
                   <item.icon className="h-7 w-7 text-foreground" />
                 </div>
                 <div className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-secondary text-foreground text-sm font-bold mx-auto mb-2">

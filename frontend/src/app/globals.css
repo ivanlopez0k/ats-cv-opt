@@ -124,6 +124,10 @@
   }
   body {
     @apply bg-background text-foreground;
+    background-image: 
+      linear-gradient(to right, oklch(0.35 0.005 285.823 / 0.08) 1px, transparent 1px),
+      linear-gradient(to bottom, oklch(0.35 0.005 285.823 / 0.08) 1px, transparent 1px);
+    background-size: 64px 64px;
   }
   .dark body {
     background-image: 

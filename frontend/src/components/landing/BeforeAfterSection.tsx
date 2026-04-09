@@ -27,15 +27,15 @@ export function BeforeAfterSection() {
         </div>
         <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
           {/* Before */}
-          <div className="bg-card rounded-xl p-6 border border-destructive/20">
+          <div className="bg-card rounded-xl p-6 border border-border">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-destructive">{BEFORE_AFTER.before.title}</h3>
-              <div className="text-2xl font-bold text-destructive">{BEFORE_AFTER.before.score}/100</div>
+              <h3 className="text-lg font-semibold text-destructive/70">{BEFORE_AFTER.before.title}</h3>
+              <div className="text-2xl font-bold text-destructive/70">{BEFORE_AFTER.before.score}/100</div>
             </div>
             <div className="space-y-3">
               {BEFORE_AFTER.before.issues.map((issue, i) => (
-                <div key={i} className="flex items-center gap-3 text-destructive/80 text-sm">
-                  <div className="w-2 h-2 rounded-full bg-destructive/50 shrink-0" />
+                <div key={i} className="flex items-center gap-3 text-muted-foreground text-sm">
+                  <div className="w-2 h-2 rounded-full bg-destructive/40 shrink-0" />
                   {issue}
                 </div>
               ))}
@@ -43,15 +43,15 @@ export function BeforeAfterSection() {
           </div>
 
           {/* After */}
-          <div className="bg-card rounded-xl p-6 border border-green-500/20">
+          <div className="bg-card rounded-xl p-6 border border-border">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-green-500">{BEFORE_AFTER.after.title}</h3>
-              <div className="text-2xl font-bold text-green-500">{BEFORE_AFTER.after.score}/100</div>
+              <h3 className="text-lg font-semibold text-emerald-600/70 dark:text-emerald-400/70">{BEFORE_AFTER.after.title}</h3>
+              <div className="text-2xl font-bold text-emerald-600/70 dark:text-emerald-400/70">{BEFORE_AFTER.after.score}/100</div>
             </div>
             <div className="space-y-3">
               {BEFORE_AFTER.after.improvements.map((imp, i) => (
-                <div key={i} className="flex items-center gap-3 text-green-500/80 text-sm">
-                  <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
+                <div key={i} className="flex items-center gap-3 text-muted-foreground text-sm">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600/60 dark:text-emerald-400/60 shrink-0" />
                   {imp}
                 </div>
               ))}
