@@ -23,8 +23,8 @@ export function DashboardHeader() {
           <Link href="/community" className="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg hover:bg-secondary transition-colors">Comunidad</Link>
           <ThemeToggle />
           <DropdownMenu>
-            <DropdownMenuTrigger>
-              <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0">
                 <Avatar><AvatarFallback className="bg-foreground text-background">{initials}</AvatarFallback></Avatar>
               </Button>
             </DropdownMenuTrigger>

@@ -37,7 +37,7 @@ function CVCard({ cv }: { cv: CV }) {
 
   return (
     <Card className="bg-card hover:shadow-lg transition-all">
-      <Link href={`/cvs/${cv.id}`} className="block">
+      <div onClick={() => window.location.href = `/cvs/${cv.id}`} className="cursor-pointer">
         <CardHeader className="pb-3">
           <div className="flex justify-between items-start">
             <div className="space-y-1">
@@ -60,7 +60,11 @@ function CVCard({ cv }: { cv: CV }) {
                 </a>
               )}
               <DropdownMenu>
-                <DropdownMenuTrigger><Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:bg-secondary hover:text-foreground" onClick={(e) => e.stopPropagation()}><MoreVertical className="h-4 w-4" /></Button></DropdownMenuTrigger>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:bg-secondary hover:text-foreground" onClick={(e) => e.stopPropagation()}>
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
                 <DropdownMenuContent className="bg-card border-border" align="end">
                   <DropdownMenuItem onClick={() => window.location.href = `/cvs/${cv.id}`}><FileText className="mr-2 h-4 w-4" /><span className="text-foreground">Ver detalle</span></DropdownMenuItem>
                   <DropdownMenuItem><a href={cv.originalPdfUrl} target="_blank" rel="noopener noreferrer" className="text-foreground">PDF original</a></DropdownMenuItem>
@@ -91,7 +95,7 @@ function CVCard({ cv }: { cv: CV }) {
             </div>
           )}
         </CardContent>
-      </Link>
+      </div>
     </Card>
   );
 }

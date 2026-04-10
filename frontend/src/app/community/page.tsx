@@ -141,8 +141,8 @@ function CommunityCard({ cv }: { cv: CV }) {
                 {cv.hasVoted ? 'Votado' : 'Votar'}
               </Button>
             )}
-            <Button asChild variant="outline" size="sm" className="border-border text-foreground hover:bg-secondary transition-all">
-              <Link href={`/cvs/${cv.id}`}>Ver CV</Link>
+            <Button variant="outline" size="sm" className="border-border text-foreground hover:bg-secondary transition-all" onClick={() => window.location.href = `/cvs/${cv.id}`}>
+              Ver CV
             </Button>
           </div>
         </div>
