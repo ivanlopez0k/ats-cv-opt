@@ -71,7 +71,7 @@ async function withRetry<T>(fn: () => Promise<T>, maxRetries = 3): Promise<T> {
 const aiWorker = new Worker(
   'ai-processing',
   async (job) => {
-    const { cvId, userId, targetJob, targetIndustry, originalPdfUrl } = job.data;
+    const { cvId, userId, targetJob, targetIndustry, originalPdfUrl, originalPdfPublicId, pdfBufferBase64 } = job.data;
 
     console.log(`Processing CV ${cvId}...`);
 
@@ -79,11 +79,24 @@ const aiWorker = new Worker(
     if (!cv) throw new Error('CV not found');
 
     try {
-      // Download PDF from Cloudinary URL
-      const pdfUrl = originalPdfUrl || cv.originalPdfUrl;
-      console.log(`Downloading PDF from: ${pdfUrl}`);
+      // Get PDF buffer: either from job data (base64) or download from Cloudinary
+      let pdfBuffer: Buffer;
+      
+      if (pdfBufferBase64) {
+        // Use buffer passed directly from upload (most efficient)
+        console.log(`📦 Using PDF buffer from job data`);
+        pdfBuffer = Buffer.from(pdfBufferBase64, 'base64');
+      } else if (originalPdfPublicId) {
+        // Fallback: download from Cloudinary API
+        console.log(`⬇️ Downloading PDF from Cloudinary: ${originalPdfPublicId}`);
+        const { downloadFromCloudinaryApi } = await import('../utils/cloudinary.js');
+        pdfBuffer = await downloadFromCloudinaryApi(originalPdfPublicId);
+      } else {
+        // Last resort: try downloading from URL (may fail for private resources)
+        console.log(`⬇️ Downloading PDF from URL: ${originalPdfUrl || cv.originalPdfUrl}`);
+        pdfBuffer = await downloadBuffer(originalPdfUrl || cv.originalPdfUrl);
+      }
 
-      const pdfBuffer = await downloadBuffer(pdfUrl);
       const extracted = await extractTextFromPDF(pdfBuffer);
 
       console.log(`Extracted ${extracted.text.length} characters from PDF`);

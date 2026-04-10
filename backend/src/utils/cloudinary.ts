@@ -51,11 +51,47 @@ export const getPublicIdFromUrl = (url: string): string => {
 export const downloadFromCloudinary = (url: string): Promise<Buffer> => {
   return new Promise((resolve, reject) => {
     https.get(url, (response) => {
+      // Handle redirects
+      if (response.statusCode === 301 || response.statusCode === 302) {
+        const redirectUrl = response.headers.location;
+        if (redirectUrl) {
+          https.get(redirectUrl, (redirectResponse) => {
+            const chunks: Buffer[] = [];
+            redirectResponse.on('data', (chunk) => chunks.push(chunk));
+            redirectResponse.on('end', () => resolve(Buffer.concat(chunks)));
+            redirectResponse.on('error', reject);
+          }).on('error', reject);
+          return;
+        }
+      }
+      
       const chunks: Buffer[] = [];
       response.on('data', (chunk) => chunks.push(chunk));
       response.on('end', () => resolve(Buffer.concat(chunks)));
       response.on('error', reject);
     }).on('error', reject);
+  });
+};
+
+/**
+ * Download a file from Cloudinary using the API (for private/raw resources)
+ */
+export const downloadFromCloudinaryApi = async (publicId: string, resourceType: string = 'raw'): Promise<Buffer> => {
+  return new Promise((resolve, reject) => {
+    cloudinary.api.resource(publicId, { resource_type: resourceType }, (error: any, result: any) => {
+      if (error) return reject(error);
+      
+      // Get the secure URL and download it
+      const secureUrl = result.secure_url;
+      if (!secureUrl) return reject(new Error('No secure URL found'));
+      
+      https.get(secureUrl, (response) => {
+        const chunks: Buffer[] = [];
+        response.on('data', (chunk) => chunks.push(chunk));
+        response.on('end', () => resolve(Buffer.concat(chunks)));
+        response.on('error', reject);
+      }).on('error', reject);
+    });
   });
 };
 

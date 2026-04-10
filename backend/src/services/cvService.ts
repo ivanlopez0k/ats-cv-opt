@@ -37,7 +37,8 @@ export const cvService = {
       },
     });
 
-    // Queue job with Cloudinary URL instead of local file path
+    // Queue job with Cloudinary URL and PDF buffer
+    // Convert buffer to base64 to safely pass through BullMQ
     await aiQueue.add('analyze-cv', {
       cvId: cv.id,
       userId,
@@ -45,6 +46,7 @@ export const cvService = {
       targetIndustry: data.targetIndustry,
       originalPdfUrl: cloudinaryResult.url,
       originalPdfPublicId: cloudinaryResult.publicId,
+      pdfBufferBase64: pdfBuffer.toString('base64'),
     });
 
     return cv;
