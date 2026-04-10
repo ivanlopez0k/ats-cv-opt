@@ -1,8 +1,6 @@
 "use client"
 
 import * as React from "react"
-import { Separator as SeparatorPrimitive } from "@base-ui/react/separator"
-
 import { cn } from "@/lib/utils"
 
 function Separator({
@@ -10,11 +8,15 @@ function Separator({
   orientation = "horizontal",
   decorative = true,
   ...props
-}: SeparatorPrimitive.Root.Props) {
+}: React.ComponentProps<"hr"> & {
+  orientation?: "horizontal" | "vertical"
+  decorative?: boolean
+}) {
   return (
-    <SeparatorPrimitive.Root
+    <hr
       data-slot="separator"
-      decorative={decorative}
+      role={decorative ? "none" : "separator"}
+      aria-orientation={decorative ? undefined : orientation}
       className={cn(
         "shrink-0 bg-border",
         orientation === "horizontal" ? "h-px w-full" : "h-full w-px",
