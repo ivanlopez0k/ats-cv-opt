@@ -12,19 +12,19 @@ interface AuthGuardProps {
 export function AuthGuard({ children }: AuthGuardProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, isHydrated } = useAuthStore();
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (isHydrated && !isAuthenticated) {
       router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
     }
-  }, [isAuthenticated, router, pathname]);
+  }, [isHydrated, isAuthenticated, router, pathname]);
 
-  if (!isAuthenticated) {
+  if (!isHydrated || !isAuthenticated) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <p className="text-gray-400">Redirigiendo al login...</p>
+          <p className="text-muted-foreground">Redirigiendo al login...</p>
         </div>
       </div>
     );
@@ -39,19 +39,29 @@ interface GuestGuardProps {
 
 export function GuestGuard({ children }: GuestGuardProps) {
   const router = useRouter();
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, isHydrated } = useAuthStore();
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isHydrated && isAuthenticated) {
       router.push('/dashboard');
     }
-  }, [isAuthenticated, router]);
+  }, [isHydrated, isAuthenticated, router]);
+
+  if (!isHydrated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-muted-foreground">Cargando...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (isAuthenticated) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <p className="text-gray-400">Redirigiendo al dashboard...</p>
+          <p className="text-muted-foreground">Redirigiendo al dashboard...</p>
         </div>
       </div>
     );

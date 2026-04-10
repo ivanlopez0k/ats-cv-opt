@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { FileText, LogOut } from 'lucide-react';
 import { useAuthStore } from '@/lib/stores/authStore';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
