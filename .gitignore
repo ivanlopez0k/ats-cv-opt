@@ -35,3 +35,6 @@ coverage/
 backend/uploads/
 
 qwen-code-export-*
+
+# Task tracking (local development)
+TASKS.md

@@ -47,7 +47,13 @@ export const cvController = {
     try {
       const cv = await cvService.create(
         userId,
-        { title, targetJob, targetIndustry, isPublic },
+        {
+          title,
+          targetJob,
+          targetIndustry,
+          // FormData sends booleans as strings, so we need to parse them
+          isPublic: isPublic === 'true' || isPublic === true,
+        },
         file.buffer,
         file.originalname
       );

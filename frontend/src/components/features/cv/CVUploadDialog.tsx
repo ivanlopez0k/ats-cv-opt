@@ -290,13 +290,13 @@ export function CVUploadDialog({ trigger }: { trigger?: React.ReactNode }) {
                     key={level.value}
                     type="button"
                     onClick={() => setContext(prev => ({ ...prev, experienceLevel: level.value }))}
-                    className={`p-2 rounded-lg border text-center text-sm transition-all ${
+                    className={`p-2 rounded-lg border-2 text-center text-sm transition-all ${
                       context.experienceLevel === level.value
-                        ? 'border-border/80 bg-secondary'
-                        : 'border-border bg-muted hover:bg-muted'
+                        ? 'border-foreground bg-foreground/10 text-foreground font-semibold ring-1 ring-foreground/20'
+                        : 'border-border bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground'
                     }`}
                   >
-                    <span className="text-foreground">{level.label}</span>
+                    {level.label}
                   </button>
                 ))}
               </div>
@@ -314,13 +314,13 @@ export function CVUploadDialog({ trigger }: { trigger?: React.ReactNode }) {
                     key={focus.value}
                     type="button"
                     onClick={() => setContext(prev => ({ ...prev, optimizationFocus: focus.value }))}
-                    className={`p-2 rounded-lg border text-center text-sm transition-all ${
+                    className={`p-2 rounded-lg border-2 text-center text-sm transition-all ${
                       context.optimizationFocus === focus.value
-                        ? 'border-border/80 bg-secondary'
-                        : 'border-border bg-muted hover:bg-muted'
+                        ? 'border-foreground bg-foreground/10 text-foreground font-semibold ring-1 ring-foreground/20'
+                        : 'border-border bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground'
                     }`}
                   >
-                    <span className="text-foreground">{focus.icon} {focus.label}</span>
+                    {focus.icon} {focus.label}
                   </button>
                 ))}
               </div>

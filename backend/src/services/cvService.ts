@@ -1,7 +1,6 @@
 import { prisma } from './userService.js';
 import { config } from '../config/index.js';
-import path from 'path';
-import fs from 'fs';
+import { uploadToCloudinary, deleteFromCloudinary, getPublicIdFromUrl } from '../utils/cloudinary.js';
 import { Queue } from 'bullmq';
 import IORedis from 'ioredis';
 
@@ -20,22 +19,17 @@ export const cvService = {
     pdfBuffer: Buffer,
     filename: string
   ) {
-    const uploadsDir = path.join(process.cwd(), 'uploads', userId);
-    if (!fs.existsSync(uploadsDir)) {
-      fs.mkdirSync(uploadsDir, { recursive: true });
-    }
+    const uniqueFilename = `${userId}/${Date.now()}-${filename.replace(/\s+/g, '-').toLowerCase()}`;
 
-    const uniqueFilename = `${Date.now()}-${filename}`;
-    const filePath = path.join(uploadsDir, uniqueFilename);
-    fs.writeFileSync(filePath, pdfBuffer);
-
-    const originalPdfUrl = `/uploads/${userId}/${uniqueFilename}`;
+    // Upload PDF to Cloudinary
+    console.log(`📤 Uploading original PDF to Cloudinary: ${uniqueFilename}`);
+    const cloudinaryResult = await uploadToCloudinary(pdfBuffer, uniqueFilename, 'cvmaster/originals');
 
     const cv = await prisma.cV.create({
       data: {
         userId,
         title: data.title,
-        originalPdfUrl,
+        originalPdfUrl: cloudinaryResult.url,
         targetJob: data.targetJob,
         targetIndustry: data.targetIndustry,
         isPublic: data.isPublic || false,
@@ -43,12 +37,14 @@ export const cvService = {
       },
     });
 
+    // Queue job with Cloudinary URL instead of local file path
     await aiQueue.add('analyze-cv', {
       cvId: cv.id,
       userId,
       targetJob: data.targetJob,
       targetIndustry: data.targetIndustry,
-      filePath,
+      originalPdfUrl: cloudinaryResult.url,
+      originalPdfPublicId: cloudinaryResult.publicId,
     });
 
     return cv;
@@ -96,20 +92,27 @@ export const cvService = {
 
   async delete(cvId: string, userId: string) {
     const cv = await prisma.cV.findUnique({ where: { id: cvId } });
-    
+
     if (!cv) throw new Error('CV no encontrado');
     if (cv.userId !== userId) throw new Error('No tienes permisos');
 
-    if (cv.originalPdfUrl) {
-      const filePath = path.join(process.cwd(), cv.originalPdfUrl);
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
+    // Delete from Cloudinary if URLs are Cloudinary URLs
+    if (cv.originalPdfUrl && cv.originalPdfUrl.includes('cloudinary')) {
+      try {
+        const publicId = getPublicIdFromUrl(cv.originalPdfUrl);
+        await deleteFromCloudinary(publicId);
+        console.log(`🗑️ Deleted original PDF from Cloudinary: ${publicId}`);
+      } catch (error) {
+        console.error('Error deleting original PDF from Cloudinary:', error);
       }
     }
-    if (cv.improvedPdfUrl) {
-      const filePath = path.join(process.cwd(), cv.improvedPdfUrl);
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
+    if (cv.improvedPdfUrl && cv.improvedPdfUrl.includes('cloudinary')) {
+      try {
+        const publicId = getPublicIdFromUrl(cv.improvedPdfUrl);
+        await deleteFromCloudinary(publicId);
+        console.log(`🗑️ Deleted improved PDF from Cloudinary: ${publicId}`);
+      } catch (error) {
+        console.error('Error deleting improved PDF from Cloudinary:', error);
       }
     }
 

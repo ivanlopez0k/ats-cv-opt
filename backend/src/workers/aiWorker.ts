@@ -6,10 +6,9 @@ import { extractTextFromPDF } from '../utils/pdf.js';
 import { aiService } from '../services/index.js';
 import { renderCVToHTML } from '../services/htmlTemplateService.js';
 import { renderHTMLToPDF } from '../services/pdfRenderer.js';
+import { uploadToCloudinary, uploadHtmlToCloudinary } from '../utils/cloudinary.js';
 import https from 'https';
 import http from 'http';
-import fs from 'fs';
-import path from 'path';
 
 const connection = new IORedis(config.redis.url, { maxRetriesPerRequest: null });
 
@@ -34,16 +33,6 @@ const downloadBuffer = (url: string): Promise<Buffer> => {
       response.on('error', reject);
     }).on('error', reject);
   });
-};
-
-/**
- * Resolve a relative URL (like /uploads/...) to an absolute one.
- */
-const resolvePdfUrl = (originalUrl: string): string => {
-  if (originalUrl.startsWith('http://') || originalUrl.startsWith('https://')) {
-    return originalUrl;
-  }
-  return `http://localhost:${config.port}${originalUrl.startsWith('/') ? '' : '/'}${originalUrl}`;
 };
 
 /**
@@ -82,7 +71,7 @@ async function withRetry<T>(fn: () => Promise<T>, maxRetries = 3): Promise<T> {
 const aiWorker = new Worker(
   'ai-processing',
   async (job) => {
-    const { cvId, userId, targetJob, targetIndustry } = job.data;
+    const { cvId, userId, targetJob, targetIndustry, originalPdfUrl } = job.data;
 
     console.log(`Processing CV ${cvId}...`);
 
@@ -90,8 +79,8 @@ const aiWorker = new Worker(
     if (!cv) throw new Error('CV not found');
 
     try {
-      // Resolve relative URLs to absolute backend URLs
-      const pdfUrl = resolvePdfUrl(cv.originalPdfUrl);
+      // Download PDF from Cloudinary URL
+      const pdfUrl = originalPdfUrl || cv.originalPdfUrl;
       console.log(`Downloading PDF from: ${pdfUrl}`);
 
       const pdfBuffer = await downloadBuffer(pdfUrl);
@@ -130,30 +119,24 @@ const aiWorker = new Worker(
       console.log(`📄 Generating PDF from HTML...`);
       const improvedPdfBuffer = await renderHTMLToPDF(htmlContent);
 
-      // Save improved PDF locally
-      const uploadsDir = path.join(process.cwd(), 'uploads', userId);
-      if (!fs.existsSync(uploadsDir)) {
-        fs.mkdirSync(uploadsDir, { recursive: true });
-      }
-      const filename = `improved-${cvId}.pdf`;
-      const localPath = path.join(uploadsDir, filename);
-      fs.writeFileSync(localPath, improvedPdfBuffer);
-      const improvedPdfUrl = `http://localhost:${config.port}/uploads/${userId}/${filename}`;
+      // Step 4: Upload improved PDF to Cloudinary
+      console.log(`📤 Uploading improved PDF to Cloudinary...`);
+      const improvedFilename = `${userId}/improved-${cvId}.pdf`;
+      const improvedPdfResult = await uploadToCloudinary(improvedPdfBuffer, improvedFilename, 'cvmaster/improved');
 
-      // Also save the HTML for preview
-      const htmlFilename = `improved-${cvId}.html`;
-      const htmlLocalPath = path.join(uploadsDir, htmlFilename);
-      fs.writeFileSync(htmlLocalPath, htmlContent);
-      const improvedHtmlUrl = `http://localhost:${config.port}/uploads/${userId}/${htmlFilename}`;
+      // Also save the HTML for preview (upload to Cloudinary as HTML)
+      console.log(`📤 Uploading HTML preview to Cloudinary...`);
+      const htmlFilename = `${userId}/improved-${cvId}`;
+      const htmlResult = await uploadHtmlToCloudinary(htmlContent, htmlFilename, 'cvmaster/html');
 
       await prisma.cV.update({
         where: { id: cvId },
         data: {
           status: 'COMPLETED' as const,
-          improvedPdfUrl,
+          improvedPdfUrl: improvedPdfResult.url,
           improvedJson: {
             ...improvement.structuredCV,
-            htmlUrl: improvedHtmlUrl,
+            htmlUrl: htmlResult.url,
           } as any,
           analysisResult: improvement.analysis as any,
         },
