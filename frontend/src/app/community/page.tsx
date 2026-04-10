@@ -63,7 +63,18 @@ function CVPreviewThumbnail({ htmlUrl }: { htmlUrl: string }) {
 function CommunityCard({ cv }: { cv: CV }) {
   const queryClient = useQueryClient();
   const { isAuthenticated } = useAuthStore();
-  const voteMutation = useMutation({ mutationFn: async () => { if (cv.hasVoted) await apiClient.delete(`/community/cvs/${cv.id}/vote`); else await apiClient.post(`/community/cvs/${cv.id}/vote`); }, onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['community-cvs'] }); toast.success(cv.hasVoted ? 'Voto eliminado' : '¡Votado!'); }, onError: () => toast.error('Error') });
+  const voteMutation = useMutation({
+    mutationFn: async () => {
+      if (cv.hasVoted) await apiClient.delete(`/community/cvs/${cv.id}/vote`);
+      else await apiClient.post(`/community/cvs/${cv.id}/vote`);
+    },
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: ['community-cvs'] });
+      if (cv.hasVoted) toast.success('Voto eliminado');
+      else toast.success('¡Votado!');
+    },
+    onError: (e: any) => toast.error(e.response?.data?.error || 'Error al votar'),
+  });
   const initials = cv.user?.username?.slice(0, 2).toUpperCase() || cv.user?.name?.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) || 'U';
 
   const improvedHtmlUrl = (cv as any).improvedJson?.htmlUrl;
