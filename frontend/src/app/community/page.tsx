@@ -86,8 +86,24 @@ function CommunityCard({ cv }: { cv: CV }) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-sm text-muted-foreground"><ThumbsUp className="h-4 w-4" /><span>{cv.upvotes} votos</span></div>
           <div className="flex gap-2">
-            {isAuthenticated && <Button variant={cv.hasVoted ? 'default' : 'outline'} size="sm" onClick={() => voteMutation.mutate()} disabled={voteMutation.isPending} className={cv.hasVoted ? 'bg-foreground text-background hover:bg-foreground/90' : 'border-border text-foreground hover:bg-secondary'}><ThumbsUp className={`h-4 w-4 mr-1 ${cv.hasVoted ? 'fill-current' : ''}`} />{cv.hasVoted ? 'Votado' : 'Votar'}</Button>}
-            <Link href={`/cvs/${cv.id}`} className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-foreground border border-border rounded-lg hover:bg-secondary transition-colors">Ver CV</Link>
+            {isAuthenticated && (
+              <Button
+                size="sm"
+                onClick={() => voteMutation.mutate()}
+                disabled={voteMutation.isPending}
+                className={cv.hasVoted
+                  ? 'bg-foreground/70 text-background hover:bg-foreground/50 transition-all shadow-inner'
+                  : 'border-border text-foreground hover:bg-secondary transition-all'
+                }
+                variant={cv.hasVoted ? 'default' : 'outline'}
+              >
+                <ThumbsUp className={`h-4 w-4 mr-1 ${cv.hasVoted ? 'fill-current' : ''}`} />
+                {cv.hasVoted ? 'Votado' : 'Votar'}
+              </Button>
+            )}
+            <Button asChild variant="outline" size="sm" className="border-border text-foreground hover:bg-secondary transition-all">
+              <Link href={`/cvs/${cv.id}`}>Ver CV</Link>
+            </Button>
           </div>
         </div>
       </CardContent>
