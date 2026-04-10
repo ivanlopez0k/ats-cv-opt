@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 export function DashboardHeader() {
   const { user, logout } = useAuthStore();
@@ -18,8 +19,9 @@ export function DashboardHeader() {
         <Link href="/" className="flex items-center gap-2 font-bold text-xl cursor-pointer">
           <FileText className="h-6 w-6" /><span>CVMaster</span>
         </Link>
-        <nav className="flex items-center gap-4">
+        <nav className="flex items-center gap-3">
           <Link href="/community" className="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg hover:bg-secondary transition-colors">Comunidad</Link>
+          <ThemeToggle />
           <DropdownMenu>
             <DropdownMenuTrigger>
               <Button variant="ghost" className="relative h-10 w-10 rounded-full">

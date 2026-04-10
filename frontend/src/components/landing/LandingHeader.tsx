@@ -1,23 +1,17 @@
 'use client';
 
 import Link from 'next/link';
-import { FileText, Sun, Moon, LogOut } from 'lucide-react';
+import { FileText, LogOut } from 'lucide-react';
 import { useAuthStore } from '@/lib/stores/authStore';
-import { useTheme } from 'next-themes';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 export function LandingHeader() {
   const { isAuthenticated, user, logout } = useAuthStore();
-  const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const initials = user?.username?.slice(0, 2).toUpperCase() || user?.name?.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) || 'U';
   const menuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -40,15 +34,7 @@ export function LandingHeader() {
           <Link href="/community" className="hidden sm:inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg hover:bg-secondary transition-colors">
             Comunidad
           </Link>
-          {mounted && (
-            <button
-              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="flex items-center justify-center w-10 h-10 rounded-lg hover:bg-secondary transition-colors"
-              aria-label="Toggle theme"
-            >
-              {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-            </button>
-          )}
+          <ThemeToggle />
           {isAuthenticated ? (
             <div className="relative" ref={menuRef}>
               <button

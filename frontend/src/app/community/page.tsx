@@ -14,6 +14,7 @@ import type { CV } from '@/lib/types';
 import { useAuthStore } from '@/lib/stores/authStore';
 import { toast } from 'sonner';
 import Link from 'next/link';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 const PAGE_SIZE = 9;
 
@@ -205,7 +206,7 @@ export default function CommunityPage() {
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen">
-        <header className="bg-background/50 backdrop-blur-md border-b border-border/50"><div className="container mx-auto px-4 h-16 flex items-center justify-between"><Link href="/" className="font-bold text-xl text-foreground">CVMaster</Link><nav className="flex items-center gap-4"><Link href="/dashboard" className="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg hover:bg-secondary transition-colors">Mi Dashboard</Link></nav></div></header>
+        <header className="bg-background/50 backdrop-blur-md border-b border-border/50"><div className="container mx-auto px-4 h-16 flex items-center justify-between"><Link href="/" className="font-bold text-xl text-foreground">CVMaster</Link><nav className="flex items-center gap-3"><Link href="/dashboard" className="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg hover:bg-secondary transition-colors">Mi Dashboard</Link><ThemeToggle /></nav></div></header>
         <main className="container mx-auto px-4 py-8 flex flex-col items-center justify-center min-h-[60vh]">
           <FileText className="h-16 w-16 text-muted-foreground/50 mb-6" />
           <h1 className="text-2xl font-bold text-foreground mb-2">Iniciá sesión para ver la comunidad</h1>
@@ -221,7 +222,7 @@ export default function CommunityPage() {
 
   return (
     <div className="min-h-screen">
-      <header className="bg-background/50 backdrop-blur-md border-b border-border/50"><div className="container mx-auto px-4 h-16 flex items-center justify-between"><Link href="/" className="font-bold text-xl text-foreground">CVMaster</Link><nav className="flex items-center gap-4"><Link href="/dashboard" className="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg hover:bg-secondary transition-colors">Mi Dashboard</Link></nav></div></header>
+      <header className="bg-background/50 backdrop-blur-md border-b border-border/50"><div className="container mx-auto px-4 h-16 flex items-center justify-between"><Link href="/" className="font-bold text-xl text-foreground">CVMaster</Link><nav className="flex items-center gap-3"><Link href="/dashboard" className="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg hover:bg-secondary transition-colors">Mi Dashboard</Link><ThemeToggle /></nav></div></header>
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8"><h1 className="text-3xl font-bold mb-2 text-foreground">Comunidad</h1><p className="text-muted-foreground">Descubre los mejores CVs</p></div>
         <Tabs defaultValue="explore" className="space-y-6">
@@ -229,28 +230,48 @@ export default function CommunityPage() {
           <TabsContent value="explore">
             <div className="relative mb-6"><Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground/70" /><Input placeholder="Buscar por puesto..." value={searchTerm} onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }} className="pl-10 bg-muted/50 border-border text-foreground placeholder:text-muted-foreground" /></div>
 
-            {/* Industry Filters */}
-            <div className="mb-4">
-              <p className="text-sm text-muted-foreground mb-2">Industria</p>
-              <div className="flex flex-wrap gap-2">
-                {INDUSTRY_FILTERS.map((industry) => (
-                  <button
-                    key={industry}
-                    onClick={() => toggleIndustry(industry)}
-                    className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
-                      selectedIndustry === industry
-                        ? 'bg-foreground text-background shadow-md'
-                        : 'bg-secondary text-foreground hover:bg-secondary/80 border border-border'
-                    }`}
-                  >
-                    {industry}
-                  </button>
-                ))}
+            {/* Industry + Score Filters Row */}
+            <div className="mb-4 flex items-end gap-6">
+              <div>
+                <p className="text-sm text-muted-foreground mb-2">Industria</p>
+                <div className="flex flex-wrap gap-2">
+                  {INDUSTRY_FILTERS.map((industry) => (
+                    <button
+                      key={industry}
+                      onClick={() => toggleIndustry(industry)}
+                      className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+                        selectedIndustry === industry
+                          ? 'bg-foreground text-background shadow-md'
+                          : 'bg-secondary text-foreground hover:bg-secondary/80 border border-border'
+                      }`}
+                    >
+                      {industry}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground mb-2">Score ATS</p>
+                <div className="flex gap-2">
+                  {SCORE_FILTERS.map((filter) => (
+                    <button
+                      key={filter.value}
+                      onClick={() => toggleScore(filter.value)}
+                      className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
+                        selectedScore === filter.value
+                          ? 'bg-foreground text-background shadow-md'
+                          : 'bg-secondary text-foreground hover:bg-secondary/80 border border-border'
+                      }`}
+                    >
+                      {filter.label}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
             {/* Job Filters */}
-            <div className="mb-4">
+            <div className="mb-6">
               <p className="text-sm text-muted-foreground mb-2">Puesto</p>
               <div className="flex flex-wrap gap-2">
                 {JOB_FILTERS.map((job) => (
@@ -264,26 +285,6 @@ export default function CommunityPage() {
                     }`}
                   >
                     {job}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Score Filters */}
-            <div className="mb-6">
-              <p className="text-sm text-muted-foreground mb-2">Score ATS</p>
-              <div className="flex flex-wrap gap-2">
-                {SCORE_FILTERS.map((filter) => (
-                  <button
-                    key={filter.value}
-                    onClick={() => toggleScore(filter.value)}
-                    className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
-                      selectedScore === filter.value
-                        ? 'bg-foreground text-background shadow-md'
-                        : 'bg-secondary text-foreground hover:bg-secondary/80 border border-border'
-                    }`}
-                  >
-                    {filter.label}
                   </button>
                 ))}
               </div>
