@@ -8,10 +8,12 @@ export const communityController = {
     const limit = parseInt(req.query.limit as string) || 12;
     const targetJob = req.query.targetJob as string;
     const targetIndustry = req.query.targetIndustry as string;
+    const userId = (req as AuthenticatedRequest).user?.userId;
 
     const result = await cvService.getPublicCVs(page, limit, {
       targetJob,
       targetIndustry,
+      userId,
     });
 
     res.json({

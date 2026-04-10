@@ -119,9 +119,10 @@ export const cvService = {
   async getPublicCVs(page: number = 1, limit: number = 12, filters?: {
     targetJob?: string;
     targetIndustry?: string;
+    userId?: string;
   }) {
     const skip = (page - 1) * limit;
-    
+
     const where = {
       isPublic: true,
       status: 'COMPLETED' as const,
@@ -137,14 +138,21 @@ export const cvService = {
         orderBy: { upvotes: 'desc' },
         include: {
           user: { select: { id: true, name: true, avatarUrl: true } },
+          votes: filters?.userId ? { where: { userId: filters.userId } } : false,
           _count: { select: { votes: true } },
         },
       }),
       prisma.cV.count({ where }),
     ]);
 
+    const cvsWithVotes = cvs.map((cv) => ({
+      ...cv,
+      hasVoted: filters?.userId ? cv.votes.length > 0 : undefined,
+      votes: undefined,
+    }));
+
     return {
-      cvs,
+      cvs: cvsWithVotes,
       pagination: {
         page,
         limit,
