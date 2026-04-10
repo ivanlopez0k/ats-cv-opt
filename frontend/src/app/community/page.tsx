@@ -1,6 +1,7 @@
 'use client';
+import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ThumbsUp, Search, User, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ThumbsUp, Search, User, ChevronLeft, ChevronRight, FileText, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -13,9 +14,51 @@ import type { CV } from '@/lib/types';
 import { useAuthStore } from '@/lib/stores/authStore';
 import { toast } from 'sonner';
 import Link from 'next/link';
-import { useState } from 'react';
 
 const PAGE_SIZE = 9;
+
+function CVPreviewThumbnail({ htmlUrl }: { htmlUrl: string }) {
+  const [content, setContent] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    fetch(htmlUrl)
+      .then((res) => res.text())
+      .then((html) => {
+        if (!cancelled) { setContent(html); setLoading(false); }
+      })
+      .catch(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [htmlUrl]);
+
+  if (loading) {
+    return <div className="h-48 bg-muted animate-pulse rounded-t-none" />;
+  }
+
+  if (!content) {
+    return null;
+  }
+
+  return (
+    <div className="relative h-48 overflow-hidden border-t border-border">
+      <div
+        className="origin-top-left"
+        style={{ transform: 'scale(0.35)', width: '285.7%', height: '285.7%' }}
+      >
+        <iframe
+          srcDoc={content}
+          className="w-full h-[800px] border-0"
+          title="CV Preview"
+          sandbox="allow-same-origin"
+          style={{ pointerEvents: 'none' }}
+        />
+      </div>
+      <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-card to-transparent pointer-events-none" />
+    </div>
+  );
+}
 
 function CommunityCard({ cv }: { cv: CV }) {
   const queryClient = useQueryClient();
@@ -23,8 +66,10 @@ function CommunityCard({ cv }: { cv: CV }) {
   const voteMutation = useMutation({ mutationFn: async () => { if (cv.hasVoted) await apiClient.delete(`/community/cvs/${cv.id}/vote`); else await apiClient.post(`/community/cvs/${cv.id}/vote`); }, onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['community-cvs'] }); toast.success(cv.hasVoted ? 'Voto eliminado' : '¡Votado!'); }, onError: () => toast.error('Error') });
   const initials = cv.user?.username?.slice(0, 2).toUpperCase() || cv.user?.name?.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) || 'U';
 
+  const improvedHtmlUrl = (cv as any).improvedJson?.htmlUrl;
+
   return (
-    <Card className="bg-card hover:shadow-lg transition-all">
+    <Card className="bg-card hover:shadow-lg transition-all overflow-hidden">
       <CardHeader className="pb-3">
         <Link href={`/cvs/${cv.id}`} className="block">
           <div className="flex justify-between items-start">
@@ -33,6 +78,10 @@ function CommunityCard({ cv }: { cv: CV }) {
           </div>
         </Link>
       </CardHeader>
+
+      {/* CV Mini Preview */}
+      {improvedHtmlUrl && <CVPreviewThumbnail htmlUrl={improvedHtmlUrl} />}
+
       <CardContent>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-sm text-muted-foreground"><ThumbsUp className="h-4 w-4" /><span>{cv.upvotes} votos</span></div>
@@ -49,6 +98,7 @@ function CommunityCard({ cv }: { cv: CV }) {
 export default function CommunityPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(1);
+  const { isAuthenticated } = useAuthStore();
 
   const { data, isLoading } = useQuery({
     queryKey: ['community-cvs', page, searchTerm],
@@ -58,6 +108,7 @@ export default function CommunityPage() {
       const r = await apiClient.get('/community/cvs', { params });
       return r.data;
     },
+    enabled: isAuthenticated,
   });
 
   const { data: topCVs } = useQuery({ queryKey: ['top-cvs'], queryFn: async () => { const r = await apiClient.get('/community/top'); return r.data.data as CV[]; } });
@@ -65,6 +116,23 @@ export default function CommunityPage() {
   const cvs = data?.data as CV[] | undefined;
   const total = data?.pagination?.total || 0;
   const totalPages = Math.ceil(total / PAGE_SIZE);
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen">
+        <header className="bg-background/50 backdrop-blur-md border-b border-border/50"><div className="container mx-auto px-4 h-16 flex items-center justify-between"><Link href="/" className="font-bold text-xl text-foreground">CVMaster</Link><nav className="flex items-center gap-4"><Link href="/dashboard" className="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg hover:bg-secondary transition-colors">Mi Dashboard</Link></nav></div></header>
+        <main className="container mx-auto px-4 py-8 flex flex-col items-center justify-center min-h-[60vh]">
+          <FileText className="h-16 w-16 text-muted-foreground/50 mb-6" />
+          <h1 className="text-2xl font-bold text-foreground mb-2">Iniciá sesión para ver la comunidad</h1>
+          <p className="text-muted-foreground mb-6 text-center max-w-md">Descubrí los mejores CVs de otros usuarios, votá los que más te gusten y aprendé de lo que funciona.</p>
+          <div className="flex gap-3">
+            <Link href="/login"><Button className="bg-foreground text-background hover:bg-foreground/90">Iniciar sesión</Button></Link>
+            <Link href="/register"><Button variant="outline" className="border-border text-foreground hover:bg-secondary">Crear cuenta</Button></Link>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">
@@ -75,19 +143,19 @@ export default function CommunityPage() {
           <TabsList className="bg-card border-border"><TabsTrigger value="explore" className="text-foreground data-[state=active]:bg-foreground data-[state=active]:text-background">Explorar</TabsTrigger><TabsTrigger value="top" className="text-foreground data-[state=active]:bg-foreground data-[state=active]:text-background">Top CVs</TabsTrigger></TabsList>
           <TabsContent value="explore">
             <div className="relative mb-6"><Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground/70" /><Input placeholder="Buscar por puesto..." value={searchTerm} onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }} className="pl-10 bg-muted/50 border-border text-foreground placeholder:text-muted-foreground" /></div>
-            {isLoading ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{[1, 2, 3, 4, 5, 6].map((i) => <Skeleton key={i} className="h-48 bg-secondary" />)}</div> : !cvs?.length ? <Card className="bg-card"><CardContent className="py-12 text-center text-muted-foreground">No hay CVs públicos</CardContent></Card> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{cvs.map((cv) => <CommunityCard key={cv.id} cv={cv} />)}</div>}
+            {isLoading ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{[1, 2, 3, 4, 5, 6].map((i) => <Skeleton key={i} className="h-96 bg-secondary" />)}</div> : !cvs?.length ? <Card className="bg-card"><CardContent className="py-12 text-center text-muted-foreground">No hay CVs públicos</CardContent></Card> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{cvs.map((cv) => <CommunityCard key={cv.id} cv={cv} />)}</div>}
             {totalPages > 1 && (
               <div className="flex items-center justify-center gap-2 mt-8">
                 <Button variant="outline" size="icon" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}><ChevronLeft className="h-4 w-4" /></Button>
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                  <Button key={p} variant={p === page ? 'default' : 'outline'} size="sm" onClick={() => setPage(p)} className={p === page ? '' : ''}>{p}</Button>
+                  <Button key={p} variant={p === page ? 'default' : 'outline'} size="sm" onClick={() => setPage(p)}>{p}</Button>
                 ))}
                 <Button variant="outline" size="icon" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}><ChevronRight className="h-4 w-4" /></Button>
               </div>
             )}
           </TabsContent>
           <TabsContent value="top">
-            {isLoading ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{[1, 2, 3].map((i) => <Skeleton key={i} className="h-48 bg-secondary" />)}</div> : !topCVs?.length ? <Card className="bg-card"><CardContent className="py-12 text-center text-muted-foreground">No hay CVs votados</CardContent></Card> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{topCVs.map((cv) => <CommunityCard key={cv.id} cv={cv} />)}</div>}
+            {isLoading ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{[1, 2, 3].map((i) => <Skeleton key={i} className="h-96 bg-secondary" />)}</div> : !topCVs?.length ? <Card className="bg-card"><CardContent className="py-12 text-center text-muted-foreground">No hay CVs votados</CardContent></Card> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{topCVs.map((cv) => <CommunityCard key={cv.id} cv={cv} />)}</div>}
           </TabsContent>
         </Tabs>
       </main>
