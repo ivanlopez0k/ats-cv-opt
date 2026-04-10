@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { LogOut, User } from 'lucide-react';
 import { useAuthStore } from '@/lib/stores/authStore';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -8,8 +8,13 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 
 export function ProfileDropdown() {
+  const router = useRouter();
   const { user, logout } = useAuthStore();
   const initials = user?.username?.slice(0, 2).toUpperCase() || user?.name?.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) || 'U';
+
+  const navigate = (path: string) => {
+    router.push(path);
+  };
 
   return (
     <DropdownMenu>
@@ -26,10 +31,16 @@ export function ProfileDropdown() {
           {user?.isPremium && <Badge variant="secondary" className="w-fit mt-1 bg-secondary text-foreground">Premium</Badge>}
         </div>
         <DropdownMenuSeparator />
-        <DropdownMenuItem><Link href="/dashboard" className="text-foreground flex items-center">Dashboard</Link></DropdownMenuItem>
-        <DropdownMenuItem><Link href="/dashboard/settings" className="text-foreground flex items-center"><User className="mr-2 h-4 w-4" />Configuración</Link></DropdownMenuItem>
+        <DropdownMenuItem onClick={() => navigate('/dashboard')}>Dashboard</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => navigate('/dashboard/settings')} className="flex items-center">
+          <User className="mr-2 h-4 w-4" />
+          Configuración
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => { logout(); window.location.href = '/login'; }} className="text-destructive hover:text-destructive/80"><LogOut className="mr-2 h-4 w-4" />Cerrar sesión</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => { logout(); router.push('/login'); }} className="text-destructive hover:text-destructive/80">
+          <LogOut className="mr-2 h-4 w-4" />
+          Cerrar sesión
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

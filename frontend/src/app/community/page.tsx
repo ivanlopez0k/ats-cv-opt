@@ -207,7 +207,15 @@ export default function CommunityPage() {
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen">
-        <header className="bg-background/50 backdrop-blur-md border-b border-border/50"><div className="container mx-auto px-4 h-16 flex items-center justify-between"><Link href="/" className="font-bold text-xl text-foreground">CVMaster</Link><nav className="flex items-center gap-3"><Link href="/dashboard" className="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg hover:bg-secondary transition-colors">Mi Dashboard</Link><ThemeToggle /><ProfileDropdown /></nav></div></header>
+        <header className="bg-background/50 backdrop-blur-md border-b border-border/50">
+          <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+            <Link href="/" className="font-bold text-xl text-foreground">CVMaster</Link>
+            <nav className="flex items-center gap-3">
+              <Link href="/dashboard" className="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg hover:bg-secondary transition-colors">Mi Dashboard</Link>
+              <ThemeToggle />
+            </nav>
+          </div>
+        </header>
         <main className="container mx-auto px-4 py-8 flex flex-col items-center justify-center min-h-[60vh]">
           <FileText className="h-16 w-16 text-muted-foreground/50 mb-6" />
           <h1 className="text-2xl font-bold text-foreground mb-2">Iniciá sesión para ver la comunidad</h1>
@@ -223,7 +231,16 @@ export default function CommunityPage() {
 
   return (
     <div className="min-h-screen">
-      <header className="bg-background/50 backdrop-blur-md border-b border-border/50"><div className="container mx-auto px-4 h-16 flex items-center justify-between"><Link href="/" className="font-bold text-xl text-foreground">CVMaster</Link><nav className="flex items-center gap-3"><Link href="/dashboard" className="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg hover:bg-secondary transition-colors">Mi Dashboard</Link><ThemeToggle /><ProfileDropdown /></nav></div></header>
+      <header className="bg-background/50 backdrop-blur-md border-b border-border/50">
+        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+          <Link href="/" className="font-bold text-xl text-foreground">CVMaster</Link>
+          <nav className="flex items-center gap-3">
+            <Link href="/dashboard" className="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg hover:bg-secondary transition-colors">Mi Dashboard</Link>
+            <ThemeToggle />
+            <ProfileDropdown />
+          </nav>
+        </div>
+      </header>
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8"><h1 className="text-3xl font-bold mb-2 text-foreground">Comunidad</h1><p className="text-muted-foreground">Descubre los mejores CVs</p></div>
         <Tabs defaultValue="explore" className="space-y-6">

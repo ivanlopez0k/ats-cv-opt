@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { User, AtSign, Globe, Briefcase, Building2, Shield, LogOut } from 'lucide-react';
+import { User, AtSign, Globe, Briefcase, Building2, Shield, LogOut, Loader2 } from 'lucide-react';
 import apiClient from '@/lib/api';
 import { toast } from 'sonner';
 
@@ -43,7 +43,9 @@ const INDUSTRIES = [
 export default function SettingsPage() {
   const router = useRouter();
   const { user, updateUser, logout } = useAuthStore();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isSavingUsername, setIsSavingUsername] = useState(false);
+  const [isSavingWorkspace, setIsSavingWorkspace] = useState(false);
 
   const [name, setName] = useState(user?.name || '');
   const [username, setUsername] = useState(user?.username || '');
@@ -58,21 +60,51 @@ export default function SettingsPage() {
       toast.error('El nombre debe tener al menos 2 caracteres');
       return;
     }
-    setIsLoading(true);
+    setIsSaving(true);
     try {
       const response = await apiClient.patch('/auth/profile', {
         name,
-        username: username.trim() || undefined,
         nationality: nationality || undefined,
-        defaultTargetJob: defaultTargetJob || undefined,
-        defaultTargetIndustry: defaultTargetIndustry || undefined,
       });
       updateUser(response.data.data);
       toast.success('Perfil actualizado');
     } catch (e: any) {
       toast.error(e.response?.data?.error || 'Error al actualizar');
     } finally {
-      setIsLoading(false);
+      setIsSaving(false);
+    }
+  };
+
+  const handleSaveUsername = async () => {
+    if (!username.trim() || username.length < 3) {
+      toast.error('El username debe tener al menos 3 caracteres');
+      return;
+    }
+    setIsSavingUsername(true);
+    try {
+      const response = await apiClient.patch('/auth/username', { username: username.trim() });
+      updateUser(response.data.data);
+      toast.success('Username actualizado');
+    } catch (e: any) {
+      toast.error(e.response?.data?.error || 'Error al actualizar username');
+    } finally {
+      setIsSavingUsername(false);
+    }
+  };
+
+  const handleSaveWorkspace = async () => {
+    setIsSavingWorkspace(true);
+    try {
+      const response = await apiClient.patch('/auth/profile', {
+        defaultTargetJob: defaultTargetJob || undefined,
+        defaultTargetIndustry: defaultTargetIndustry || undefined,
+      });
+      updateUser(response.data.data);
+      toast.success('Área de trabajo actualizada');
+    } catch (e: any) {
+      toast.error(e.response?.data?.error || 'Error al actualizar');
+    } finally {
+      setIsSavingWorkspace(false);
     }
   };
 
@@ -98,85 +130,98 @@ export default function SettingsPage() {
 
           {/* Profile Tab */}
           <TabsContent value="profile">
-            <Card className="bg-card">
-              <CardHeader>
-                <CardTitle className="text-foreground">Información personal</CardTitle>
-                <CardDescription className="text-muted-foreground">Datos básicos de tu perfil público</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Avatar */}
-                <div className="flex items-center gap-4">
-                  <Avatar className="h-20 w-20">
-                    <AvatarFallback className="text-xl bg-foreground text-background">{initials}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="font-medium text-foreground">{user?.name}</p>
-                    <p className="text-sm text-muted-foreground">@{user?.username}</p>
-                    {user?.isPremium && <span className="text-xs bg-secondary text-foreground px-2 py-0.5 rounded-full mt-1 inline-block">Premium</span>}
+            <div className="space-y-6">
+              <Card className="bg-card">
+                <CardHeader>
+                  <CardTitle className="text-foreground">Información personal</CardTitle>
+                  <CardDescription className="text-muted-foreground">Datos básicos de tu perfil público</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Avatar */}
+                  <div className="flex items-center gap-4">
+                    <Avatar className="h-20 w-20">
+                      <AvatarFallback className="text-xl bg-foreground text-background">{initials}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-medium text-foreground">{user?.name}</p>
+                      <p className="text-sm text-muted-foreground">@{user?.username}</p>
+                      {user?.isPremium && <span className="text-xs bg-secondary text-foreground px-2 py-0.5 rounded-full mt-1 inline-block">Premium</span>}
+                    </div>
                   </div>
-                </div>
 
-                <Separator />
+                  <Separator />
 
-                {/* Name */}
-                <div className="space-y-2">
-                  <Label htmlFor="name" className="text-foreground flex items-center gap-2">
-                    <User className="h-4 w-4 text-muted-foreground" /> Nombre completo
-                  </Label>
-                  <Input
-                    id="name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Juan Pérez"
-                    className="bg-muted/50 border-border text-foreground"
-                  />
-                </div>
+                  {/* Name */}
+                  <div className="space-y-2">
+                    <Label htmlFor="name" className="text-foreground flex items-center gap-2">
+                      <User className="h-4 w-4 text-muted-foreground" /> Nombre completo
+                    </Label>
+                    <Input
+                      id="name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Juan Pérez"
+                      className="bg-muted/50 border-border text-foreground"
+                    />
+                  </div>
 
-                {/* Username */}
-                <div className="space-y-2">
-                  <Label htmlFor="username" className="text-foreground flex items-center gap-2">
-                    <AtSign className="h-4 w-4 text-muted-foreground" /> Username
-                  </Label>
-                  <Input
-                    id="username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    placeholder="juan_perez"
-                    className="bg-muted/50 border-border text-foreground"
-                  />
-                  <p className="text-xs text-muted-foreground">Se muestra en tu perfil público</p>
-                </div>
+                  {/* Email (read-only) */}
+                  <div className="space-y-2">
+                    <Label className="text-foreground">Email</Label>
+                    <Input value={user?.email} disabled className="bg-muted/50 border-border text-muted-foreground" />
+                    <p className="text-xs text-muted-foreground">No se puede cambiar</p>
+                  </div>
 
-                {/* Email (read-only) */}
-                <div className="space-y-2">
-                  <Label className="text-foreground">Email</Label>
-                  <Input value={user?.email} disabled className="bg-muted/50 border-border text-muted-foreground" />
-                  <p className="text-xs text-muted-foreground">No se puede cambiar</p>
-                </div>
+                  {/* Nationality */}
+                  <div className="space-y-2">
+                    <Label htmlFor="nationality" className="text-foreground flex items-center gap-2">
+                      <Globe className="h-4 w-4 text-muted-foreground" /> Nacionalidad <span className="text-muted-foreground/70 font-normal">(opcional)</span>
+                    </Label>
+                    <select
+                      id="nationality"
+                      value={nationality}
+                      onChange={(e) => setNationality(e.target.value)}
+                      className="flex h-9 w-full rounded-md border border-border bg-muted/50 px-3 py-1 text-sm text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    >
+                      <option value="">Seleccionar...</option>
+                      {NATIONALITIES.map((n) => (
+                        <option key={n} value={n}>{n}</option>
+                      ))}
+                    </select>
+                  </div>
 
-                {/* Nationality */}
-                <div className="space-y-2">
-                  <Label htmlFor="nationality" className="text-foreground flex items-center gap-2">
-                    <Globe className="h-4 w-4 text-muted-foreground" /> Nacionalidad <span className="text-muted-foreground/70 font-normal">(opcional)</span>
-                  </Label>
-                  <select
-                    id="nationality"
-                    value={nationality}
-                    onChange={(e) => setNationality(e.target.value)}
-                    className="flex h-9 w-full rounded-md border border-border bg-muted/50 px-3 py-1 text-sm text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                  >
-                    <option value="">Seleccionar...</option>
-                    {NATIONALITIES.map((n) => (
-                      <option key={n} value={n}>{n}</option>
-                    ))}
-                  </select>
-                </div>
+                  <Button onClick={handleSaveProfile} disabled={isSaving} className="bg-foreground text-background font-medium hover:bg-foreground/90">
+                    {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {isSaving ? 'Guardando...' : 'Guardar cambios'}
+                  </Button>
+                </CardContent>
+              </Card>
 
-                <Button onClick={handleSaveProfile} disabled={isLoading} className="bg-foreground text-background font-medium hover:bg-foreground/90">
-                  {isLoading ? 'Guardando...' : 'Guardar cambios'}
-                </Button>
-              </CardContent>
-            </Card>
+              {/* Username Card */}
+              <Card className="bg-card">
+                <CardHeader>
+                  <CardTitle className="text-foreground flex items-center gap-2"><AtSign className="h-5 w-5" /> Username</CardTitle>
+                  <CardDescription className="text-muted-foreground">Tu nombre de usuario público</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="username" className="text-foreground">Nuevo username</Label>
+                    <Input
+                      id="username"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      placeholder="juan_perez"
+                      className="bg-muted/50 border-border text-foreground"
+                    />
+                    <p className="text-xs text-muted-foreground">Se muestra en tu perfil público</p>
+                  </div>
+                  <Button onClick={handleSaveUsername} disabled={isSavingUsername} className="bg-foreground text-background font-medium hover:bg-foreground/90">
+                    {isSavingUsername && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {isSavingUsername ? 'Guardando...' : 'Cambiar username'}
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           {/* Workspace Tab */}
@@ -220,8 +265,9 @@ export default function SettingsPage() {
                   </select>
                 </div>
 
-                <Button onClick={handleSaveProfile} disabled={isLoading} className="bg-foreground text-background font-medium hover:bg-foreground/90">
-                  {isLoading ? 'Guardando...' : 'Guardar área de trabajo'}
+                <Button onClick={handleSaveWorkspace} disabled={isSavingWorkspace} className="bg-foreground text-background font-medium hover:bg-foreground/90">
+                  {isSavingWorkspace && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {isSavingWorkspace ? 'Guardando...' : 'Guardar área de trabajo'}
                 </Button>
               </CardContent>
             </Card>
@@ -244,3 +290,4 @@ export default function SettingsPage() {
     </div>
   );
 }
+
