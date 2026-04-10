@@ -60,11 +60,11 @@ export function LandingHeader() {
                       Dashboard
                     </Link>
                     <Link
-                      href="/cvs"
+                      href="/dashboard/settings"
                       onClick={() => setProfileOpen(false)}
                       className="flex items-center px-4 py-3 text-sm text-foreground hover:bg-secondary transition-colors"
                     >
-                      Mis CVs
+                      Configuración
                     </Link>
                     <button
                       onClick={() => {
