@@ -120,14 +120,18 @@ export const cvService = {
     targetJob?: string;
     targetIndustry?: string;
     userId?: string;
+    minScore?: string;
   }) {
     const skip = (page - 1) * limit;
 
-    const where = {
+    const where: any = {
       isPublic: true,
       status: 'COMPLETED' as const,
       ...(filters?.targetJob && { targetJob: { contains: filters.targetJob, mode: 'insensitive' as const } }),
       ...(filters?.targetIndustry && { targetIndustry: { contains: filters.targetIndustry, mode: 'insensitive' as const } }),
+      ...(filters?.minScore === '90' && { analysisResult: { path: ['score'], gte: 90 } }),
+      ...(filters?.minScore === '70' && { analysisResult: { path: ['score'], gte: 70, lte: 89 } }),
+      ...(filters?.minScore === 'low' && { analysisResult: { path: ['score'], lte: 69 } }),
     };
 
     const [cvs, total] = await Promise.all([

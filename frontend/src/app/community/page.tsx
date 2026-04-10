@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ThumbsUp, Search, User, ChevronLeft, ChevronRight, FileText, Loader2 } from 'lucide-react';
+import { ThumbsUp, Search, User, ChevronLeft, ChevronRight, FileText, Loader2, X } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -16,6 +16,34 @@ import { toast } from 'sonner';
 import Link from 'next/link';
 
 const PAGE_SIZE = 9;
+
+const INDUSTRY_FILTERS = [
+  'Tecnología',
+  'Marketing',
+  'Diseño',
+  'Ventas',
+  'Finanzas',
+  'Salud',
+  'Educación',
+  'Ingeniería',
+];
+
+const JOB_FILTERS = [
+  'Frontend',
+  'Backend',
+  'Full Stack',
+  'Data',
+  'DevOps',
+  'Mobile',
+  'QA',
+  'Product',
+];
+
+const SCORE_FILTERS = [
+  { label: '90+', value: '90' as const },
+  { label: '70-89', value: '70' as const },
+  { label: '<70', value: 'low' as const },
+];
 
 function CVPreviewThumbnail({ htmlUrl }: { htmlUrl: string }) {
   const [content, setContent] = useState<string | null>(null);
@@ -125,13 +153,18 @@ function CommunityCard({ cv }: { cv: CV }) {
 export default function CommunityPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(1);
+  const [selectedIndustry, setSelectedIndustry] = useState<string | null>(null);
+  const [selectedJob, setSelectedJob] = useState<string | null>(null);
+  const [selectedScore, setSelectedScore] = useState<string | null>(null);
   const { isAuthenticated } = useAuthStore();
 
   const { data, isLoading } = useQuery({
-    queryKey: ['community-cvs', page, searchTerm],
+    queryKey: ['community-cvs', page, searchTerm, selectedIndustry, selectedJob, selectedScore],
     queryFn: async () => {
       const params: Record<string, string> = { page: String(page), limit: String(PAGE_SIZE) };
       if (searchTerm) params.targetJob = searchTerm;
+      if (selectedIndustry) params.targetIndustry = selectedIndustry;
+      if (selectedScore) params.minScore = selectedScore;
       const r = await apiClient.get('/community/cvs', { params });
       return r.data;
     },
@@ -143,6 +176,31 @@ export default function CommunityPage() {
   const cvs = data?.data as CV[] | undefined;
   const total = data?.pagination?.total || 0;
   const totalPages = Math.ceil(total / PAGE_SIZE);
+
+  const hasActiveFilters = selectedIndustry || selectedJob || selectedScore;
+
+  const clearFilters = () => {
+    setSelectedIndustry(null);
+    setSelectedJob(null);
+    setSelectedScore(null);
+    setSearchTerm('');
+    setPage(1);
+  };
+
+  const toggleIndustry = (industry: string) => {
+    setSelectedIndustry(prev => prev === industry ? null : industry);
+    setPage(1);
+  };
+
+  const toggleJob = (job: string) => {
+    setSelectedJob(prev => prev === job ? null : job);
+    setPage(1);
+  };
+
+  const toggleScore = (score: string) => {
+    setSelectedScore(prev => prev === score ? null : score);
+    setPage(1);
+  };
 
   if (!isAuthenticated) {
     return (
@@ -170,7 +228,98 @@ export default function CommunityPage() {
           <TabsList className="bg-card border-border"><TabsTrigger value="explore" className="text-foreground data-[state=active]:bg-foreground data-[state=active]:text-background">Explorar</TabsTrigger><TabsTrigger value="top" className="text-foreground data-[state=active]:bg-foreground data-[state=active]:text-background">Top CVs</TabsTrigger></TabsList>
           <TabsContent value="explore">
             <div className="relative mb-6"><Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground/70" /><Input placeholder="Buscar por puesto..." value={searchTerm} onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }} className="pl-10 bg-muted/50 border-border text-foreground placeholder:text-muted-foreground" /></div>
-            {isLoading ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{[1, 2, 3, 4, 5, 6].map((i) => <Skeleton key={i} className="h-96 bg-secondary" />)}</div> : !cvs?.length ? <Card className="bg-card"><CardContent className="py-12 text-center text-muted-foreground">No hay CVs públicos</CardContent></Card> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{cvs.map((cv) => <CommunityCard key={cv.id} cv={cv} />)}</div>}
+
+            {/* Industry Filters */}
+            <div className="mb-4">
+              <p className="text-sm text-muted-foreground mb-2">Industria</p>
+              <div className="flex flex-wrap gap-2">
+                {INDUSTRY_FILTERS.map((industry) => (
+                  <button
+                    key={industry}
+                    onClick={() => toggleIndustry(industry)}
+                    className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+                      selectedIndustry === industry
+                        ? 'bg-foreground text-background shadow-md'
+                        : 'bg-secondary text-foreground hover:bg-secondary/80 border border-border'
+                    }`}
+                  >
+                    {industry}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Job Filters */}
+            <div className="mb-4">
+              <p className="text-sm text-muted-foreground mb-2">Puesto</p>
+              <div className="flex flex-wrap gap-2">
+                {JOB_FILTERS.map((job) => (
+                  <button
+                    key={job}
+                    onClick={() => toggleJob(job)}
+                    className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+                      selectedJob === job
+                        ? 'bg-foreground text-background shadow-md'
+                        : 'bg-secondary text-foreground hover:bg-secondary/80 border border-border'
+                    }`}
+                  >
+                    {job}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Score Filters */}
+            <div className="mb-6">
+              <p className="text-sm text-muted-foreground mb-2">Score ATS</p>
+              <div className="flex flex-wrap gap-2">
+                {SCORE_FILTERS.map((filter) => (
+                  <button
+                    key={filter.value}
+                    onClick={() => toggleScore(filter.value)}
+                    className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+                      selectedScore === filter.value
+                        ? 'bg-foreground text-background shadow-md'
+                        : 'bg-secondary text-foreground hover:bg-secondary/80 border border-border'
+                    }`}
+                  >
+                    {filter.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Active filters indicator */}
+            {hasActiveFilters && (
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-sm text-muted-foreground">Filtros activos:</span>
+                <div className="flex gap-2 flex-wrap">
+                  {selectedIndustry && (
+                    <Badge variant="secondary" className="gap-1 cursor-pointer hover:bg-secondary/80" onClick={() => { setSelectedIndustry(null); setPage(1); }}>
+                      {selectedIndustry}
+                      <X className="h-3 w-3" />
+                    </Badge>
+                  )}
+                  {selectedJob && (
+                    <Badge variant="secondary" className="gap-1 cursor-pointer hover:bg-secondary/80" onClick={() => { setSelectedJob(null); setPage(1); }}>
+                      {selectedJob}
+                      <X className="h-3 w-3" />
+                    </Badge>
+                  )}
+                  {selectedScore && (
+                    <Badge variant="secondary" className="gap-1 cursor-pointer hover:bg-secondary/80" onClick={() => { setSelectedScore(null); setPage(1); }}>
+                      Score {selectedScore === 'low' ? '<70' : selectedScore === '90' ? '90+' : '70-89'}
+                      <X className="h-3 w-3" />
+                    </Badge>
+                  )}
+                </div>
+                <button onClick={clearFilters} className="text-xs text-muted-foreground hover:text-foreground underline">
+                  Limpiar todo
+                </button>
+              </div>
+            )}
+
+            {isLoading ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{[1, 2, 3, 4, 5, 6].map((i) => <Skeleton key={i} className="h-96 bg-secondary" />)}</div> : !cvs?.length ? <Card className="bg-card"><CardContent className="py-12 text-center text-muted-foreground">No hay CVs que coincidan con los filtros</CardContent></Card> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{cvs.map((cv) => <CommunityCard key={cv.id} cv={cv} />)}</div>}
             {totalPages > 1 && (
               <div className="flex items-center justify-center gap-2 mt-8">
                 <Button variant="outline" size="icon" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}><ChevronLeft className="h-4 w-4" /></Button>
