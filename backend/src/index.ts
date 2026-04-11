@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import { config } from './config/index.js';
 import routes from './routes/index.js';
 import { errorHandler } from './middlewares/index.js';
+import { requestLogger, logger } from './utils/logger.js';
 import path from 'path';
 import { createServer, Server } from 'http';
 
@@ -23,6 +24,9 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Request logging middleware (generates requestId, logs all requests)
+app.use(requestLogger);
+
 // Only serve static uploads if not in production (Cloudinary handles files in prod)
 if (!config.isProd) {
   app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
@@ -34,10 +38,27 @@ app.use(errorHandler);
 
 const PORT = config.port;
 
-const httpServer = server.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📚 API: http://localhost:${PORT}/api`);
-  console.log(`🤖 AI Worker connected to Redis`);
+const httpServer = server.listen(PORT, async () => {
+  logger.info(`🚀 Server running on port ${PORT}`);
+  logger.info(`📚 API: http://localhost:${PORT}/api`);
+  logger.info(`🤖 AI Worker connected to Redis`);
+  logger.info(`📦 Environment: ${config.nodeEnv}`);
+
+  // Clean stale jobs from previous test runs (development only)
+  if (!config.isProd) {
+    try {
+      const waitingJobs = await aiQueue.getWaiting();
+      const delayedJobs = await aiQueue.getDelayed();
+      
+      if (waitingJobs.length > 0 || delayedJobs.length > 0) {
+        await aiQueue.drain();
+        await aiQueue.clean(0, 1000, 'failed');
+        logger.info(`🧹 Cleaned ${waitingJobs.length + delayedJobs.length} stale job(s) from queue`);
+      }
+    } catch (error) {
+      logger.debug('Queue cleanup skipped (no stale jobs)');
+    }
+  }
 });
 
 // ============================================================
@@ -46,64 +67,82 @@ const httpServer = server.listen(PORT, () => {
 
 let isShuttingDown = false;
 
-async function gracefulShutdown(signal: string, timeoutMs: number = 10000): Promise<void> {
+async function gracefulShutdown(signal: string): Promise<void> {
   if (isShuttingDown) {
-    console.log(`⚠️  Second ${signal} received. Forcing shutdown...`);
+    logger.warn(`⚠️  Second ${signal} received. Forcing shutdown...`);
     process.exit(1);
   }
 
   isShuttingDown = true;
-  console.log(`\n🛑 ${signal} received. Starting graceful shutdown...`);
+  logger.info(`\n🛑 ${signal} received. Starting graceful shutdown...`);
+
+  // Check if there are active jobs being processed
+  const activeJobs = await aiQueue.getActive();
+  const hasActiveJob = activeJobs.length > 0;
+
+  if (hasActiveJob) {
+    logger.warn(`⚠️  ${activeJobs.length} AI job(s) in progress. Waiting for completion...`);
+    logger.warn(`   (This may take up to 6 minutes depending on the job)`);
+  }
+
+  // If there's an active AI job, give it up to 6 minutes to complete
+  // Otherwise, 30 seconds is enough for normal cleanup
+  const timeoutMs = hasActiveJob ? 6 * 60 * 1000 : 30 * 1000;
+  const timeoutSeconds = timeoutMs / 1000;
 
   const shutdownTimer = setTimeout(() => {
-    console.error(`❌ Shutdown timed out after ${timeoutMs / 1000}s. Forcing exit.`);
+    logger.error(`❌ Shutdown timed out after ${timeoutSeconds}s. Forcing exit.`);
     process.exit(1);
   }, timeoutMs);
 
   try {
     // Step 1: Stop accepting new HTTP connections
-    console.log('⏸️  Stopping HTTP server...');
+    logger.info('⏸️  Stopping HTTP server...');
     await new Promise<void>((resolve) => {
       httpServer.close(() => {
-        console.log('✅ HTTP server stopped');
+        logger.info('✅ HTTP server stopped');
         resolve();
       });
-      // Force close all existing connections after 5s
+      // Force close all existing connections after 10s
       setTimeout(() => {
-        console.log('⚠️  Forcing HTTP connections to close');
+        logger.warn('⚠️  Forcing HTTP connections to close');
         httpServer.closeAllConnections?.();
-      }, 5000);
+      }, 10000);
     });
 
     // Step 2: Pause AI queue to stop accepting new jobs
-    console.log('⏸️  Pausing AI queue...');
+    logger.info('⏸️  Pausing AI queue...');
     await aiQueue.pause();
+    logger.info('✅ AI queue paused (no new jobs will be accepted)');
 
-    // Step 3: Close AI worker
-    console.log('⏸️  Closing AI worker...');
+    // Step 3: Close AI worker (waits for current job to finish)
+    logger.info('⏸️  Closing AI worker...');
+    if (hasActiveJob) {
+      logger.info('   Waiting for active job(s) to complete...');
+    }
     await aiWorker.close();
-    console.log('✅ AI worker closed');
+    logger.info('✅ AI worker closed');
 
     // Step 4: Close Redis connection
-    console.log('⏸️  Closing Redis connection...');
+    logger.info('⏸️  Closing Redis connection...');
     // IORedis instance is accessible through BullMQ queue connection
     const redisConnection = aiQueue.opts.connection as any;
     if (redisConnection && typeof redisConnection.quit === 'function') {
       await redisConnection.quit();
-      console.log('✅ Redis connection closed');
+      logger.info('✅ Redis connection closed');
     }
 
     // Step 5: Close Prisma connection pool
-    console.log('⏸️  Disconnecting from database...');
+    logger.info('⏸️  Disconnecting from database...');
     await prisma.$disconnect();
-    console.log('✅ Database disconnected');
+    logger.info('✅ Database disconnected');
 
     clearTimeout(shutdownTimer);
-    console.log('✅ Graceful shutdown completed');
+    logger.info(`✅ Graceful shutdown completed (took ${hasActiveJob ? '~6 min' : '< 1s'})`);
     process.exit(0);
   } catch (error) {
     clearTimeout(shutdownTimer);
-    console.error('❌ Error during graceful shutdown:', error);
+    logger.error('❌ Error during graceful shutdown:', { error });
     process.exit(1);
   }
 }
@@ -114,12 +153,12 @@ process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
 // Handle uncaught exceptions
 process.on('uncaughtException', (error) => {
-  console.error('❌ Uncaught Exception:', error);
+  logger.error('❌ Uncaught Exception:', { error: error.message, stack: error.stack });
   gracefulShutdown('uncaughtException');
 });
 
 process.on('unhandledRejection', (reason) => {
-  console.error('❌ Unhandled Rejection:', reason);
+  logger.error('❌ Unhandled Rejection:', { reason: String(reason) });
   gracefulShutdown('unhandledRejection');
 });
 
