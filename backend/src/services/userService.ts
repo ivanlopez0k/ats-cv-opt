@@ -350,6 +350,54 @@ export const userService = {
 
     return !user?.isEmailVerified;
   },
+
+  // ============================================================
+  // Password reset
+  // ============================================================
+  async createPasswordResetToken(email: string) {
+    const user = await this.findByEmail(email);
+    if (!user) return null;
+
+    const passwordResetToken = crypto.randomBytes(32).toString('hex');
+    const passwordResetExpiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+    return prisma.user.update({
+      where: { id: user.id },
+      data: { passwordResetToken, passwordResetExpiresAt },
+      select: { id: true, email: true, username: true, name: true, passwordResetToken: true },
+    });
+  },
+
+  async resetPassword(token: string, newPassword: string) {
+    const user = await prisma.user.findFirst({
+      where: {
+        passwordResetToken: token,
+        passwordResetExpiresAt: { gt: new Date() },
+      },
+    });
+
+    if (!user) return null;
+
+    const passwordHash = await bcrypt.hash(newPassword, 12);
+
+    return prisma.user.update({
+      where: { id: user.id },
+      data: {
+        passwordHash,
+        passwordResetToken: null,
+        passwordResetExpiresAt: null,
+        failedLoginAttempts: 0,
+        lockedUntil: null,
+      },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        name: true,
+        isEmailVerified: true,
+      },
+    });
+  },
 };
 
 export { prisma };

@@ -5,6 +5,9 @@ import {
   registerSchema,
   refreshSchema,
   updateUsernameSchema,
+  changePasswordSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
 } from '../controllers/index.js';
 import { authenticate, validate } from '../middlewares/index.js';
 import { authRateLimit } from '../middlewares/rateLimit.js';
@@ -26,7 +29,9 @@ router.get('/check-username/:username', authController.checkUsername);
 router.patch('/username', authenticate, validate(updateUsernameSchema), authController.updateUsername);
 
 // Password management
-router.post('/change-password', authenticate, authController.changePassword);
+router.post('/change-password', authenticate, validate(changePasswordSchema), authController.changePassword);
+router.post('/forgot-password', authRateLimit, validate(forgotPasswordSchema), authController.forgotPassword);
+router.post('/reset-password', authRateLimit, validate(resetPasswordSchema), authController.resetPassword);
 
 // Email verification (toggle-controlled)
 router.get('/verify-email/:token', authController.verifyEmail);

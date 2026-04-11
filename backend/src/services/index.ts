@@ -3,5 +3,7 @@ export { cvService, aiQueue } from './cvService.js';
 export { voteService } from './voteService.js';
 export { aiService } from './aiService.js';
 export { sessionService } from './sessionService.js';
+export { emailService } from './emailService.js';
+export { auditService } from './auditService.js';
 export { renderCVToHTML } from './htmlTemplateService.js';
 export { renderHTMLToPDF, renderHTMLToPDFFile } from './pdfRenderer.js';

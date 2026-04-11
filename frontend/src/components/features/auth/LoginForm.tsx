@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -65,6 +66,11 @@ export function LoginForm() {
           <Button type="submit" className="w-full bg-foreground text-background font-semibold hover:bg-foreground/90">
             {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Ingresando...</> : 'Iniciar Sesión'}
           </Button>
+          <div className="text-center">
+            <Link href="/forgot-password" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              ¿Olvidaste tu contraseña?
+            </Link>
+          </div>
         </form>
         <div className="mt-4 text-center text-sm">
           <span className="text-muted-foreground">¿No tienes cuenta?</span> <a href="/register" className="text-foreground hover:underline font-medium">Regístrate</a>

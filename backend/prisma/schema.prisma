@@ -22,6 +22,8 @@ model User {
   isEmailVerified        Boolean   @default(false)
   emailVerifyToken       String?
   emailVerifyExpiresAt   DateTime?
+  passwordResetToken     String?
+  passwordResetExpiresAt DateTime?
   failedLoginAttempts    Int       @default(0)
   lockedUntil            DateTime?
   createdAt              DateTime  @default(now())

@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { z } from 'zod';
-import { userService, sessionService } from '../services/index.js';
+import { userService, sessionService, emailService } from '../services/index.js';
 import { auditService } from '../services/auditService.js';
 import { AuthenticatedRequest } from '../types/index.js';
 import { config } from '../config/index.js';
@@ -46,6 +46,15 @@ export const updateUsernameSchema = z.object({
     .min(3, 'El username debe tener al menos 3 caracteres')
     .max(20, 'El username debe tener máximo 20 caracteres')
     .regex(/^[a-zA-Z0-9_]+$/, 'El username solo puede contener letras, números y guiones bajos'),
+});
+
+export const forgotPasswordSchema = z.object({
+  email: z.string().email('Email inválido'),
+});
+
+export const resetPasswordSchema = z.object({
+  token: z.string().min(1, 'Token requerido'),
+  newPassword: z.string().min(8, 'La nueva contraseña debe tener al menos 8 caracteres'),
 });
 
 // ============================================================
@@ -123,12 +132,30 @@ export const authController = {
       });
 
       if (config.security.emailVerificationEnabled) {
+        // Send verification email (non-blocking, don't fail registration if email fails)
+        emailService.sendVerificationEmail(user.email, user.name, tokens.accessToken)
+          .then(result => {
+            if (!result.success) {
+              console.error('Failed to send verification email:', result.error);
+            }
+          })
+          .catch(err => console.error('Failed to send verification email:', err));
+
         res.status(201).json({
           success: true,
           data: { user, emailVerificationRequired: true },
         });
         return;
       }
+
+      // Send welcome email if email verification is not required
+      emailService.sendWelcomeEmail(user.email, user.name)
+        .then(result => {
+          if (!result.success) {
+            console.error('Failed to send welcome email:', result.error);
+          }
+        })
+        .catch(err => console.error('Failed to send welcome email:', err));
 
       res.status(201).json({
         success: true,
@@ -376,6 +403,10 @@ export const authController = {
     }
 
     const result = await userService.resendVerificationEmail(userId);
+    if (!result) {
+      res.status(500).json({ success: false, error: 'Error al generar token de verificación' });
+      return;
+    }
 
     await auditService.log({
       userId,
@@ -384,8 +415,16 @@ export const authController = {
       userAgent: req.headers['user-agent'] || undefined,
     });
 
-    // TODO: Send actual email via Resend here
-    // await emailService.sendVerificationEmail(user.email, result.emailVerifyToken!);
+    // Send verification email
+    const emailResult = await emailService.sendVerificationEmail(
+      result.email,
+      result.username,
+      result.emailVerifyToken!
+    );
+
+    if (!emailResult.success) {
+      console.error('Failed to resend verification email:', emailResult.error);
+    }
 
     res.json({ success: true, message: 'Email de verificación reenviado' });
   },
@@ -402,9 +441,13 @@ export const authController = {
       return;
     }
 
-    const user = await userService.findByEmail(
-      (await userService.findById(userId))?.email || ''
-    );
+    const currentUser = await userService.findById(userId);
+    if (!currentUser) {
+      res.status(404).json({ success: false, error: 'Usuario no encontrado' });
+      return;
+    }
+
+    const user = await userService.findByEmail(currentUser.email);
     if (!user) {
       res.status(404).json({ success: false, error: 'Usuario no encontrado' });
       return;
@@ -436,6 +479,100 @@ export const authController = {
       userAgent: req.headers['user-agent'] || undefined,
     });
 
+    // Send password changed notification email
+    emailService.sendPasswordChangedNotification(user.email, user.name)
+      .then(result => {
+        if (!result.success) {
+          console.error('Failed to send password changed notification:', result.error);
+        }
+      })
+      .catch(err => console.error('Failed to send password changed notification:', err));
+
     res.json({ success: true, message: 'Contraseña actualizada' });
+  },
+
+  // ============================================================
+  // Forgot password
+  // ============================================================
+  async forgotPassword(req: Request, res: Response): Promise<void> {
+    const { email } = req.body;
+
+    if (!email) {
+      res.status(400).json({ success: false, error: 'Email requerido' });
+      return;
+    }
+
+    const user = await userService.findByEmail(email);
+    if (!user) {
+      // Don't reveal if email exists (security best practice)
+      res.json({ success: true, message: 'Si el email existe, recibirás un link para resetear tu contraseña' });
+      return;
+    }
+
+    const result = await userService.createPasswordResetToken(email);
+    if (!result) {
+      res.status(500).json({ success: false, error: 'Error al generar token de reset' });
+      return;
+    }
+
+    // Send password reset email
+    const emailResult = await emailService.sendPasswordResetEmail(
+      result.email,
+      result.name,
+      result.passwordResetToken!
+    );
+
+    if (!emailResult.success) {
+      console.error('Failed to send password reset email:', emailResult.error);
+      res.status(500).json({ success: false, error: 'Error al enviar email de reset' });
+      return;
+    }
+
+    await auditService.log({
+      userId: user.id,
+      event: 'PASSWORD_RESET_REQUESTED',
+      ipAddress: req.ip || undefined,
+      userAgent: req.headers['user-agent'] || undefined,
+    });
+
+    res.json({ success: true, message: 'Si el email existe, recibirás un link para resetear tu contraseña' });
+  },
+
+  // ============================================================
+  // Reset password
+  // ============================================================
+  async resetPassword(req: Request, res: Response): Promise<void> {
+    const { token, newPassword } = req.body;
+
+    if (!token || !newPassword) {
+      res.status(400).json({ success: false, error: 'Token y nueva contraseña requeridos' });
+      return;
+    }
+
+    // Validate password strength
+    const { validatePasswordStrength } = await import('../services/userService.js');
+    const strengthResult = validatePasswordStrength(newPassword);
+    if (!strengthResult.valid) {
+      res.status(400).json({ success: false, error: strengthResult.errors.join(', ') });
+      return;
+    }
+
+    const user = await userService.resetPassword(token, newPassword);
+    if (!user) {
+      res.status(400).json({ success: false, error: 'Token inválido o expirado' });
+      return;
+    }
+
+    // Revoke all sessions
+    await sessionService.deleteAllUserSessions(user.id);
+
+    await auditService.log({
+      userId: user.id,
+      event: 'PASSWORD_RESET_COMPLETED',
+      ipAddress: req.ip || undefined,
+      userAgent: req.headers['user-agent'] || undefined,
+    });
+
+    res.json({ success: true, message: 'Contraseña actualizada exitosamente' });
   },
 };
