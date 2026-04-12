@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Clock, CheckCircle, XCircle, FileText, Download, ArrowLeft, Globe, Lock, Trash2, AlertTriangle } from 'lucide-react';
+import { Clock, CheckCircle, XCircle, FileText, Download, ArrowLeft, Globe, Lock, Trash2, AlertTriangle, Sparkles, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
 import { CVPreview } from '@/components/features/cv/CVPreview';
 import apiClient from '@/lib/api';
@@ -54,6 +54,28 @@ export default function CVDetailPage({ params }: { params: Promise<{ id: string 
       router.push('/dashboard');
     },
     onError: () => toast.error('Error al eliminar el CV'),
+  });
+
+  const reanalyzeMutation = useMutation({
+    mutationFn: async () => {
+      return apiClient.post('/ai/reanalyze', { cvId: id });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cv', id] });
+      toast.success('Re-análisis iniciado. La IA está trabajando en tu CV...');
+    },
+    onError: () => toast.error('Error al iniciar re-análisis'),
+  });
+
+  // Polling when CV is processing (for re-analysis)
+  const { refetch } = useQuery({
+    queryKey: ['cv', id],
+    queryFn: async () => {
+      const r = await apiClient.get(`/cvs/${id}`);
+      return r.data.data as CV;
+    },
+    enabled: cv?.status === 'PROCESSING',
+    refetchInterval: cv?.status === 'PROCESSING' ? 5000 : false,
   });
 
   if (isLoading) {
@@ -157,6 +179,25 @@ export default function CVDetailPage({ params }: { params: Promise<{ id: string 
             </Button>
           </div>
         </div>
+
+        {/* Re-analyze button for completed CVs */}
+        {cv.status === 'COMPLETED' && (
+          <div className="mb-6">
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-foreground/20 text-foreground hover:bg-secondary"
+              onClick={() => reanalyzeMutation.mutate()}
+              disabled={reanalyzeMutation.isPending}
+            >
+              {reanalyzeMutation.isPending ? (
+                <><RefreshCw className="mr-2 h-4 w-4 animate-spin" />Re-analizando...</>
+              ) : (
+                <><Sparkles className="mr-2 h-4 w-4" />Re-analizar con IA</>
+              )}
+            </Button>
+          </div>
+        )}
 
         {/* Processing state */}
         {cv.status === 'PROCESSING' && (
@@ -335,9 +376,22 @@ export default function CVDetailPage({ params }: { params: Promise<{ id: string 
                 <XCircle className={`h-8 w-8 ${status.color}`} />
               </div>
               <h2 className="text-xl font-semibold mb-2 text-foreground">Error al procesar</h2>
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground mb-4">
                 {(cv.analysisResult as any)?.error || 'Ocurrió un error al procesar tu CV'}
               </p>
+              <Button
+                variant="default"
+                size="sm"
+                className="bg-foreground text-background hover:bg-foreground/90"
+                onClick={() => reanalyzeMutation.mutate()}
+                disabled={reanalyzeMutation.isPending}
+              >
+                {reanalyzeMutation.isPending ? (
+                  <><RefreshCw className="mr-2 h-4 w-4 animate-spin" />Reintentando...</>
+                ) : (
+                  <><RefreshCw className="mr-2 h-4 w-4" />Reintentar</>
+                )}
+              </Button>
             </CardContent>
           </Card>
         )}
