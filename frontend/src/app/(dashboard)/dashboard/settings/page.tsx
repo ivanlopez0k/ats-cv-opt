@@ -46,6 +46,10 @@ export default function SettingsPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isSavingUsername, setIsSavingUsername] = useState(false);
   const [isSavingWorkspace, setIsSavingWorkspace] = useState(false);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   const [name, setName] = useState(user?.name || '');
   const [username, setUsername] = useState(user?.username || '');
@@ -105,6 +109,36 @@ export default function SettingsPage() {
       toast.error(e.response?.data?.error || 'Error al actualizar');
     } finally {
       setIsSavingWorkspace(false);
+    }
+  };
+
+  const handleChangePassword = async () => {
+    if (!currentPassword) {
+      toast.error('Ingresá tu contraseña actual');
+      return;
+    }
+    if (newPassword.length < 8) {
+      toast.error('La nueva contraseña debe tener al menos 8 caracteres');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast.error('Las contraseñas no coinciden');
+      return;
+    }
+    setIsChangingPassword(true);
+    try {
+      await apiClient.post('/auth/change-password', {
+        currentPassword,
+        newPassword,
+      });
+      toast.success('Contraseña actualizada correctamente');
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (e: any) {
+      toast.error(e.response?.data?.error || 'Error al cambiar la contraseña');
+    } finally {
+      setIsChangingPassword(false);
     }
   };
 
@@ -275,15 +309,79 @@ export default function SettingsPage() {
 
           {/* Security Tab */}
           <TabsContent value="security">
-            <Card className="bg-card border-destructive/30">
-              <CardHeader>
-                <CardTitle className="text-destructive flex items-center gap-2"><LogOut className="h-5 w-5" /> Cerrar sesión</CardTitle>
-                <CardDescription className="text-muted-foreground">Salí de tu cuenta en este dispositivo</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button variant="destructive" onClick={() => { logout(); router.push('/login'); }}>Cerrar sesión</Button>
-              </CardContent>
-            </Card>
+            <div className="space-y-6">
+              {/* Change Password Card */}
+              <Card className="bg-card">
+                <CardHeader>
+                  <CardTitle className="text-foreground flex items-center gap-2">
+                    <Shield className="h-5 w-5" /> Cambiar contraseña
+                  </CardTitle>
+                  <CardDescription className="text-muted-foreground">
+                    Ingresá tu contraseña actual y la nueva contraseña
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="currentPassword" className="text-foreground">Contraseña actual</Label>
+                    <Input
+                      id="currentPassword"
+                      type="password"
+                      value={currentPassword}
+                      onChange={(e) => setCurrentPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="bg-muted/50 border-border text-foreground"
+                    />
+                  </div>
+
+                  <Separator />
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="newPassword" className="text-foreground">Nueva contraseña</Label>
+                      <Input
+                        id="newPassword"
+                        type="password"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        placeholder="Mínimo 8 caracteres"
+                        className="bg-muted/50 border-border text-foreground"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="confirmPassword" className="text-foreground">Confirmar contraseña</Label>
+                      <Input
+                        id="confirmPassword"
+                        type="password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        placeholder="Repetí la nueva contraseña"
+                        className="bg-muted/50 border-border text-foreground"
+                      />
+                    </div>
+                  </div>
+
+                  <Button
+                    onClick={handleChangePassword}
+                    disabled={isChangingPassword}
+                    className="bg-foreground text-background font-medium hover:bg-foreground/90"
+                  >
+                    {isChangingPassword && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {isChangingPassword ? 'Cambiando...' : 'Cambiar contraseña'}
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Logout Card */}
+              <Card className="bg-card border-destructive/30">
+                <CardHeader>
+                  <CardTitle className="text-destructive flex items-center gap-2"><LogOut className="h-5 w-5" /> Cerrar sesión</CardTitle>
+                  <CardDescription className="text-muted-foreground">Salí de tu cuenta en este dispositivo</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button variant="destructive" onClick={() => { logout(); router.push('/login'); }}>Cerrar sesión</Button>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
       </main>
