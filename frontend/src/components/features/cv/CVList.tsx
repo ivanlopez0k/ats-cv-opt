@@ -1,12 +1,14 @@
 'use client';
 
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { FileText, Clock, CheckCircle, XCircle, MoreVertical, Globe, Lock, ExternalLink } from 'lucide-react';
+import { FileText, Clock, CheckCircle, XCircle, MoreVertical, Globe, Lock, ExternalLink, Trash2, AlertTriangle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { CVUploadDialog } from './CVUploadDialog';
 import Link from 'next/link';
 import apiClient from '@/lib/api';
@@ -19,6 +21,7 @@ function CVCardSkeleton() {
 
 function CVCard({ cv }: { cv: CV }) {
   const queryClient = useQueryClient();
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const statusConfig = { PROCESSING: { icon: Clock, variant: 'secondary' as const, text: 'Procesando' }, COMPLETED: { icon: CheckCircle, variant: 'default' as const, text: 'Listo' }, FAILED: { icon: XCircle, variant: 'destructive' as const, text: 'Fallido' } };
   const status = statusConfig[cv.status];
 
@@ -35,7 +38,22 @@ function CVCard({ cv }: { cv: CV }) {
     },
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      return apiClient.delete(`/cvs/${cv.id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cvs'] });
+      toast.success('CV eliminado');
+      setShowDeleteDialog(false);
+    },
+    onError: () => {
+      toast.error('Error al eliminar el CV');
+    },
+  });
+
   return (
+    <>
     <Card className="bg-card hover:shadow-lg transition-all">
       <div onClick={() => window.location.href = `/cvs/${cv.id}`} className="cursor-pointer">
         <CardHeader className="pb-3">
@@ -84,6 +102,15 @@ function CVCard({ cv }: { cv: CV }) {
                       )}
                     </DropdownMenuItem>
                   )}
+                  <DropdownMenuItem
+                    className="text-destructive focus:text-destructive"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setShowDeleteDialog(true);
+                    }}
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" /><span>Eliminar</span>
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -97,6 +124,38 @@ function CVCard({ cv }: { cv: CV }) {
         </CardContent>
       </div>
     </Card>
+
+    {/* Delete Confirmation Dialog */}
+    <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+      <DialogContent className="bg-card border-border">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-destructive">
+            <AlertTriangle className="h-5 w-5" />
+            Eliminar CV
+          </DialogTitle>
+          <DialogDescription>
+            ¿Estás seguro de que querés eliminar <strong>"{cv.title}"</strong>? Esta acción no se puede deshacer.
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button
+            variant="outline"
+            onClick={() => setShowDeleteDialog(false)}
+            disabled={deleteMutation.isPending}
+          >
+            Cancelar
+          </Button>
+          <Button
+            variant="destructive"
+            onClick={() => deleteMutation.mutate()}
+            disabled={deleteMutation.isPending}
+          >
+            {deleteMutation.isPending ? 'Eliminando...' : 'Eliminar'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }
 

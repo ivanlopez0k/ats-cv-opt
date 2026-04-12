@@ -1,6 +1,8 @@
 'use client';
+import { useState } from 'react';
 import { use } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
 import { DashboardHeader } from '@/components/features/dashboard/DashboardHeader';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,7 +10,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Clock, CheckCircle, XCircle, FileText, Download, ArrowLeft, Globe, Lock } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Clock, CheckCircle, XCircle, FileText, Download, ArrowLeft, Globe, Lock, Trash2, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 import { CVPreview } from '@/components/features/cv/CVPreview';
 import apiClient from '@/lib/api';
@@ -18,8 +21,10 @@ import { useAuthStore } from '@/lib/stores/authStore';
 
 export default function CVDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const router = useRouter();
   const { user } = useAuthStore();
   const queryClient = useQueryClient();
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const { data: cv, isLoading } = useQuery({
     queryKey: ['cv', id],
@@ -38,6 +43,17 @@ export default function CVDetailPage({ params }: { params: Promise<{ id: string 
       toast.success(cv?.isPublic ? 'CV vuelto privado' : 'CV compartido con la comunidad');
     },
     onError: () => toast.error('Error al actualizar'),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      return apiClient.delete(`/cvs/${id}`);
+    },
+    onSuccess: () => {
+      toast.success('CV eliminado');
+      router.push('/dashboard');
+    },
+    onError: () => toast.error('Error al eliminar el CV'),
   });
 
   if (isLoading) {
@@ -130,6 +146,15 @@ export default function CVDetailPage({ params }: { params: Promise<{ id: string 
                 <Download className="mr-2 h-4 w-4" /> Mejorado
               </a>
             )}
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-destructive/50 text-destructive hover:bg-destructive/10"
+              onClick={() => setShowDeleteDialog(true)}
+              disabled={deleteMutation.isPending}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
           </div>
         </div>
 
@@ -316,6 +341,37 @@ export default function CVDetailPage({ params }: { params: Promise<{ id: string 
             </CardContent>
           </Card>
         )}
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <DialogContent className="bg-card border-border">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-destructive">
+                <AlertTriangle className="h-5 w-5" />
+                Eliminar CV
+              </DialogTitle>
+              <DialogDescription>
+                ¿Estás seguro de que querés eliminar <strong>"{cv.title}"</strong>? Esta acción no se puede deshacer.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setShowDeleteDialog(false)}
+                disabled={deleteMutation.isPending}
+              >
+                Cancelar
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => deleteMutation.mutate()}
+                disabled={deleteMutation.isPending}
+              >
+                {deleteMutation.isPending ? 'Eliminando...' : 'Eliminar'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </main>
     </div>
   );
