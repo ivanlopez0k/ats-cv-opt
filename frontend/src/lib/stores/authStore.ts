@@ -61,6 +61,10 @@ export const useAuthStore = create<AuthState>()(
       onRehydrateStorage: () => (state) => {
         if (state) {
           state.setHydrated();
+          // Clear stale auth data if it looks corrupted
+          if (state.refreshToken && !state.user) {
+            state.logout();
+          }
         }
       },
     }

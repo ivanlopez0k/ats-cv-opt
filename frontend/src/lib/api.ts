@@ -26,51 +26,37 @@ apiClient.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // Avoid infinite retry loops
+    // Avoid infinite retry loops - only attempt refresh once per request
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-      const refreshToken = useAuthStore.getState().refreshToken;
+      const { refreshToken, user } = useAuthStore.getState();
 
-      // If we have a refresh token in store, use it (dev mode)
-      if (refreshToken) {
+      // If we have a refresh token, try to refresh
+      if (refreshToken && user) {
         try {
           const response = await axios.post(
             `${API_URL}/auth/refresh`,
             { refreshToken },
             { withCredentials: true }
           );
-          const { accessToken, refreshToken: newRefreshToken } = response.data.data;
-          useAuthStore
-            .getState()
-            .setAuth(useAuthStore.getState().user!, accessToken, newRefreshToken);
-          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+          const { accessToken: newAccessToken, refreshToken: newRefreshToken } = response.data.data;
+          useAuthStore.getState().setAuth(user, newAccessToken, newRefreshToken);
+          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
           return apiClient(originalRequest);
-        } catch {
-          useAuthStore.getState().logout();
-        }
-      } else {
-        // ============================================================
-        // COOKIE MODE: Try to refresh via cookie
-        // The backend will read the HttpOnly cookie automatically.
-        // ============================================================
-        try {
-          const response = await apiClient.post(`${API_URL}/auth/refresh`, {
-            refreshToken: '__cookie__',
-          });
-          const { accessToken } = response.data.data;
-          if (response.data.data.user) {
-            useAuthStore.getState().setAuth(
-              response.data.data.user,
-              accessToken,
-              response.data.data.refreshToken
-            );
-            originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-            return apiClient(originalRequest);
+        } catch (refreshError: any) {
+          // Refresh failed - user is truly unauthenticated
+          // Only logout if the refresh endpoint confirmed failure (not a network error)
+          if (refreshError.response?.status === 401) {
+            useAuthStore.getState().logout();
           }
-        } catch {
-          // Refresh also failed — user is truly unauthenticated
-          useAuthStore.getState().logout();
+          // Don't retry - just reject the original request
+          return Promise.reject(error);
         }
+      }
+
+      // No refresh token - just logout and reject
+      if (!refreshToken) {
+        useAuthStore.getState().logout();
       }
     }
 
