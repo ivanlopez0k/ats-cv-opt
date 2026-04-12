@@ -2,6 +2,7 @@ import { Router } from 'express';
 import multer from 'multer';
 import { cvController, createCVSchema, updateCVSchema } from '../controllers/index.js';
 import { authenticate, validate } from '../middlewares/index.js';
+import { uploadRateLimit } from '../middlewares/rateLimit.js';
 
 const router = Router();
 
@@ -17,7 +18,7 @@ const upload = multer({
   },
 });
 
-router.post('/upload', authenticate, upload.single('pdf'), cvController.upload);
+router.post('/upload', authenticate, uploadRateLimit, upload.single('pdf'), validate(createCVSchema), cvController.upload);
 router.get('/', authenticate, cvController.getAll);
 router.get('/:id', authenticate, cvController.getById);
 router.patch('/:id', authenticate, validate(updateCVSchema), cvController.update);
