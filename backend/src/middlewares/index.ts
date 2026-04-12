@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { ZodError, ZodSchema } from 'zod';
 import { verifyToken } from '../utils/jwt.js';
 import { JwtPayload } from '../types/index.js';
+import { logger } from '../utils/logger.js';
 
 export const authenticate = (
   req: Request,
@@ -67,7 +68,14 @@ export const errorHandler = (
   res: Response,
   next: NextFunction
 ): void => {
-  console.error('Error:', err);
+  const requestId = (req as any).requestId;
+  logger.error(`Request failed`, {
+    requestId,
+    method: req.method,
+    url: req.originalUrl,
+    error: err.message,
+    stack: err.stack,
+  });
 
   if (err.name === 'MulterError') {
     res.status(400).json({
@@ -79,8 +87,8 @@ export const errorHandler = (
 
   res.status(500).json({
     success: false,
-    error: process.env.NODE_ENV === 'production' 
-      ? 'Internal server error' 
+    error: process.env.NODE_ENV === 'production'
+      ? 'Internal server error'
       : err.message,
   });
 };

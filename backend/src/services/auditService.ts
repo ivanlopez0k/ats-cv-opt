@@ -1,5 +1,6 @@
 import { prisma } from './userService.js';
 import { config } from '../config/index.js';
+import { logger } from '../utils/logger.js';
 
 export type AuditEventType =
   | 'LOGIN_SUCCESS'
@@ -44,7 +45,7 @@ export const auditService = {
       });
     } catch (err) {
       // Never break the main flow because of audit logging
-      console.error('[AuditLog] Failed to write:', err);
+      logger.error('[AuditLog] Failed to write:', err);
     }
   },
 

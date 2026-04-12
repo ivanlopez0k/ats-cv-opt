@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { z } from 'zod';
 import { cvService, voteService } from '../services/index.js';
 import { AuthenticatedRequest } from '../types/index.js';
+import { logger } from '../utils/logger.js';
 
 export const createCVSchema = z.object({
   title: z.string().min(1, 'Título requerido'),
@@ -64,7 +65,7 @@ export const cvController = {
         message: 'CV subido exitosamente. Procesamiento en progreso...',
       });
     } catch (error) {
-      console.error('Error uploading CV:', error);
+      logger.error('Error uploading CV:', error);
       res.status(500).json({ success: false, error: 'Error al procesar el CV' });
     }
   },

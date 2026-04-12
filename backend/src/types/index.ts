@@ -11,6 +11,7 @@ export interface JwtPayload {
 
 export interface AuthenticatedRequest extends Request {
   user?: JwtPayload;
+  requestId?: string;
 }
 
 export interface CVWithRelations extends CV {

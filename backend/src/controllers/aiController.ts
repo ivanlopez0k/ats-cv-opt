@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { z } from 'zod';
 import { aiService } from '../services/index.js';
 import { AuthenticatedRequest } from '../types/index.js';
+import { logger } from '../utils/logger.js';
 
 export const analyzeSchema = z.object({
   cvId: z.string().min(1, 'CV ID requerido'),
@@ -42,7 +43,7 @@ export const aiController = {
         data: { analysis },
       });
     } catch (error) {
-      console.error('AI Analysis Error:', error);
+      logger.error('AI Analysis Error:', error);
       res.status(500).json({ success: false, error: 'Error en el análisis de IA' });
     }
   },

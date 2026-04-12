@@ -2,6 +2,7 @@ import OpenAI from 'openai';
 import { config } from '../config/index.js';
 import { CVAnalysisResult, CVImprovementResult } from '../types/index.js';
 import http from 'http';
+import { logger } from '../utils/logger.js';
 
 const openai = new OpenAI({ apiKey: config.openai.apiKey });
 
@@ -131,13 +132,13 @@ async function callOllama(prompt: string): Promise<string> {
               return;
             }
             if (!parsed.response && parsed.response !== '') {
-              console.error('[Ollama] Raw response:', data.slice(0, 1000));
+              logger.error('[Ollama] Raw response:', data.slice(0, 1000));
               reject(new Error(`Ollama returned no response field. Raw: ${data.slice(0, 500)}`));
               return;
             }
             resolve(parsed.response || '');
           } catch (parseErr: any) {
-            console.error('[Ollama] Failed to parse response:', data.slice(0, 1000));
+            logger.error('[Ollama] Failed to parse response:', data.slice(0, 1000));
             reject(new Error(`Ollama response parse error: ${parseErr.message}. Raw: ${data.slice(0, 500)}`));
           }
         });
@@ -202,7 +203,7 @@ export const aiService = {
   async analyzeCV(cvText: string, targetJob?: string, targetIndustry?: string): Promise<CVAnalysisResult> {
     // Mode 1: Ollama (local, free)
     if (config.ollama.enabled) {
-      console.log(`🦙 Using Ollama (${config.ollama.model}) for analysis`);
+      logger.info(`🦙 Using Ollama (${config.ollama.model}) for analysis`);
       const prompt = `${SYSTEM_PROMPT_ANALYSIS}\n\nCV a analizar:\n${cvText}\n\n${targetJob ? `Puesto objetivo: ${targetJob}` : ''}${targetIndustry ? `Industria: ${targetIndustry}` : ''}`;
       const response = await callOllama(prompt);
       return extractJson(response) as CVAnalysisResult;
@@ -210,7 +211,7 @@ export const aiService = {
 
     // Mode 2: Mock (dev, no API needed)
     if (config.openai.mockEnabled) {
-      console.log('🎭 Using mock AI analysis (development mode)');
+      logger.info('🎭 Using mock AI analysis (development mode)');
       const mock = generateMockAnalysis(cvText, targetJob, targetIndustry);
       return mock.analysis;
     }
@@ -244,7 +245,7 @@ Responde SOLO con JSON válido, sin texto adicional.`;
   async improveCV(cvText: string, targetJob?: string, targetIndustry?: string): Promise<CVImprovementResult> {
     // Mode 1: Ollama (local, free)
     if (config.ollama.enabled) {
-      console.log(`🦙 Using Ollama (${config.ollama.model}) for improvement`);
+      logger.info(`🦙 Using Ollama (${config.ollama.model}) for improvement`);
       const prompt = `${SYSTEM_PROMPT_IMPROVEMENT}\n\nCV a mejorar:\n${cvText}\n\n${targetJob ? `Puesto objetivo: ${targetJob}` : ''}${targetIndustry ? `Industria: ${targetIndustry}` : ''}`;
       const response = await callOllama(prompt);
       return extractJson(response) as CVImprovementResult;
@@ -252,7 +253,7 @@ Responde SOLO con JSON válido, sin texto adicional.`;
 
     // Mode 2: Mock (dev, no API needed)
     if (config.openai.mockEnabled) {
-      console.log('🎭 Using mock AI improvement (development mode)');
+      logger.info('🎭 Using mock AI improvement (development mode)');
       return generateMockAnalysis(cvText, targetJob, targetIndustry);
     }
 

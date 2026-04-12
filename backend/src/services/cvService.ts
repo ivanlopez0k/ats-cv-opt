@@ -3,6 +3,7 @@ import { config } from '../config/index.js';
 import { uploadToCloudinary, deleteFromCloudinary, getPublicIdFromUrl } from '../utils/cloudinary.js';
 import { Queue } from 'bullmq';
 import IORedis from 'ioredis';
+import { logger } from '../utils/logger.js';
 
 const redis = new IORedis(config.redis.url, { maxRetriesPerRequest: null });
 export const aiQueue = new Queue('ai-processing', { connection: redis });
@@ -22,7 +23,7 @@ export const cvService = {
     const uniqueFilename = `${userId}/${Date.now()}-${filename.replace(/\s+/g, '-').toLowerCase()}`;
 
     // Upload PDF to Cloudinary
-    console.log(`📤 Uploading original PDF to Cloudinary: ${uniqueFilename}`);
+    logger.info(`📤 Uploading original PDF to Cloudinary: ${uniqueFilename}`);
     const cloudinaryResult = await uploadToCloudinary(pdfBuffer, uniqueFilename, 'cvmaster/originals');
 
     const cv = await prisma.cV.create({
@@ -103,18 +104,18 @@ export const cvService = {
       try {
         const publicId = getPublicIdFromUrl(cv.originalPdfUrl);
         await deleteFromCloudinary(publicId);
-        console.log(`🗑️ Deleted original PDF from Cloudinary: ${publicId}`);
+        logger.info(`🗑️ Deleted original PDF from Cloudinary: ${publicId}`);
       } catch (error) {
-        console.error('Error deleting original PDF from Cloudinary:', error);
+        logger.error('Error deleting original PDF from Cloudinary:', error);
       }
     }
     if (cv.improvedPdfUrl && cv.improvedPdfUrl.includes('cloudinary')) {
       try {
         const publicId = getPublicIdFromUrl(cv.improvedPdfUrl);
         await deleteFromCloudinary(publicId);
-        console.log(`🗑️ Deleted improved PDF from Cloudinary: ${publicId}`);
+        logger.info(`🗑️ Deleted improved PDF from Cloudinary: ${publicId}`);
       } catch (error) {
-        console.error('Error deleting improved PDF from Cloudinary:', error);
+        logger.error('Error deleting improved PDF from Cloudinary:', error);
       }
     }
 

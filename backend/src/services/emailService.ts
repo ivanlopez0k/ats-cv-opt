@@ -1,5 +1,6 @@
 import { Resend } from 'resend';
 import { config } from '../config/index.js';
+import { logger } from '../utils/logger.js';
 
 // Initialize Resend client
 const resend = config.resend.apiKey ? new Resend(config.resend.apiKey) : null;
@@ -114,11 +115,11 @@ async function sendEmail({
   html: string;
 }): Promise<{ success: boolean; error?: string }> {
   if (!resend) {
-    console.warn('⚠️ Resend API key not configured. Email not sent.');
-    console.log(`📧 Email would be sent to: ${to}`);
-    console.log(`📧 Subject: ${subject}`);
+    logger.warn('⚠️ Resend API key not configured. Email not sent.');
+    logger.info(`📧 Email would be sent to: ${to}`);
+    logger.info(`📧 Subject: ${subject}`);
     // Log first 200 chars of HTML for debugging
-    console.log(`📧 HTML preview: ${html.substring(0, 200)}...`);
+    logger.info(`📧 HTML preview: ${html.substring(0, 200)}...`);
     return { success: true }; // Don't fail the flow in dev mode
   }
 
@@ -131,14 +132,14 @@ async function sendEmail({
     });
 
     if (result.error) {
-      console.error('❌ Resend error:', result.error);
+      logger.error('❌ Resend error:', result.error);
       return { success: false, error: result.error.message };
     }
 
-    console.log(`✅ Email sent to ${to} (${subject})`);
+    logger.info(`✅ Email sent to ${to} (${subject})`);
     return { success: true };
   } catch (error: any) {
-    console.error('❌ Failed to send email:', error.message);
+    logger.error('❌ Failed to send email:', error.message);
     return { success: false, error: error.message };
   }
 }

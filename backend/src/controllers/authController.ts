@@ -4,6 +4,7 @@ import { userService, sessionService, emailService } from '../services/index.js'
 import { auditService } from '../services/auditService.js';
 import { AuthenticatedRequest } from '../types/index.js';
 import { config } from '../config/index.js';
+import { logger } from '../utils/logger.js';
 
 // ============================================================
 // Zod schemas
@@ -136,10 +137,10 @@ export const authController = {
         emailService.sendVerificationEmail(user.email, user.name, tokens.accessToken)
           .then(result => {
             if (!result.success) {
-              console.error('Failed to send verification email:', result.error);
+              logger.error('Failed to send verification email:', result.error);
             }
           })
-          .catch(err => console.error('Failed to send verification email:', err));
+          .catch(err => logger.error('Failed to send verification email:', err));
 
         res.status(201).json({
           success: true,
@@ -152,10 +153,10 @@ export const authController = {
       emailService.sendWelcomeEmail(user.email, user.name)
         .then(result => {
           if (!result.success) {
-            console.error('Failed to send welcome email:', result.error);
+            logger.error('Failed to send welcome email:', result.error);
           }
         })
-        .catch(err => console.error('Failed to send welcome email:', err));
+        .catch(err => logger.error('Failed to send welcome email:', err));
 
       res.status(201).json({
         success: true,
@@ -423,7 +424,7 @@ export const authController = {
     );
 
     if (!emailResult.success) {
-      console.error('Failed to resend verification email:', emailResult.error);
+      logger.error('Failed to resend verification email:', emailResult.error);
     }
 
     res.json({ success: true, message: 'Email de verificación reenviado' });
@@ -483,10 +484,10 @@ export const authController = {
     emailService.sendPasswordChangedNotification(user.email, user.name)
       .then(result => {
         if (!result.success) {
-          console.error('Failed to send password changed notification:', result.error);
+          logger.error('Failed to send password changed notification:', result.error);
         }
       })
-      .catch(err => console.error('Failed to send password changed notification:', err));
+      .catch(err => logger.error('Failed to send password changed notification:', err));
 
     res.json({ success: true, message: 'Contraseña actualizada' });
   },
@@ -523,7 +524,7 @@ export const authController = {
     );
 
     if (!emailResult.success) {
-      console.error('Failed to send password reset email:', emailResult.error);
+      logger.error('Failed to send password reset email:', emailResult.error);
       res.status(500).json({ success: false, error: 'Error al enviar email de reset' });
       return;
     }
