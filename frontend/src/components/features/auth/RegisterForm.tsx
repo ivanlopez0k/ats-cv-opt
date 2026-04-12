@@ -73,10 +73,16 @@ export function RegisterForm() {
     setIsLoading(true);
     try {
       const response = await apiClient.post('/auth/register', data);
-      const { user, accessToken, refreshToken } = response.data.data;
+      const { user, accessToken, refreshToken, emailVerificationRequired } = response.data.data;
       setAuth(user, accessToken, refreshToken);
-      toast.success('¡Cuenta creada!');
-      router.push('/dashboard');
+
+      if (emailVerificationRequired) {
+        toast.success('¡Cuenta creada! Verificá tu email para continuar.');
+        router.push('/auth/verify-email?sent=true');
+      } else {
+        toast.success('¡Bienvenido!');
+        router.push('/dashboard');
+      }
     } catch (error: any) {
       toast.error(error.response?.data?.error || 'Error al registrarse');
     } finally {

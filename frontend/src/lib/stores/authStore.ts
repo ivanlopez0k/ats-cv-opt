@@ -8,7 +8,7 @@ interface User {
   name: string;
   role: string;
   isPremium: boolean;
-  isEmailVerified?: boolean;
+  isEmailVerified: boolean;
   nationality?: string;
   defaultTargetJob?: string;
   defaultTargetIndustry?: string;
@@ -21,6 +21,7 @@ interface AuthState {
   refreshToken: string | null;
   isAuthenticated: boolean;
   isHydrated: boolean;
+  isEmailVerified: boolean;
   setAuth: (user: User, accessToken: string, refreshToken?: string) => void;
   updateUser: (user: Partial<User>) => void;
   logout: () => void;
@@ -36,17 +37,19 @@ export const useAuthStore = create<AuthState>()(
       refreshToken: null,
       isAuthenticated: false,
       isHydrated: false,
+      isEmailVerified: false,
       setAuth: (user, accessToken, refreshToken) =>
-        set({ user, accessToken, refreshToken, isAuthenticated: true }),
+        set({ user, accessToken, refreshToken, isAuthenticated: true, isEmailVerified: user.isEmailVerified }),
       updateUser: (userData) =>
         set((state) => ({
           user: state.user ? { ...state.user, ...userData } : null,
+          isEmailVerified: userData.isEmailVerified ?? state.isEmailVerified,
         })),
       logout: () =>
-        set({ user: null, accessToken: null, refreshToken: null, isAuthenticated: false }),
+        set({ user: null, accessToken: null, refreshToken: null, isAuthenticated: false, isEmailVerified: false }),
       needsEmailVerification: () => {
         const { user } = get();
-        return !!user && user.isEmailVerified === false;
+        return !!user && !user.isEmailVerified;
       },
       setHydrated: () => set({ isHydrated: true }),
     }),
@@ -57,6 +60,7 @@ export const useAuthStore = create<AuthState>()(
         accessToken: state.accessToken,
         refreshToken: state.refreshToken,
         isAuthenticated: state.isAuthenticated,
+        isEmailVerified: state.isEmailVerified,
       }),
       onRehydrateStorage: () => (state) => {
         if (state) {
