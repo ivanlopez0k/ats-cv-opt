@@ -12,6 +12,25 @@ interface CVPreviewProps {
   improvedPdfUrl?: string;
 }
 
+/**
+ * Basic client-side HTML sanitization for defense in depth.
+ * Removes dangerous tags and attributes before injecting in iframe.
+ */
+function sanitizeHtmlClient(html: string): string {
+  return (
+    html
+      // Remove script tags and content
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+      // Remove event handlers
+      .replace(/\son\w+\s*=\s*["'][^"']*["']/gi, '')
+      .replace(/\son\w+\s*=\s*\S+/gi, '')
+      // Remove javascript: URLs
+      .replace(/javascript\s*:/gi, '')
+      // Remove data: URLs in src (except images)
+      .replace(/<(?!img)\b[^>]*\ssrc\s*=\s*["']data:/gi, (match) => match.replace('data:', 'blocked:'))
+  );
+}
+
 export function CVPreview({ cvId, userId, improvedHtmlUrl, improvedPdfUrl }: CVPreviewProps) {
   const [showPreview, setShowPreview] = useState(false);
   const [htmlContent, setHtmlContent] = useState<string | null>(null);
@@ -23,7 +42,8 @@ export function CVPreview({ cvId, userId, improvedHtmlUrl, improvedPdfUrl }: CVP
       fetch(improvedHtmlUrl)
         .then((res) => res.text())
         .then((html) => {
-          setHtmlContent(html);
+          // Sanitize HTML before injecting in iframe (defense in depth)
+          setHtmlContent(sanitizeHtmlClient(html));
           setLoading(false);
         })
         .catch(() => {

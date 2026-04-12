@@ -4,6 +4,7 @@
  */
 
 import puppeteer from 'puppeteer';
+import { sanitizeHtml } from '../utils/sanitize.js';
 
 export interface PDFRenderOptions {
   format?: 'A4' | 'Letter';
@@ -49,6 +50,9 @@ export async function renderHTMLToPDF(
   try {
     const page = await browser.newPage();
 
+    // Sanitize HTML to prevent XSS before rendering
+    const sanitizedHtml = sanitizeHtml(html);
+
     // Set viewport for consistent rendering
     await page.setViewport({
       width: 794, // A4 width in pixels at 96 DPI
@@ -56,8 +60,8 @@ export async function renderHTMLToPDF(
       deviceScaleFactor: 2, // Higher quality
     });
 
-    // Set content and wait for fonts
-    await page.setContent(html, {
+    // Set sanitized content and wait for fonts
+    await page.setContent(sanitizedHtml, {
       waitUntil: 'networkidle0',
       timeout: 30000,
     });

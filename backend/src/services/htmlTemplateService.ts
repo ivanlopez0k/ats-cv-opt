@@ -4,6 +4,7 @@
  */
 
 import { CVImprovementResult } from '../types/index.js';
+import { sanitizeHtml } from '../utils/sanitize.js';
 
 export interface CVTemplateOptions {
   template?: 'modern' | 'classic' | 'minimal';
@@ -590,11 +591,16 @@ function getScoreColor(score: number): string {
 export function renderCVToHTML(cv: CVImprovementResult, options: CVTemplateOptions = {}): string {
   const { template = 'modern', accentColor = '#2563eb' } = options;
 
+  let html: string;
   switch (template) {
     case 'classic':
-      return classicTemplate(cv);
+      html = classicTemplate(cv);
+      break;
     case 'modern':
     default:
-      return modernTemplate(cv, accentColor);
+      html = modernTemplate(cv, accentColor);
   }
+
+  // Sanitize output to prevent XSS from AI-generated content
+  return sanitizeHtml(html);
 }
