@@ -5,5 +5,6 @@ export { aiService } from './aiService.js';
 export { sessionService } from './sessionService.js';
 export { emailService } from './emailService.js';
 export { auditService } from './auditService.js';
+export { adminService } from './adminService.js';
 export { renderCVToHTML } from './htmlTemplateService.js';
 export { renderHTMLToPDF, renderHTMLToPDFFile } from './pdfRenderer.js';
