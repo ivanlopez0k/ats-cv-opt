@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import multer from 'multer';
 import {
   authController,
   loginSchema,
@@ -14,6 +15,20 @@ import { authRateLimit } from '../middlewares/rateLimit.js';
 
 const router = Router();
 
+// Multer config for avatar upload (memory storage, max 2MB)
+const avatarUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Solo se permiten imágenes (JPG, PNG, WebP)'));
+    }
+  },
+});
+
 // Apply rate limiting to auth endpoints (toggle-controlled)
 router.post('/register', authRateLimit, validate(registerSchema), authController.register);
 router.post('/login', authRateLimit, validate(loginSchema), authController.login);
@@ -23,6 +38,10 @@ router.post('/logout', authController.logout);
 // Protected routes
 router.get('/me', authenticate, authController.me);
 router.patch('/profile', authenticate, authController.updateProfile);
+
+// Avatar management
+router.patch('/avatar', authenticate, avatarUpload.single('avatar'), authController.uploadAvatar);
+router.delete('/avatar', authenticate, authController.deleteAvatar);
 
 // Username management
 router.get('/check-username/:username', authController.checkUsername);

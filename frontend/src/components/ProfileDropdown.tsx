@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { LogOut, User } from 'lucide-react';
 import { useAuthStore } from '@/lib/stores/authStore';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 
 export function ProfileDropdown() {
@@ -20,6 +20,7 @@ export function ProfileDropdown() {
     <DropdownMenu>
       <DropdownMenuTrigger className="relative h-10 w-10 rounded-full hover:bg-secondary transition-colors">
         <Avatar className="h-10 w-10">
+          <AvatarImage src={user?.avatarUrl || undefined} />
           <AvatarFallback className="bg-foreground text-background text-sm font-semibold">{initials}</AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>

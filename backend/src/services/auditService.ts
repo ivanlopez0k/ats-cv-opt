@@ -22,7 +22,9 @@ export type AuditEventType =
   | 'ADMIN_PREMIUM_TOGGLE'
   | 'ADMIN_DELETE_USER'
   | 'ADMIN_CV_STATUS_CHANGE'
-  | 'ADMIN_DELETE_CV';
+  | 'ADMIN_DELETE_CV'
+  | 'AVATAR_UPLOADED'
+  | 'AVATAR_REMOVED';
 
 export const auditService = {
   /**

@@ -4,6 +4,7 @@ import { userService, sessionService, emailService } from '../services/index.js'
 import { auditService } from '../services/auditService.js';
 import { AuthenticatedRequest } from '../types/index.js';
 import { config } from '../config/index.js';
+import { uploadImageToCloudinary, deleteFromCloudinary, getPublicIdFromCloudinaryUrl } from '../utils/cloudinary.js';
 import { logger } from '../utils/logger.js';
 
 // ============================================================
@@ -575,5 +576,108 @@ export const authController = {
     });
 
     res.json({ success: true, message: 'Contraseña actualizada exitosamente' });
+  },
+
+  // ============================================================
+  // Avatar upload
+  // ============================================================
+  async uploadAvatar(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const userId = req.user?.userId;
+    const file = req.file;
+
+    if (!userId) {
+      res.status(401).json({ success: false, error: 'No autenticado' });
+      return;
+    }
+
+    if (!file) {
+      res.status(400).json({ success: false, error: 'Imagen requerida' });
+      return;
+    }
+
+    // Validate image type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.mimetype)) {
+      res.status(400).json({ success: false, error: 'Solo se permiten imágenes (JPG, PNG, WebP)' });
+      return;
+    }
+
+    // Validate size (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      res.status(400).json({ success: false, error: 'La imagen debe ser menor a 2MB' });
+      return;
+    }
+
+    try {
+      const user = await userService.findById(userId);
+      if (!user) {
+        res.status(404).json({ success: false, error: 'Usuario no encontrado' });
+        return;
+      }
+
+      // Delete old avatar if exists
+      if (user.avatarUrl && user.avatarUrl.includes('cloudinary')) {
+        try {
+          const oldPublicId = getPublicIdFromCloudinaryUrl(user.avatarUrl);
+          await deleteFromCloudinary(oldPublicId);
+        } catch (error) {
+          logger.warn('Failed to delete old avatar:', error);
+        }
+      }
+
+      // Upload new avatar
+      const filename = `${userId}/avatar-${Date.now()}`;
+      const result = await uploadImageToCloudinary(file.buffer, filename, 'cvmaster/avatars');
+
+      // Update user
+      const updatedUser = await userService.updateAvatar(userId, result.url);
+
+      await auditService.log({
+        userId,
+        event: 'AVATAR_UPLOADED',
+        ipAddress: req.ip || undefined,
+        userAgent: req.headers['user-agent'] || undefined,
+      });
+
+      res.json({ success: true, data: { avatarUrl: updatedUser.avatarUrl } });
+    } catch (error: any) {
+      logger.error('Error uploading avatar:', error);
+      res.status(500).json({ success: false, error: 'Error al subir el avatar' });
+    }
+  },
+
+  async deleteAvatar(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const userId = req.user?.userId;
+
+    if (!userId) {
+      res.status(401).json({ success: false, error: 'No autenticado' });
+      return;
+    }
+
+    try {
+      const user = await userService.findById(userId);
+      if (!user) {
+        res.status(404).json({ success: false, error: 'Usuario no encontrado' });
+        return;
+      }
+
+      // Delete from Cloudinary if exists
+      if (user.avatarUrl && user.avatarUrl.includes('cloudinary')) {
+        try {
+          const publicId = getPublicIdFromCloudinaryUrl(user.avatarUrl);
+          await deleteFromCloudinary(publicId);
+        } catch (error) {
+          logger.warn('Failed to delete avatar from Cloudinary:', error);
+        }
+      }
+
+      // Remove from DB
+      await userService.removeAvatar(userId);
+
+      res.json({ success: true, message: 'Avatar eliminado' });
+    } catch (error: any) {
+      logger.error('Error deleting avatar:', error);
+      res.status(500).json({ success: false, error: 'Error al eliminar el avatar' });
+    }
   },
 };

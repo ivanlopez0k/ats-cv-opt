@@ -122,4 +122,43 @@ export const uploadHtmlToCloudinary = async (
   });
 };
 
+export const uploadImageToCloudinary = async (
+  fileBuffer: Buffer,
+  filename: string,
+  folder: string = 'cvmaster/avatars'
+): Promise<{ url: string; publicId: string }> => {
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder,
+        public_id: filename,
+        resource_type: 'image',
+        transformation: [
+          { width: 256, height: 256, crop: 'fill', gravity: 'face' },
+          { quality: 'auto', fetch_format: 'auto' },
+        ],
+      },
+      (error, result) => {
+        if (error) return reject(error);
+        if (!result) return reject(new Error('No result from Cloudinary'));
+        resolve({
+          url: result.secure_url,
+          publicId: result.public_id,
+        });
+      }
+    );
+
+    uploadStream.end(fileBuffer);
+  });
+};
+
+export const getPublicIdFromCloudinaryUrl = (url: string): string => {
+  const parts = url.split('/');
+  const filename = parts[parts.length - 1];
+  const uploadIndex = parts.indexOf('upload');
+  if (uploadIndex === -1) return filename;
+  const folderParts = parts.slice(uploadIndex + 1, -1);
+  return [...folderParts, filename.replace(/\.[^/.]+$/, '')].join('/');
+};
+
 export { cloudinary };

@@ -12,6 +12,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { User, AtSign, Globe, Briefcase, Building2, Shield, LogOut, Loader2 } from 'lucide-react';
+import { AvatarUpload } from '@/components/features/auth/AvatarUpload';
 import apiClient from '@/lib/api';
 import { toast } from 'sonner';
 
@@ -173,9 +174,7 @@ export default function SettingsPage() {
                 <CardContent className="space-y-6">
                   {/* Avatar */}
                   <div className="flex items-center gap-4">
-                    <Avatar className="h-20 w-20">
-                      <AvatarFallback className="text-xl bg-foreground text-background">{initials}</AvatarFallback>
-                    </Avatar>
+                    <AvatarUpload size="lg" />
                     <div>
                       <p className="font-medium text-foreground">{user?.name}</p>
                       <p className="text-sm text-muted-foreground">@{user?.username}</p>

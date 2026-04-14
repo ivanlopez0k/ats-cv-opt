@@ -398,6 +398,31 @@ export const userService = {
       },
     });
   },
+
+  // ============================================================
+  // Avatar
+  // ============================================================
+  async updateAvatar(userId: string, avatarUrl: string) {
+    return prisma.user.update({
+      where: { id: userId },
+      data: { avatarUrl },
+      select: { id: true, username: true, email: true, name: true, avatarUrl: true },
+    });
+  },
+
+  async removeAvatar(userId: string) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { avatarUrl: true },
+    });
+    if (!user) throw new Error('Usuario no encontrado');
+
+    return prisma.user.update({
+      where: { id: userId },
+      data: { avatarUrl: null },
+      select: { id: true, username: true, email: true, name: true, avatarUrl: true },
+    });
+  },
 };
 
 export { prisma };
