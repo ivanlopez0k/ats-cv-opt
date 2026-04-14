@@ -53,14 +53,31 @@ export const cvService = {
     return cv;
   },
 
-  async findAllByUser(userId: string) {
-    return prisma.cV.findMany({
-      where: { userId },
-      orderBy: { createdAt: 'desc' },
-      include: {
-        _count: { select: { votes: true } },
+  async findAllByUser(userId: string, page: number = 1, limit: number = 20) {
+    const skip = (page - 1) * limit;
+
+    const [cvs, total] = await Promise.all([
+      prisma.cV.findMany({
+        where: { userId },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+        include: {
+          _count: { select: { votes: true } },
+        },
+      }),
+      prisma.cV.count({ where: { userId } }),
+    ]);
+
+    return {
+      cvs,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
       },
-    });
+    };
   },
 
   async findById(cvId: string) {

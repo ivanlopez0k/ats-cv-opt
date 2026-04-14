@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { FileText, Clock, CheckCircle, XCircle, MoreVertical, Globe, Lock, ExternalLink, Trash2, AlertTriangle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -160,11 +160,41 @@ function CVCard({ cv }: { cv: CV }) {
 }
 
 export function CVList() {
-  const { data, isLoading, error } = useQuery({ queryKey: ['cvs'], queryFn: async () => { const response = await apiClient.get('/cvs'); return response.data.data as CV[]; } });
+  const [page, setPage] = useState(1);
+  const [allCVs, setAllCVs] = useState<CV[]>([]);
+  const LIMIT = 20;
+  const queryClient = useQueryClient();
+
+  const { data, isLoading, error, isFetching } = useQuery({
+    queryKey: ['cvs', page],
+    queryFn: async () => {
+      const response = await apiClient.get('/cvs', { params: { page, limit: LIMIT } });
+      return response.data;
+    },
+  });
+
+  // Accumulate CVs as user loads more pages
+  useEffect(() => {
+    if (data?.data) {
+      if (page === 1) {
+        setAllCVs(data.data);
+      } else {
+        setAllCVs((prev) => [...prev, ...data.data]);
+      }
+    }
+  }, [data, page]);
+
+  const hasMore = data?.pagination?.page < data?.pagination?.totalPages;
+  const totalPages = data?.pagination?.totalPages || 0;
+
+  // Refetch when page changes
+  const refetchPage = () => {
+    queryClient.invalidateQueries({ queryKey: ['cvs', page] });
+  };
 
   if (isLoading) return <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{[1, 2, 3].map((i) => <CVCardSkeleton key={i} />)}</div>;
   if (error) return <Card className="bg-card"><CardContent className="py-8 text-center text-muted-foreground">Error al cargar</CardContent></Card>;
-  if (!data?.length) return (
+  if (!allCVs.length) return (
     <Card className="bg-card">
       <CardContent className="py-12 text-center">
         <FileText className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
@@ -179,6 +209,29 @@ export function CVList() {
     </Card>
   );
 
-  return <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{data.map((cv) => <CVCard key={cv.id} cv={cv} />)}</div>;
+  return (
+    <div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {allCVs.map((cv) => <CVCard key={cv.id} cv={cv} />)}
+      </div>
+
+      {/* Pagination info and Load More button */}
+      {hasMore && (
+        <div className="flex flex-col items-center gap-3 mt-8">
+          <p className="text-sm text-muted-foreground">
+            Mostrando {allCVs.length} de {data?.pagination?.total || 0} CVs (página {page} de {totalPages})
+          </p>
+          <Button
+            variant="outline"
+            onClick={() => setPage((p) => p + 1)}
+            disabled={isFetching}
+            className="border-border text-foreground hover:bg-secondary"
+          >
+            {isFetching ? 'Cargando...' : 'Cargar más'}
+          </Button>
+        </div>
+      )}
+    </div>
+  );
 }
 

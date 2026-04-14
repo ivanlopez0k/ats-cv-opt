@@ -72,15 +72,16 @@ export const cvController = {
 
   async getAll(req: AuthenticatedRequest, res: Response): Promise<void> {
     const userId = req.user?.userId;
-
     if (!userId) {
-      res.status(401).json({ success: false, error: 'No autenticado' });
+      errorResponse(res, 'No autenticado', 401);
       return;
     }
 
-    const cvs = await cvService.findAllByUser(userId);
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 20;
 
-    res.json({ success: true, data: cvs });
+    const result = await cvService.findAllByUser(userId, page, limit);
+    paginatedResponse(res, result.cvs, result.pagination);
   },
 
   async getById(req: AuthenticatedRequest, res: Response): Promise<void> {
