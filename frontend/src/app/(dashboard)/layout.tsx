@@ -1,3 +1,5 @@
+'use client';
+
 import { AuthGuard } from '@/lib/guards';
 import { useAuthStore } from '@/lib/stores/authStore';
 import { EmailVerificationBanner } from '@/components/features/auth/EmailVerificationBanner';
