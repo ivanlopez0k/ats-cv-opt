@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { aiService } from '../services/index.js';
 import { AuthenticatedRequest } from '../types/index.js';
 import { logger } from '../utils/logger.js';
+import { successResponse, errorResponse, createdResponse, paginatedResponse } from '../utils/response.js';
 
 export const analyzeSchema = z.object({
   cvId: z.string().min(1, 'CV ID requerido'),

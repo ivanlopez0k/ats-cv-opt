@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { cvService, voteService } from '../services/index.js';
 import { AuthenticatedRequest } from '../types/index.js';
+import { successResponse, errorResponse, paginatedResponse } from '../utils/response.js';
 
 export const communityController = {
   async getPublicCVs(req: Request, res: Response): Promise<void> {

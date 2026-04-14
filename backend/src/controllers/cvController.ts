@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { cvService, voteService } from '../services/index.js';
 import { AuthenticatedRequest } from '../types/index.js';
 import { logger } from '../utils/logger.js';
-
+import { successResponse, errorResponse, createdResponse, paginatedResponse } from '../utils/response.js';
 export const createCVSchema = z.object({
   title: z.string().min(1, 'Título requerido'),
   targetJob: z.string().optional(),

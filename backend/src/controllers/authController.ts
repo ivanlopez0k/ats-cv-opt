@@ -6,6 +6,7 @@ import { AuthenticatedRequest } from '../types/index.js';
 import { config } from '../config/index.js';
 import { uploadImageToCloudinary, deleteFromCloudinary, getPublicIdFromCloudinaryUrl } from '../utils/cloudinary.js';
 import { logger } from '../utils/logger.js';
+import { successResponse, errorResponse, createdResponse } from '../utils/response.js';
 
 // ============================================================
 // Zod schemas
@@ -143,26 +144,15 @@ export const authController = {
           })
           .catch(err => logger.error('Failed to send verification email:', err));
 
-        res.status(201).json({
-          success: true,
-          data: { user, emailVerificationRequired: true },
-        });
+        createdResponse(res, { user, emailVerificationRequired: true });
         return;
       }
 
-      // Send welcome email if email verification is not required
       emailService.sendWelcomeEmail(user.email, user.name)
-        .then(result => {
-          if (!result.success) {
-            logger.error('Failed to send welcome email:', result.error);
-          }
-        })
+        .then(result => { if (!result.success) logger.error('Failed to send welcome email:', result.error); })
         .catch(err => logger.error('Failed to send welcome email:', err));
 
-      res.status(201).json({
-        success: true,
-        data: { user, ...tokens, emailVerificationRequired: false },
-      });
+      createdResponse(res, { user, ...tokens, emailVerificationRequired: false });
     } catch (error: any) {
       // Username or password validation error
       if (error.message?.includes('username') || error.message?.includes('contraseña')) {
@@ -179,7 +169,7 @@ export const authController = {
 
     const user = await userService.findByEmail(email);
     if (!user) {
-      res.status(401).json({ success: false, error: 'Credenciales inválidas' });
+      errorResponse(res, 'Credenciales inválidas', 401);
       return;
     }
 
@@ -209,7 +199,7 @@ export const authController = {
         ...clientInfo,
         details: { reason: 'invalid_password' },
       });
-      res.status(401).json({ success: false, error: 'Credenciales inválidas' });
+      errorResponse(res, 'Credenciales inválidas', 401);
       return;
     }
 
@@ -231,13 +221,10 @@ export const authController = {
 
     const userData = await userService.findById(user.id);
 
-    res.json({
-      success: true,
-      data: {
-        user: userData,
-        ...tokens,
-        emailVerificationRequired: config.security.emailVerificationEnabled && !(userData as any)?.isEmailVerified,
-      },
+    successResponse(res, {
+      user: userData,
+      ...tokens,
+      emailVerificationRequired: config.security.emailVerificationEnabled && !(userData as any)?.isEmailVerified,
     });
   },
 
@@ -248,11 +235,10 @@ export const authController = {
     try {
       const tokens = await sessionService.refreshSession(refreshToken, clientInfo);
       setAuthCookies(res, tokens);
-
-      res.json({ success: true, data: tokens });
+      successResponse(res, tokens);
     } catch (error: any) {
       clearAuthCookies(res);
-      res.status(401).json({ success: false, error: error.message || 'Refresh token inválido' });
+      errorResponse(res, error.message || 'Refresh token inválido', 401);
     }
   },
 
@@ -265,26 +251,24 @@ export const authController = {
     }
 
     clearAuthCookies(res);
-
-    res.json({ success: true, message: 'Sesión cerrada' });
+    successResponse(res, null, 'Sesión cerrada');
   },
 
   async me(req: AuthenticatedRequest, res: Response): Promise<void> {
     const userId = req.user?.userId;
 
     if (!userId) {
-      res.status(401).json({ success: false, error: 'No autenticado' });
+      errorResponse(res, 'No autenticado', 401);
       return;
     }
 
     const user = await userService.findById(userId);
-
     if (!user) {
-      res.status(404).json({ success: false, error: 'Usuario no encontrado' });
+      errorResponse(res, 'Usuario no encontrado', 404);
       return;
     }
 
-    res.json({ success: true, data: user });
+    successResponse(res, user);
   },
 
   async updateProfile(req: AuthenticatedRequest, res: Response): Promise<void> {
@@ -292,7 +276,7 @@ export const authController = {
     const { name, avatarUrl, nationality, defaultTargetJob, defaultTargetIndustry } = req.body;
 
     if (!userId) {
-      res.status(401).json({ success: false, error: 'No autenticado' });
+      errorResponse(res, 'No autenticado', 401);
       return;
     }
 
@@ -311,7 +295,7 @@ export const authController = {
       userAgent: req.headers['user-agent'] || undefined,
     });
 
-    res.json({ success: true, data: user });
+    successResponse(res, user);
   },
 
   async updateUsername(req: AuthenticatedRequest, res: Response): Promise<void> {
@@ -319,15 +303,15 @@ export const authController = {
     const { username } = req.body;
 
     if (!userId) {
-      res.status(401).json({ success: false, error: 'No autenticado' });
+      errorResponse(res, 'No autenticado', 401);
       return;
     }
 
     try {
       const user = await userService.updateUsername(userId, username);
-      res.json({ success: true, data: user });
+      successResponse(res, user);
     } catch (error: any) {
-      res.status(400).json({ success: false, error: error.message });
+      errorResponse(res, error.message, 400);
     }
   },
 
@@ -335,21 +319,20 @@ export const authController = {
     const { username } = req.params;
 
     if (!username) {
-      res.status(400).json({ success: false, error: 'Username requerido' });
+      errorResponse(res, 'Username requerido', 400);
       return;
     }
 
-    // Validate format first
     const { validateUsername } = await import('../services/userService.js');
     const validation = validateUsername(username);
 
     if (validation && !validation.valid) {
-      res.json({ success: true, available: false, error: validation.error });
+      successResponse(res, { available: false, error: validation.error });
       return;
     }
 
     const available = await userService.isUsernameAvailable(username);
-    res.json({ success: true, available });
+    successResponse(res, { available });
   },
 
   // ============================================================
@@ -359,14 +342,13 @@ export const authController = {
     const { token } = req.params;
 
     if (!config.security.emailVerificationEnabled) {
-      res.status(400).json({ success: false, error: 'Verificación de email deshabilitada' });
+      errorResponse(res, 'Verificación de email deshabilitada', 400);
       return;
     }
 
     const user = await userService.verifyEmail(token);
-
     if (!user) {
-      res.status(400).json({ success: false, error: 'Token inválido o expirado' });
+      errorResponse(res, 'Token inválido o expirado', 400);
       return;
     }
 
@@ -377,36 +359,36 @@ export const authController = {
       userAgent: req.headers['user-agent'] || undefined,
     });
 
-    res.json({ success: true, message: 'Email verificado exitosamente' });
+    successResponse(res, null, 'Email verificado exitosamente');
   },
 
   async resendVerificationEmail(req: AuthenticatedRequest, res: Response): Promise<void> {
     const userId = req.user?.userId;
 
     if (!userId) {
-      res.status(401).json({ success: false, error: 'No autenticado' });
+      errorResponse(res, 'No autenticado', 401);
       return;
     }
 
     if (!config.security.emailVerificationEnabled) {
-      res.status(400).json({ success: false, error: 'Verificación de email deshabilitada' });
+      errorResponse(res, 'Verificación de email deshabilitada', 400);
       return;
     }
 
     const user = await userService.findById(userId);
     if (!user) {
-      res.status(404).json({ success: false, error: 'Usuario no encontrado' });
+      errorResponse(res, 'Usuario no encontrado', 404);
       return;
     }
 
     if ((user as any).isEmailVerified) {
-      res.status(400).json({ success: false, error: 'Email ya verificado' });
+      errorResponse(res, 'Email ya verificado', 400);
       return;
     }
 
     const result = await userService.resendVerificationEmail(userId);
     if (!result) {
-      res.status(500).json({ success: false, error: 'Error al generar token de verificación' });
+      errorResponse(res, 'Error al generar token de verificación', 500);
       return;
     }
 
@@ -417,7 +399,6 @@ export const authController = {
       userAgent: req.headers['user-agent'] || undefined,
     });
 
-    // Send verification email
     const emailResult = await emailService.sendVerificationEmail(
       result.email,
       result.username,
@@ -428,50 +409,44 @@ export const authController = {
       logger.error('Failed to resend verification email:', emailResult.error);
     }
 
-    res.json({ success: true, message: 'Email de verificación reenviado' });
+    successResponse(res, null, 'Email de verificación reenviado');
   },
 
-  // ============================================================
-  // Change password
-  // ============================================================
   async changePassword(req: AuthenticatedRequest, res: Response): Promise<void> {
     const userId = req.user?.userId;
     const { currentPassword, newPassword } = req.body;
 
     if (!userId) {
-      res.status(401).json({ success: false, error: 'No autenticado' });
+      errorResponse(res, 'No autenticado', 401);
       return;
     }
 
     const currentUser = await userService.findById(userId);
     if (!currentUser) {
-      res.status(404).json({ success: false, error: 'Usuario no encontrado' });
+      errorResponse(res, 'Usuario no encontrado', 404);
       return;
     }
 
     const user = await userService.findByEmail(currentUser.email);
     if (!user) {
-      res.status(404).json({ success: false, error: 'Usuario no encontrado' });
+      errorResponse(res, 'Usuario no encontrado', 404);
       return;
     }
 
     const isValid = await userService.verifyPassword(user, currentPassword);
     if (!isValid) {
-      res.status(401).json({ success: false, error: 'Contraseña actual incorrecta' });
+      errorResponse(res, 'Contraseña actual incorrecta', 401);
       return;
     }
 
-    // Validate new password strength
     const { validatePasswordStrength } = await import('../services/userService.js');
     const strengthResult = validatePasswordStrength(newPassword);
     if (!strengthResult.valid) {
-      res.status(400).json({ success: false, error: strengthResult.errors.join(', ') });
+      errorResponse(res, strengthResult.errors.join(', '), 400);
       return;
     }
 
     await userService.updatePassword(userId, await require('bcrypt').hash(newPassword, 12));
-
-    // Revoke all other sessions
     await sessionService.deleteAllUserSessions(userId);
 
     await auditService.log({
@@ -481,43 +456,34 @@ export const authController = {
       userAgent: req.headers['user-agent'] || undefined,
     });
 
-    // Send password changed notification email
     emailService.sendPasswordChangedNotification(user.email, user.name)
-      .then(result => {
-        if (!result.success) {
-          logger.error('Failed to send password changed notification:', result.error);
-        }
-      })
+      .then(result => { if (!result.success) logger.error('Failed to send password changed notification:', result.error); })
       .catch(err => logger.error('Failed to send password changed notification:', err));
 
-    res.json({ success: true, message: 'Contraseña actualizada' });
+    successResponse(res, null, 'Contraseña actualizada');
   },
 
-  // ============================================================
-  // Forgot password
-  // ============================================================
   async forgotPassword(req: Request, res: Response): Promise<void> {
     const { email } = req.body;
 
     if (!email) {
-      res.status(400).json({ success: false, error: 'Email requerido' });
+      errorResponse(res, 'Email requerido', 400);
       return;
     }
 
     const user = await userService.findByEmail(email);
     if (!user) {
       // Don't reveal if email exists (security best practice)
-      res.json({ success: true, message: 'Si el email existe, recibirás un link para resetear tu contraseña' });
+      successResponse(res, null, 'Si el email existe, recibirás un link para resetear tu contraseña');
       return;
     }
 
     const result = await userService.createPasswordResetToken(email);
     if (!result) {
-      res.status(500).json({ success: false, error: 'Error al generar token de reset' });
+      errorResponse(res, 'Error al generar token de reset', 500);
       return;
     }
 
-    // Send password reset email
     const emailResult = await emailService.sendPasswordResetEmail(
       result.email,
       result.name,
@@ -526,7 +492,7 @@ export const authController = {
 
     if (!emailResult.success) {
       logger.error('Failed to send password reset email:', emailResult.error);
-      res.status(500).json({ success: false, error: 'Error al enviar email de reset' });
+      errorResponse(res, 'Error al enviar email de reset', 500);
       return;
     }
 
@@ -537,37 +503,31 @@ export const authController = {
       userAgent: req.headers['user-agent'] || undefined,
     });
 
-    res.json({ success: true, message: 'Si el email existe, recibirás un link para resetear tu contraseña' });
+    successResponse(res, null, 'Si el email existe, recibirás un link para resetear tu contraseña');
   },
 
-  // ============================================================
-  // Reset password
-  // ============================================================
   async resetPassword(req: Request, res: Response): Promise<void> {
     const { token, newPassword } = req.body;
 
     if (!token || !newPassword) {
-      res.status(400).json({ success: false, error: 'Token y nueva contraseña requeridos' });
+      errorResponse(res, 'Token y nueva contraseña requeridos', 400);
       return;
     }
 
-    // Validate password strength
     const { validatePasswordStrength } = await import('../services/userService.js');
     const strengthResult = validatePasswordStrength(newPassword);
     if (!strengthResult.valid) {
-      res.status(400).json({ success: false, error: strengthResult.errors.join(', ') });
+      errorResponse(res, strengthResult.errors.join(', '), 400);
       return;
     }
 
     const user = await userService.resetPassword(token, newPassword);
     if (!user) {
-      res.status(400).json({ success: false, error: 'Token inválido o expirado' });
+      errorResponse(res, 'Token inválido o expirado', 400);
       return;
     }
 
-    // Revoke all sessions
     await sessionService.deleteAllUserSessions(user.id);
-
     await auditService.log({
       userId: user.id,
       event: 'PASSWORD_RESET_COMPLETED',
@@ -575,47 +535,41 @@ export const authController = {
       userAgent: req.headers['user-agent'] || undefined,
     });
 
-    res.json({ success: true, message: 'Contraseña actualizada exitosamente' });
+    successResponse(res, null, 'Contraseña actualizada exitosamente');
   },
 
-  // ============================================================
-  // Avatar upload
-  // ============================================================
   async uploadAvatar(req: AuthenticatedRequest, res: Response): Promise<void> {
     const userId = req.user?.userId;
     const file = req.file;
 
     if (!userId) {
-      res.status(401).json({ success: false, error: 'No autenticado' });
+      errorResponse(res, 'No autenticado', 401);
       return;
     }
 
     if (!file) {
-      res.status(400).json({ success: false, error: 'Imagen requerida' });
+      errorResponse(res, 'Imagen requerida', 400);
       return;
     }
 
-    // Validate image type
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
     if (!allowedTypes.includes(file.mimetype)) {
-      res.status(400).json({ success: false, error: 'Solo se permiten imágenes (JPG, PNG, WebP)' });
+      errorResponse(res, 'Solo se permiten imágenes (JPG, PNG, WebP)', 400);
       return;
     }
 
-    // Validate size (max 2MB)
     if (file.size > 2 * 1024 * 1024) {
-      res.status(400).json({ success: false, error: 'La imagen debe ser menor a 2MB' });
+      errorResponse(res, 'La imagen debe ser menor a 2MB', 400);
       return;
     }
 
     try {
       const user = await userService.findById(userId);
       if (!user) {
-        res.status(404).json({ success: false, error: 'Usuario no encontrado' });
+        errorResponse(res, 'Usuario no encontrado', 404);
         return;
       }
 
-      // Delete old avatar if exists
       if (user.avatarUrl && user.avatarUrl.includes('cloudinary')) {
         try {
           const oldPublicId = getPublicIdFromCloudinaryUrl(user.avatarUrl);
@@ -625,11 +579,8 @@ export const authController = {
         }
       }
 
-      // Upload new avatar
       const filename = `${userId}/avatar-${Date.now()}`;
       const result = await uploadImageToCloudinary(file.buffer, filename, 'cvmaster/avatars');
-
-      // Update user
       const updatedUser = await userService.updateAvatar(userId, result.url);
 
       await auditService.log({
@@ -639,10 +590,10 @@ export const authController = {
         userAgent: req.headers['user-agent'] || undefined,
       });
 
-      res.json({ success: true, data: { avatarUrl: updatedUser.avatarUrl } });
+      successResponse(res, { avatarUrl: updatedUser.avatarUrl });
     } catch (error: any) {
       logger.error('Error uploading avatar:', error);
-      res.status(500).json({ success: false, error: 'Error al subir el avatar' });
+      errorResponse(res, 'Error al subir el avatar', 500);
     }
   },
 
@@ -650,18 +601,17 @@ export const authController = {
     const userId = req.user?.userId;
 
     if (!userId) {
-      res.status(401).json({ success: false, error: 'No autenticado' });
+      errorResponse(res, 'No autenticado', 401);
       return;
     }
 
     try {
       const user = await userService.findById(userId);
       if (!user) {
-        res.status(404).json({ success: false, error: 'Usuario no encontrado' });
+        errorResponse(res, 'Usuario no encontrado', 404);
         return;
       }
 
-      // Delete from Cloudinary if exists
       if (user.avatarUrl && user.avatarUrl.includes('cloudinary')) {
         try {
           const publicId = getPublicIdFromCloudinaryUrl(user.avatarUrl);
@@ -671,13 +621,11 @@ export const authController = {
         }
       }
 
-      // Remove from DB
       await userService.removeAvatar(userId);
-
-      res.json({ success: true, message: 'Avatar eliminado' });
+      successResponse(res, null, 'Avatar eliminado');
     } catch (error: any) {
       logger.error('Error deleting avatar:', error);
-      res.status(500).json({ success: false, error: 'Error al eliminar el avatar' });
+      errorResponse(res, 'Error al eliminar el avatar', 500);
     }
   },
 };

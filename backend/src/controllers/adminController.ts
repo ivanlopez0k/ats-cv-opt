@@ -7,6 +7,7 @@ import { adminService } from '../services/adminService.js';
 import { auditService } from '../services/auditService.js';
 import { AuthenticatedRequest } from '../types/index.js';
 import { logger } from '../utils/logger.js';
+import { successResponse, errorResponse, createdResponse, paginatedResponse } from '../utils/response.js';
 
 export const adminController = {
   // ============================================================
