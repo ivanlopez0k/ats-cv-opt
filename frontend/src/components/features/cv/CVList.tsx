@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { FileText, Clock, CheckCircle, XCircle, MoreVertical, Globe, Lock, ExternalLink, Trash2, AlertTriangle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -11,46 +11,21 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { CVUploadDialog } from './CVUploadDialog';
 import Link from 'next/link';
-import apiClient from '@/lib/api';
 import { toast } from 'sonner';
 import type { CV } from '@/lib/types';
+import { useCVs, useTogglePublic, useDeleteCV } from '@/hooks';
 
 function CVCardSkeleton() {
   return <Card className="bg-card"><CardHeader><Skeleton className="h-6 w-48 bg-secondary" /><Skeleton className="h-4 w-32 mt-2 bg-secondary" /></CardHeader><CardContent><Skeleton className="h-4 w-full bg-secondary" /></CardContent></Card>;
 }
 
 function CVCard({ cv }: { cv: CV }) {
-  const queryClient = useQueryClient();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const statusConfig = { PROCESSING: { icon: Clock, variant: 'secondary' as const, text: 'Procesando' }, COMPLETED: { icon: CheckCircle, variant: 'default' as const, text: 'Listo' }, FAILED: { icon: XCircle, variant: 'destructive' as const, text: 'Fallido' } };
   const status = statusConfig[cv.status];
 
-  const togglePublicMutation = useMutation({
-    mutationFn: async () => {
-      return apiClient.patch(`/cvs/${cv.id}`, { isPublic: !cv.isPublic });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['cvs'] });
-      toast.success(cv.isPublic ? 'CV vuelto privado' : 'CV compartido con la comunidad');
-    },
-    onError: () => {
-      toast.error('Error al actualizar');
-    },
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: async () => {
-      return apiClient.delete(`/cvs/${cv.id}`);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['cvs'] });
-      toast.success('CV eliminado');
-      setShowDeleteDialog(false);
-    },
-    onError: () => {
-      toast.error('Error al eliminar el CV');
-    },
-  });
+  const togglePublicMutation = useTogglePublic(cv.id);
+  const deleteMutation = useDeleteCV(() => setShowDeleteDialog(false));
 
   return (
     <>
@@ -91,7 +66,7 @@ function CVCard({ cv }: { cv: CV }) {
                     <DropdownMenuItem
                       onClick={(e) => {
                         e.preventDefault();
-                        togglePublicMutation.mutate();
+                        togglePublicMutation.mutate(cv.isPublic);
                       }}
                       disabled={togglePublicMutation.isPending}
                     >
@@ -147,7 +122,7 @@ function CVCard({ cv }: { cv: CV }) {
           </Button>
           <Button
             variant="destructive"
-            onClick={() => deleteMutation.mutate()}
+            onClick={() => deleteMutation.mutate(cv.id)}
             disabled={deleteMutation.isPending}
           >
             {deleteMutation.isPending ? 'Eliminando...' : 'Eliminar'}
@@ -163,34 +138,22 @@ export function CVList() {
   const [page, setPage] = useState(1);
   const [allCVs, setAllCVs] = useState<CV[]>([]);
   const LIMIT = 20;
-  const queryClient = useQueryClient();
 
-  const { data, isLoading, error, isFetching } = useQuery({
-    queryKey: ['cvs', page],
-    queryFn: async () => {
-      const response = await apiClient.get('/cvs', { params: { page, limit: LIMIT } });
-      return response.data;
-    },
-  });
+  const { cvs, pagination, isLoading, error, isFetching } = useCVs({ page, limit: LIMIT });
 
   // Accumulate CVs as user loads more pages
   useEffect(() => {
-    if (data?.data) {
+    if (cvs.length > 0) {
       if (page === 1) {
-        setAllCVs(data.data);
+        setAllCVs(cvs);
       } else {
-        setAllCVs((prev) => [...prev, ...data.data]);
+        setAllCVs((prev) => [...prev, ...cvs]);
       }
     }
-  }, [data, page]);
+  }, [cvs, page]);
 
-  const hasMore = data?.pagination?.page < data?.pagination?.totalPages;
-  const totalPages = data?.pagination?.totalPages || 0;
-
-  // Refetch when page changes
-  const refetchPage = () => {
-    queryClient.invalidateQueries({ queryKey: ['cvs', page] });
-  };
+  const hasMore = pagination ? pagination.page < pagination.totalPages : false;
+  const totalPages = pagination?.totalPages || 0;
 
   if (isLoading) return <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{[1, 2, 3].map((i) => <CVCardSkeleton key={i} />)}</div>;
   if (error) return <Card className="bg-card"><CardContent className="py-8 text-center text-muted-foreground">Error al cargar</CardContent></Card>;
@@ -219,7 +182,7 @@ export function CVList() {
       {hasMore && (
         <div className="flex flex-col items-center gap-3 mt-8">
           <p className="text-sm text-muted-foreground">
-            Mostrando {allCVs.length} de {data?.pagination?.total || 0} CVs (página {page} de {totalPages})
+            Mostrando {allCVs.length} de {pagination?.total || 0} CVs (página {page} de {totalPages})
           </p>
           <Button
             variant="outline"
