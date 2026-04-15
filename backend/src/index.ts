@@ -27,12 +27,19 @@ app.use(express.urlencoded({ extended: true }));
 // Request logging middleware (generates requestId, logs all requests)
 app.use(requestLogger);
 
+// API Version header
+app.use((req, res, next) => {
+  res.setHeader('X-API-Version', 'v1');
+  next();
+});
+
 // Only serve static uploads if not in production (Cloudinary handles files in prod)
 if (!config.isProd) {
   app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 }
 
-app.use('/api', routes);
+// Mount API routes with version prefix
+app.use('/api/v1', routes);
 
 app.use(errorHandler);
 
