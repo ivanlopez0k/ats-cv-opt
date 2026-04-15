@@ -23,5 +23,6 @@ router.get('/', authenticate, cvController.getAll);
 router.get('/:id', authenticate, cvController.getById);
 router.patch('/:id', authenticate, validate(updateCVSchema), cvController.update);
 router.delete('/:id', authenticate, cvController.delete);
+router.post('/:id/restore', authenticate, cvController.restore);
 
 export default router;

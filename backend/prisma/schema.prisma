@@ -52,9 +52,9 @@ model Session {
 }
 
 model CV {
-  id             String   @id @default(cuid())
+  id             String    @id @default(cuid())
   userId         String
-  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   title          String
   originalPdfUrl String
   improvedPdfUrl String?
@@ -63,11 +63,12 @@ model CV {
   targetIndustry String?
   contextAnswers Json?
   analysisResult Json?
-  status         CVStatus @default(PROCESSING)
-  isPublic       Boolean  @default(false)
-  upvotes        Int      @default(0)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  status         CVStatus  @default(PROCESSING)
+  isPublic       Boolean   @default(false)
+  upvotes        Int       @default(0)
+  deletedAt      DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
   votes Vote[]
 }

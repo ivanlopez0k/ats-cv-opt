@@ -149,4 +149,22 @@ export const cvController = {
       res.status(403).json({ success: false, error: message });
     }
   },
+
+  async restore(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const userId = req.user?.userId;
+    const { id } = req.params;
+
+    if (!userId) {
+      res.status(401).json({ success: false, error: 'No autenticado' });
+      return;
+    }
+
+    try {
+      const cv = await cvService.restore(id, userId);
+      res.json({ success: true, data: cv, message: 'CV restaurado exitosamente' });
+    } catch (error: any) {
+      const message = error instanceof Error ? error.message : 'Error al restaurar';
+      res.status(403).json({ success: false, error: message });
+    }
+  },
 };

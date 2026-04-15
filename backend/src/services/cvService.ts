@@ -58,7 +58,7 @@ export const cvService = {
 
     const [cvs, total] = await Promise.all([
       prisma.cV.findMany({
-        where: { userId },
+        where: { userId, deletedAt: null },
         orderBy: { createdAt: 'desc' },
         skip,
         take: limit,
@@ -66,7 +66,7 @@ export const cvService = {
           _count: { select: { votes: true } },
         },
       }),
-      prisma.cV.count({ where: { userId } }),
+      prisma.cV.count({ where: { userId, deletedAt: null } }),
     ]);
 
     return {
@@ -82,7 +82,7 @@ export const cvService = {
 
   async findById(cvId: string) {
     return prisma.cV.findUnique({
-      where: { id: cvId },
+      where: { id: cvId, deletedAt: null },
       include: {
         user: {
           select: { id: true, name: true, avatarUrl: true },
@@ -99,8 +99,8 @@ export const cvService = {
     targetIndustry?: string;
     isPublic?: boolean;
   }) {
-    const cv = await prisma.cV.findUnique({ where: { id: cvId } });
-    
+    const cv = await prisma.cV.findUnique({ where: { id: cvId, deletedAt: null } });
+
     if (!cv) throw new Error('CV no encontrado');
     if (cv.userId !== userId) throw new Error('No tienes permisos');
 
@@ -111,32 +111,29 @@ export const cvService = {
   },
 
   async delete(cvId: string, userId: string) {
-    const cv = await prisma.cV.findUnique({ where: { id: cvId } });
+    const cv = await prisma.cV.findUnique({ where: { id: cvId, deletedAt: null } });
 
     if (!cv) throw new Error('CV no encontrado');
     if (cv.userId !== userId) throw new Error('No tienes permisos');
 
-    // Delete from Cloudinary if URLs are Cloudinary URLs
-    if (cv.originalPdfUrl && cv.originalPdfUrl.includes('cloudinary')) {
-      try {
-        const publicId = getPublicIdFromUrl(cv.originalPdfUrl);
-        await deleteFromCloudinary(publicId);
-        logger.info(`🗑️ Deleted original PDF from Cloudinary: ${publicId}`);
-      } catch (error) {
-        logger.error('Error deleting original PDF from Cloudinary:', error);
-      }
-    }
-    if (cv.improvedPdfUrl && cv.improvedPdfUrl.includes('cloudinary')) {
-      try {
-        const publicId = getPublicIdFromUrl(cv.improvedPdfUrl);
-        await deleteFromCloudinary(publicId);
-        logger.info(`🗑️ Deleted improved PDF from Cloudinary: ${publicId}`);
-      } catch (error) {
-        logger.error('Error deleting improved PDF from Cloudinary:', error);
-      }
-    }
+    // Soft delete: mark as deleted instead of removing from DB
+    return prisma.cV.update({
+      where: { id: cvId },
+      data: { deletedAt: new Date() },
+    });
+  },
 
-    return prisma.cV.delete({ where: { id: cvId } });
+  async restore(cvId: string, userId: string) {
+    const cv = await prisma.cV.findUnique({ where: { id: cvId } });
+
+    if (!cv) throw new Error('CV no encontrado');
+    if (cv.userId !== userId) throw new Error('No tienes permisos');
+    if (!cv.deletedAt) throw new Error('El CV no está eliminado');
+
+    return prisma.cV.update({
+      where: { id: cvId },
+      data: { deletedAt: null },
+    });
   },
 
   async getPublicCVs(page: number = 1, limit: number = 12, filters?: {
@@ -150,6 +147,7 @@ export const cvService = {
     const where: any = {
       isPublic: true,
       status: 'COMPLETED' as const,
+      deletedAt: null,
       ...(filters?.targetJob && { targetJob: { contains: filters.targetJob, mode: 'insensitive' as const } }),
       ...(filters?.targetIndustry && { targetIndustry: { contains: filters.targetIndustry, mode: 'insensitive' as const } }),
       ...(filters?.minScore === '90' && { analysisResult: { path: ['score'], gte: 90 } }),
@@ -191,7 +189,7 @@ export const cvService = {
 
   async getTopCVs(limit: number = 10) {
     return prisma.cV.findMany({
-      where: { isPublic: true, status: 'COMPLETED' },
+      where: { isPublic: true, status: 'COMPLETED', deletedAt: null },
       take: limit,
       orderBy: { upvotes: 'desc' },
       include: {
