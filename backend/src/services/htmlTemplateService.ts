@@ -509,73 +509,54 @@ function minimalTemplate(cv: CVImprovementResult): string {
   <meta charset="UTF-8">
   <title>CV - ${structuredCV.personalInfo.name || 'Candidato'}</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap');
-    
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    
-    :root {
-      --bg: #ffffff;
-      --text: #1a1a1a;
-      --text-light: #6b7280;
-      --accent: #374151;
-      --border: #e5e7eb;
-      --code-bg: #f3f4f6;
-    }
-    
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #0f0f0f;
-        --text: #f5f5f5;
-        --text-light: #9ca3af;
-        --accent: #d1d5db;
-        --border: #2d2d2d;
-        --code-bg: #1f1f1f;
-      }
-    }
-    
+
     body {
-      font-family: 'DM Sans', -apple-system, sans-serif;
-      color: var(--text);
-      line-height: 1.6;
-      max-width: 210mm;
+      font-family: Arial, Helvetica, sans-serif;
+      color: #1a1a1a;
+      line-height: 1.5;
+      max-width: 190mm;
       margin: 0 auto;
-      padding: 48px 56px;
-      background: var(--bg);
+      padding: 30px 40px;
+      background: white;
     }
-    
-    /* Header */
-    header {
-      margin-bottom: 32px;
-      padding-bottom: 24px;
-      border-bottom: 1px solid var(--border);
-    }
-    
-    header h1 {
-      font-size: 24px;
-      font-weight: 700;
-      letter-spacing: -0.5px;
-      margin-bottom: 4px;
-    }
-    
-    header .title {
-      font-size: 14px;
-      color: var(--text-light);
-      margin-bottom: 12px;
-    }
-    
-    .contact-info {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-      font-size: 12px;
-      color: var(--text-light);
-    }
-    
-    .contact-info span {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-    }
+
+    header { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #333; }
+    header h1 { font-size: 20px; font-weight: bold; margin-bottom: 3px; color: #111; }
+    header .title { font-size: 12px; color: #666; margin-bottom: 8px; }
+    .contact-info { display: flex; flex-wrap: wrap; gap: 10px; font-size: 10px; color: #666; }
+
+    .section { margin-bottom: 16px; }
+    .section-title { font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: #444; margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px solid #ccc; }
+
+    .experience-item { margin-bottom: 12px; }
+    .experience-item h3 { font-size: 12px; font-weight: bold; color: #1a1a1a; }
+    .experience-item .company { font-size: 10px; color: #666; margin-bottom: 3px; }
+    .experience-item ul { margin-left: 12px; font-size: 10px; color: #333; }
+    .experience-item li { margin-bottom: 1px; }
+
+    .skills-grid { display: flex; flex-wrap: wrap; gap: 5px; }
+    .skill-item { font-size: 9px; background: #eee; padding: 3px 6px; border-radius: 2px; color: #333; }
+
+    .education-item { margin-bottom: 8px; }
+    .education-item h4 { font-size: 11px; font-weight: bold; }
+    .education-item p { font-size: 10px; color: #666; }
+
+    .summary { font-size: 11px; line-height: 1.5; color: #333; }
+    .ats-badge { display: inline-block; font-size: 9px; padding: 3px 6px; background: #eee; border-radius: 3px; margin-bottom: 10px; }
+    .ats-badge .score { font-weight: bold; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>${structuredCV.personalInfo.name || 'Nombre'}</h1>
+    <div class="title">${sections.title || 'Profesional'}</div>
+    <div class="contact-info">
+      ${structuredCV.personalInfo.email ? structuredCV.personalInfo.email : ''}
+      ${structuredCV.personalInfo.phone ? ' | ' + structuredCV.personalInfo.phone : ''}
+      ${structuredCV.personalInfo.location ? ' | ' + structuredCV.personalInfo.location : ''}
+    </div>
+  </header>
     
     /* Sections */
     .section {
