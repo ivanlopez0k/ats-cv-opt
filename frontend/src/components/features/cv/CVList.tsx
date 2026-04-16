@@ -54,9 +54,9 @@ function CVCard({ cv }: { cv: CV }) {
               )}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:bg-secondary hover:text-foreground" onClick={(e) => e.stopPropagation()}>
+                  <span className="h-8 w-8 inline-flex items-center justify-center rounded-md text-muted-foreground hover:bg-secondary hover:text-foreground cursor-pointer" onClick={(e) => e.stopPropagation()}>
                     <MoreVertical className="h-4 w-4" />
-                  </Button>
+                  </span>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="bg-card border-border" align="end">
                   <DropdownMenuItem onClick={() => window.location.href = `/cvs/${cv.id}`}><FileText className="mr-2 h-4 w-4" /><span className="text-foreground">Ver detalle</span></DropdownMenuItem>
