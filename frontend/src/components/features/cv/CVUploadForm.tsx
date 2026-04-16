@@ -91,34 +91,20 @@ export function CVUploadForm() {
 
   const handleDragEnter = useCallback((e: React.DragEvent) => {
     e.preventDefault();
-    e.stopPropagation();
-    // Only set dragOver if we're dragging files
-    if (e.dataTransfer.types.includes('Files')) {
-      setIsDragOver(true);
-    }
+    setIsDragOver(true);
   }, []);
 
   const handleDragLeave = useCallback((e: React.DragEvent) => {
     e.preventDefault();
-    e.stopPropagation();
-    // Only set false if we're actually leaving the drop zone (not entering a child)
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX;
-    const y = e.clientY;
-    // Check if we're outside the bounds
-    if (x < rect.left || x >= rect.right || y < rect.top || y >= rect.bottom) {
+    // Solo resetear si no hay elementos hijos (evitar flicker)
+    if (e.currentTarget && !e.currentTarget.contains(e.relatedTarget as Node)) {
       setIsDragOver(false);
     }
   }, []);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
-    e.stopPropagation();
-    // Set drop effect
-    if (e.dataTransfer.types.includes('Files')) {
-      e.dataTransfer.dropEffect = 'copy';
-      setIsDragOver(true);
-    }
+    e.dataTransfer.dropEffect = 'copy';
   }, []);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
