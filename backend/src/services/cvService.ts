@@ -198,4 +198,11 @@ export const cvService = {
       },
     });
   },
+
+  async getDeletedByUser(userId: string) {
+    return prisma.cV.findMany({
+      where: { userId, deletedAt: { not: null } },
+      orderBy: { deletedAt: 'desc' },
+    });
+  },
 };

@@ -25,6 +25,7 @@ export interface CV {
   status: 'PROCESSING' | 'COMPLETED' | 'FAILED';
   isPublic: boolean;
   upvotes: number;
+  deletedAt?: string | null;
   createdAt: string;
   updatedAt: string;
   user?: Pick<User, 'id' | 'username' | 'name' | 'avatarUrl'>;

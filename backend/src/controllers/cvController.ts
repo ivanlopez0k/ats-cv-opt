@@ -167,4 +167,20 @@ export const cvController = {
       res.status(403).json({ success: false, error: message });
     }
   },
+
+  async getDeleted(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const userId = req.user?.userId;
+    if (!userId) {
+      errorResponse(res, 'No autenticado', 401);
+      return;
+    }
+
+    try {
+      const cvs = await cvService.getDeletedByUser(userId);
+      successResponse(res, cvs, 'CVs eliminados encontrados');
+    } catch (error) {
+      logger.error('Error fetching deleted CVs:', error);
+      errorResponse(res, 'Error al obtener CVs eliminados', 500);
+    }
+  },
 };

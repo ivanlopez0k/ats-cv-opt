@@ -11,10 +11,13 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { User, AtSign, Globe, Briefcase, Building2, Shield, LogOut, Loader2 } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { User, AtSign, Globe, Briefcase, Building2, Shield, LogOut, Loader2, Trash2, RotateCcw, FileText } from 'lucide-react';
 import { AvatarUpload } from '@/components/features/auth/AvatarUpload';
 import apiClient from '@/lib/api';
 import { toast } from 'sonner';
+import { useDeletedCVs, useRestoreCV } from '@/hooks';
+import type { CV } from '@/lib/types';
 
 const NATIONALITIES = [
   'Argentina', 'Bolivia', 'Brasil', 'Chile', 'Colombia', 'Costa Rica',
@@ -52,6 +55,12 @@ export default function SettingsPage() {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
+  // Deleted CVs state
+  const [showRestoreDialog, setShowRestoreDialog] = useState(false);
+  const [selectedCV, setSelectedCV] = useState<CV | null>(null);
+  const { cvs: deletedCVs, isLoading: loadingDeleted } = useDeletedCVs();
+  const restoreMutation = useRestoreCV(() => setShowRestoreDialog(false));
+
   const [name, setName] = useState(user?.name || '');
   const [username, setUsername] = useState(user?.username || '');
   const [nationality, setNationality] = useState(user?.nationality || '');
@@ -59,6 +68,12 @@ export default function SettingsPage() {
   const [defaultTargetIndustry, setDefaultTargetIndustry] = useState(user?.defaultTargetIndustry || '');
 
   const initials = user?.name?.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) || 'U';
+
+  const handleRestore = () => {
+    if (selectedCV) {
+      restoreMutation.mutate(selectedCV.id);
+    }
+  };
 
   const handleSaveProfile = async () => {
     if (!name.trim() || name.length < 2) {
@@ -160,6 +175,9 @@ export default function SettingsPage() {
             </TabsTrigger>
             <TabsTrigger value="security" className="text-foreground data-[state=active]:bg-foreground data-[state=active]:text-background">
               <Shield className="mr-2 h-4 w-4" /> Seguridad
+            </TabsTrigger>
+            <TabsTrigger value="deleted" className="text-foreground data-[state=active]:bg-foreground data-[state=active]:text-background">
+              <Trash2 className="mr-2 h-4 w-4" /> Eliminados
             </TabsTrigger>
           </TabsList>
 
@@ -382,7 +400,90 @@ export default function SettingsPage() {
               </Card>
             </div>
           </TabsContent>
+
+          {/* Deleted CVs Tab */}
+          <TabsContent value="deleted">
+            <Card className="bg-card">
+              <CardHeader>
+                <CardTitle className="text-foreground flex items-center gap-2">
+                  <Trash2 className="h-5 w-5" /> CVs eliminados
+                </CardTitle>
+                <CardDescription className="text-muted-foreground">
+                  Recuperá CVs que eliminaste recientemente
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {loadingDeleted ? (
+                  <p className="text-muted-foreground">Cargando...</p>
+                ) : deletedCVs.length === 0 ? (
+                  <div className="text-center py-8">
+                    <FileText className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
+                    <p className="text-muted-foreground">No tenés CVs eliminados</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {deletedCVs.map((cv) => (
+                      <div
+                        key={cv.id}
+                        className="flex items-center justify-between p-4 border border-border rounded-lg bg-muted/30"
+                      >
+                        <div className="flex-1">
+                          <p className="font-medium text-foreground">{cv.title}</p>
+                          <p className="text-sm text-muted-foreground">
+                            Eliminado el {cv.deletedAt ? new Date(cv.deletedAt).toLocaleDateString('es-AR') : 'fecha unknown'}
+                          </p>
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedCV(cv);
+                            setShowRestoreDialog(true);
+                          }}
+                          className="border-border text-foreground hover:bg-secondary"
+                        >
+                          <RotateCcw className="mr-2 h-4 w-4" />
+                          Restaurar
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
         </Tabs>
+
+        {/* Restore Confirmation Dialog */}
+        <Dialog open={showRestoreDialog} onOpenChange={setShowRestoreDialog}>
+          <DialogContent className="bg-card border-border">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-foreground">
+                <RotateCcw className="h-5 w-5" />
+                Restaurar CV
+              </DialogTitle>
+              <DialogDescription className="text-muted-foreground">
+                ¿Estás seguro de que querés restaurar <strong>"{selectedCV?.title}"</strong>? Volverá a aparecer en tu lista de CVs.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setShowRestoreDialog(false)}
+                disabled={restoreMutation.isPending}
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={handleRestore}
+                disabled={restoreMutation.isPending}
+                className="bg-foreground text-background hover:bg-foreground/90"
+              >
+                {restoreMutation.isPending ? 'Restaurando...' : 'Restaurar'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </main>
     </div>
   );

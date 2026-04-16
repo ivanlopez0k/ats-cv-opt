@@ -20,6 +20,7 @@ const upload = multer({
 
 router.post('/upload', authenticate, uploadRateLimit, upload.single('pdf'), validate(createCVSchema), cvController.upload);
 router.get('/', authenticate, cvController.getAll);
+router.get('/deleted', authenticate, cvController.getDeleted);
 router.get('/:id', authenticate, cvController.getById);
 router.patch('/:id', authenticate, validate(updateCVSchema), cvController.update);
 router.delete('/:id', authenticate, cvController.delete);
