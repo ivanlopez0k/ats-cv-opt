@@ -53,7 +53,7 @@ function CVCard({ cv }: { cv: CV }) {
                 </a>
               )}
               <DropdownMenu>
-                <DropdownMenuTrigger asChild>
+                <DropdownMenuTrigger>
                   <span className="h-8 w-8 inline-flex items-center justify-center rounded-md text-muted-foreground hover:bg-secondary hover:text-foreground cursor-pointer" onClick={(e) => e.stopPropagation()}>
                     <MoreVertical className="h-4 w-4" />
                   </span>
