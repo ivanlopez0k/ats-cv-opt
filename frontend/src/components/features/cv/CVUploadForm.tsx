@@ -91,11 +91,13 @@ export function CVUploadForm() {
 
   const handleDragEnter = useCallback((e: React.DragEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     setIsDragOver(true);
   }, []);
 
   const handleDragLeave = useCallback((e: React.DragEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     // Solo resetear si no hay elementos hijos (evitar flicker)
     if (e.currentTarget && !e.currentTarget.contains(e.relatedTarget as Node)) {
       setIsDragOver(false);
@@ -104,12 +106,18 @@ export function CVUploadForm() {
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     e.dataTransfer.dropEffect = 'copy';
+    e.dataTransfer.effectAllowed = 'copy';
   }, []);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    // Also prevent native browser behavior
+    if (e.nativeEvent) {
+      e.nativeEvent.preventDefault();
+    }
     setIsDragOver(false);
     const droppedFile = e.dataTransfer.files?.[0];
     if (droppedFile) {
