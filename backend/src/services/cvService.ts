@@ -16,6 +16,7 @@ export const cvService = {
       targetJob?: string;
       targetIndustry?: string;
       isPublic?: boolean;
+      template?: 'MODERN' | 'CLASSIC' | 'MINIMAL';
     },
     pdfBuffer: Buffer,
     filename: string
@@ -34,6 +35,7 @@ export const cvService = {
         targetJob: data.targetJob,
         targetIndustry: data.targetIndustry,
         isPublic: data.isPublic || false,
+        template: data.template || 'MODERN',
         status: 'PROCESSING',
       },
     });
@@ -45,6 +47,7 @@ export const cvService = {
       userId,
       targetJob: data.targetJob,
       targetIndustry: data.targetIndustry,
+      template: data.template || 'MODERN',
       originalPdfUrl: cloudinaryResult.url,
       originalPdfPublicId: cloudinaryResult.publicId,
       pdfBufferBase64: pdfBuffer.toString('base64'),

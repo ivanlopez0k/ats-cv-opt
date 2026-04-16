@@ -23,6 +23,7 @@ export interface CV {
   targetIndustry?: string;
   analysisResult?: CVAnalysis;
   status: 'PROCESSING' | 'COMPLETED' | 'FAILED';
+  template?: 'MODERN' | 'CLASSIC' | 'MINIMAL';
   isPublic: boolean;
   upvotes: number;
   deletedAt?: string | null;

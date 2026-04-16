@@ -72,7 +72,7 @@ async function withRetry<T>(fn: () => Promise<T>, maxRetries = 3): Promise<T> {
 const aiWorker = new Worker(
   'ai-processing',
   async (job) => {
-    const { cvId, userId, targetJob, targetIndustry, originalPdfUrl, originalPdfPublicId, pdfBufferBase64 } = job.data;
+    const { cvId, userId, targetJob, targetIndustry, originalPdfUrl, originalPdfPublicId, pdfBufferBase64, template } = job.data;
 
     logger.info(`Processing CV ${cvId}...`);
 
@@ -122,10 +122,10 @@ const aiWorker = new Worker(
 
       logger.info(`✅ AI analysis complete. Score: ${improvement.analysis.score}/100`);
 
-      // Step 2: Render CV to HTML with professional template
-      logger.info(`🎨 Rendering CV to HTML with modern template...`);
+      // Step 2: Render CV to HTML with user's selected template
+      logger.info(`🎨 Rendering CV to HTML with ${template || 'modern'} template...`);
       const htmlContent = renderCVToHTML(improvement, {
-        template: 'modern',
+        template: (template || 'modern').toLowerCase() as 'modern' | 'classic' | 'minimal',
         accentColor: '#2563eb',
       });
 
@@ -148,6 +148,7 @@ const aiWorker = new Worker(
         data: {
           status: 'COMPLETED' as const,
           improvedPdfUrl: improvedPdfResult.url,
+          template: (template || 'MODERN').toUpperCase() as 'MODERN' | 'CLASSIC' | 'MINIMAL',
           improvedJson: {
             ...improvement.structuredCV,
             htmlUrl: htmlResult.url,

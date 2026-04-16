@@ -497,6 +497,240 @@ function classicTemplate(cv: CVImprovementResult): string {
 }
 
 /**
+ * Minimal single-column CV template with clean, distraction-free design.
+ */
+function minimalTemplate(cv: CVImprovementResult): string {
+  const { improvedText, structuredCV, analysis } = cv;
+  const sections = parseCVSections(improvedText);
+
+  return `<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>CV - ${structuredCV.personalInfo.name || 'Candidato'}</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap');
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    :root {
+      --bg: #ffffff;
+      --text: #1a1a1a;
+      --text-light: #6b7280;
+      --accent: #374151;
+      --border: #e5e7eb;
+      --code-bg: #f3f4f6;
+    }
+    
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f0f0f;
+        --text: #f5f5f5;
+        --text-light: #9ca3af;
+        --accent: #d1d5db;
+        --border: #2d2d2d;
+        --code-bg: #1f1f1f;
+      }
+    }
+    
+    body {
+      font-family: 'DM Sans', -apple-system, sans-serif;
+      color: var(--text);
+      line-height: 1.6;
+      max-width: 210mm;
+      margin: 0 auto;
+      padding: 48px 56px;
+      background: var(--bg);
+    }
+    
+    /* Header */
+    header {
+      margin-bottom: 32px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    header h1 {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 4px;
+    }
+    
+    header .title {
+      font-size: 14px;
+      color: var(--text-light);
+      margin-bottom: 12px;
+    }
+    
+    .contact-info {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      font-size: 12px;
+      color: var(--text-light);
+    }
+    
+    .contact-info span {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    /* Sections */
+    .section {
+      margin-bottom: 28px;
+    }
+    
+    .section-title {
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-light);
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    /* Experience */
+    .experience-item {
+      margin-bottom: 20px;
+    }
+    
+    .experience-item h3 {
+      font-size: 14px;
+      font-weight: 500;
+    }
+    
+    .experience-item .company {
+      font-size: 12px;
+      color: var(--text-light);
+      margin-bottom: 6px;
+    }
+    
+    .experience-item ul {
+      margin-left: 16px;
+      font-size: 12px;
+    }
+    
+    .experience-item li {
+      margin-bottom: 4px;
+    }
+    
+    /* Skills */
+    .skills-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    
+    .skill-item {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      background: var(--code-bg);
+      padding: 4px 10px;
+      border-radius: 4px;
+    }
+    
+    /* Education */
+    .education-item {
+      margin-bottom: 12px;
+    }
+    
+    .education-item h4 {
+      font-size: 13px;
+      font-weight: 500;
+    }
+    
+    .education-item p {
+      font-size: 12px;
+      color: var(--text-light);
+    }
+    
+    /* Summary */
+    .summary {
+      font-size: 13px;
+      line-height: 1.7;
+    }
+    
+    /* ATS Badge */
+    .ats-badge {
+      display: inline-block;
+      font-size: 10px;
+      padding: 4px 8px;
+      background: var(--code-bg);
+      border-radius: 4px;
+      margin-bottom: 16px;
+    }
+    
+    .ats-badge .score {
+      font-weight: 500;
+      color: var(--text);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>${structuredCV.personalInfo.name || 'Nombre del Candidato'}</h1>
+    <div class="title">${sections.title || 'Profesional'}</div>
+    <div class="contact-info">
+      ${structuredCV.personalInfo.email ? `<span>${structuredCV.personalInfo.email}</span>` : ''}
+      ${structuredCV.personalInfo.phone ? `<span>${structuredCV.personalInfo.phone}</span>` : ''}
+      ${structuredCV.personalInfo.location ? `<span>${structuredCV.personalInfo.location}</span>` : ''}
+    </div>
+  </header>
+  
+  ${sections.summary ? `
+  <div class="section">
+    <div class="summary">${sections.summary}</div>
+  </div>
+  ` : ''}
+  
+  ${sections.experience ? `
+  <div class="section">
+    <div class="section-title">Experiencia</div>
+    ${sections.experience.map((exp: any) => `
+    <div class="experience-item">
+      <h3>${exp.title || 'Posición'}</h3>
+      <div class="company">${exp.company || 'Empresa'} ${exp.duration ? ` · ${exp.duration}` : ''}</div>
+      ${exp.achievements ? `<ul>${exp.achievements.map((a: string) => `<li>${a}</li>`).join('')}</ul>` : ''}
+    </div>
+    `).join('')}
+  </div>
+  ` : ''}
+  
+  ${structuredCV.skills && structuredCV.skills.length > 0 ? `
+  <div class="section">
+    <div class="section-title">Stack</div>
+    <div class="skills-grid">
+      ${structuredCV.skills.map((s: string) => `<span class="skill-item">${s}</span>`).join('')}
+    </div>
+  </div>
+  ` : ''}
+  
+  ${structuredCV.education && structuredCV.education.length > 0 ? `
+  <div class="section">
+    <div class="section-title">Formación</div>
+    ${structuredCV.education.map((edu: any) => `
+    <div class="education-item">
+      <h4>${edu.degree || 'Título'}</h4>
+      <p>${edu.institution || 'Institución'} ${edu.year ? ` · ${edu.year}` : ''}</p>
+    </div>
+    `).join('')}
+  </div>
+  ` : ''}
+  
+  ${analysis?.score ? `
+  <div class="ats-badge">
+    <span class="score">ATS Score: ${analysis.score}/100</span>
+  </div>
+  ` : ''}
+</body>
+</html>`;
+}
+
+/**
  * Parse CV text into structured sections.
  */
 function parseCVSections(text: string): Record<string, any> {
@@ -595,6 +829,9 @@ export function renderCVToHTML(cv: CVImprovementResult, options: CVTemplateOptio
   switch (template) {
     case 'classic':
       html = classicTemplate(cv);
+      break;
+    case 'minimal':
+      html = minimalTemplate(cv);
       break;
     case 'modern':
     default:

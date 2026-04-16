@@ -9,6 +9,7 @@ export const createCVSchema = z.object({
   targetJob: z.string().optional(),
   targetIndustry: z.string().optional(),
   isPublic: z.coerce.boolean().default(false).optional(),
+  template: z.enum(['MODERN', 'CLASSIC', 'MINIMAL']).default('MODERN').optional(),
 });
 
 export const updateCVSchema = z.object({
@@ -43,7 +44,7 @@ export const cvController = {
       return;
     }
 
-    const { title, targetJob, targetIndustry, isPublic } = req.body;
+    const { title, targetJob, targetIndustry, isPublic, template } = req.body;
 
     try {
       const cv = await cvService.create(
@@ -54,6 +55,8 @@ export const cvController = {
           targetIndustry,
           // FormData sends booleans as strings, so we need to parse them
           isPublic: isPublic === 'true' || isPublic === true,
+          // Template: uppercase or default to MODERN
+          template: template?.toUpperCase() || 'MODERN',
         },
         file.buffer,
         file.originalname

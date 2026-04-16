@@ -55,7 +55,7 @@ model CV {
   id             String    @id @default(cuid())
   userId         String
   user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  title          String
+  title         String
   originalPdfUrl String
   improvedPdfUrl String?
   improvedJson   Json?
@@ -64,8 +64,9 @@ model CV {
   contextAnswers Json?
   analysisResult Json?
   status         CVStatus  @default(PROCESSING)
+  template       CVTemplate @default(MODERN)
   isPublic       Boolean   @default(false)
-  upvotes        Int       @default(0)
+  upvotes       Int       @default(0)
   deletedAt      DateTime?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
@@ -77,6 +78,12 @@ enum CVStatus {
   PROCESSING
   COMPLETED
   FAILED
+}
+
+enum CVTemplate {
+  MODERN
+  CLASSIC
+  MINIMAL
 }
 
 model Vote {

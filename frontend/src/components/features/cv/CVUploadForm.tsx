@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Loader2, Upload, FileText, X, ArrowRight, ArrowLeft, Sparkles, Briefcase, Building2, Target, Lightbulb, FileQuestion, CheckCircle2 } from 'lucide-react';
+import { Loader2, Upload, FileText, X, ArrowRight, ArrowLeft, Sparkles, Briefcase, Building2, Target, Lightbulb, FileQuestion, CheckCircle2, Palette } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -44,7 +44,13 @@ const OPTIMIZATION_FOCUSES = [
   { value: 'career-change', label: 'Cambio de carrera', icon: '🔄', desc: 'Transición a un nuevo rol o industria' },
 ];
 
-type Step = 'upload' | 'context' | 'uploading';
+const TEMPLATES = [
+  { value: 'MODERN', label: 'Moderno', desc: 'Diseño profesional de dos columnas', preview: '💙' },
+  { value: 'CLASSIC', label: 'Clásico', desc: 'Estilo tradicional y elegante', preview: '📋' },
+  { value: 'MINIMAL', label: 'Minimalista', desc: 'Limpio y moderno', preview: '⚪' },
+];
+
+type Step = 'upload' | 'context' | 'template' | 'uploading';
 
 interface ContextAnswers {
   targetJob: string;
@@ -62,6 +68,7 @@ export function CVUploadForm() {
   const [title, setTitle] = useState('');
   const [isDragOver, setIsDragOver] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [selectedTemplate, setSelectedTemplate] = useState('MODERN');
 
   const [context, setContext] = useState<ContextAnswers>({
     targetJob: '',
@@ -125,6 +132,7 @@ export function CVUploadForm() {
     formData.append('title', title);
     formData.append('targetJob', context.targetJob);
     formData.append('targetIndustry', context.targetIndustry);
+    formData.append('template', selectedTemplate);
     formData.append('contextAnswers', JSON.stringify(context));
 
     try {
@@ -245,7 +253,7 @@ export function CVUploadForm() {
               <CardDescription className="text-gray-400">Respondé estas preguntas para que la IA optimice mejor tu CV</CardDescription>
             </div>
             <Badge variant="secondary" className="bg-white/10 text-white border-white/10">
-              <Sparkles className="h-3 w-3 mr-1" /> Paso 2 de 2
+              <Sparkles className="h-3 w-3 mr-1" /> Paso 2 de 3
             </Badge>
           </div>
         </CardHeader>
@@ -385,6 +393,83 @@ export function CVUploadForm() {
             <Button
               className="flex-[2] bg-white text-black font-semibold hover:bg-gray-200 shadow-lg shadow-white/10 h-12 text-base"
               disabled={!canSubmit}
+              onClick={() => setStep('template')}
+            >
+              Continuar <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // ============================================================
+  // STEP 3: Template Selection
+  // ============================================================
+  if (step === 'template') {
+    return (
+      <Card className="glass-card">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-white text-2xl">Elegí tu plantilla</CardTitle>
+              <CardDescription className="text-gray-400">Seleccioná el estilo visual para tu CV mejorado</CardDescription>
+            </div>
+            <Badge variant="secondary" className="bg-white/10 text-white border-white/10">
+              <Sparkles className="h-3 w-3 mr-1" /> Paso 3 de 3
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* File info */}
+          <div className="flex items-center gap-3 p-3 rounded-lg bg-white/5 border border-white/10">
+            <FileText className="h-5 w-5 text-gray-400" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm text-white truncate">{file?.name}</p>
+              <p className="text-xs text-gray-500">{title}</p>
+            </div>
+            <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white shrink-0" onClick={() => setStep('context')}>
+              Cambiar
+            </Button>
+          </div>
+
+          {/* Template Selection */}
+          <div className="space-y-3">
+            <Label className="text-white flex items-center gap-2">
+              <Palette className="h-4 w-4 text-gray-400" />
+              ¿Qué estilo preferís?
+            </Label>
+            <div className="grid grid-cols-3 gap-3">
+              {TEMPLATES.map((t) => (
+                <button
+                  key={t.value}
+                  type="button"
+                  onClick={() => setSelectedTemplate(t.value)}
+                  className={`p-4 rounded-lg border text-center transition-all ${
+                    selectedTemplate === t.value
+                      ? 'border-white/40 bg-white/10 shadow-md'
+                      : 'border-white/10 bg-black/20 hover:bg-white/5'
+                  }`}
+                >
+                  <p className="text-2xl mb-2">{t.preview}</p>
+                  <p className="text-sm font-medium text-white">{t.label}</p>
+                  <p className="text-xs text-gray-400 mt-1">{t.desc}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Navigation */}
+          <div className="flex gap-3">
+            <Button
+              variant="ghost"
+              className="flex-1 text-white hover:bg-white/10 h-12"
+              onClick={() => setStep('context')}
+            >
+              <ArrowLeft className="mr-2 h-5 w-5" /> Volver
+            </Button>
+            <Button
+              className="flex-[2] bg-white text-black font-semibold hover:bg-gray-200 shadow-lg shadow-white/10 h-12 text-base"
               onClick={handleSubmit}
             >
               <Sparkles className="mr-2 h-5 w-5" /> Analizar y Mejorar con IA
@@ -396,7 +481,7 @@ export function CVUploadForm() {
   }
 
   // ============================================================
-  // STEP 3: Uploading
+  // STEP 4: Uploading
   // ============================================================
   return (
     <Card className="glass-card">
