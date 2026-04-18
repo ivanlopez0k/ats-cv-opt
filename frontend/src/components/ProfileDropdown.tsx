@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { LogOut, User } from 'lucide-react';
+import { LogOut, User, LayoutDashboard } from 'lucide-react';
 import { useAuthStore } from '@/lib/stores/authStore';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -32,7 +32,10 @@ export function ProfileDropdown() {
           {user?.isPremium && <Badge variant="secondary" className="w-fit mt-1 bg-secondary text-foreground">Premium</Badge>}
         </div>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => navigate('/dashboard')}>Dashboard</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => navigate('/dashboard')} className="flex items-center">
+          <LayoutDashboard className="mr-2 h-4 w-4" />
+          Dashboard
+        </DropdownMenuItem>
         <DropdownMenuItem onClick={() => navigate('/dashboard/settings')} className="flex items-center">
           <User className="mr-2 h-4 w-4" />
           Configuración
