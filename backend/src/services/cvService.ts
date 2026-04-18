@@ -84,6 +84,51 @@ export const cvService = {
     };
   },
 
+  async getStatsForUser(userId: string) {
+    // Get all user's CVs (not deleted)
+    const cvs = await prisma.cV.findMany({
+      where: { userId, deletedAt: null },
+      select: {
+        status: true,
+        isPublic: true,
+        upvotes: true,
+        analysisResult: true,
+        createdAt: true,
+      },
+    });
+
+    const total = cvs.length;
+    const completed = cvs.filter((c) => c.status === 'COMPLETED').length;
+    const failed = cvs.filter((c) => c.status === 'FAILED').length;
+    const processing = cvs.filter((c) => c.status === 'PROCESSING').length;
+    const publicCount = cvs.filter((c) => c.isPublic).length;
+
+    // Calculate average score from CVs with analysis
+    const cvsWithScore = cvs.filter((c) => c.status === 'COMPLETED' && c.analysisResult);
+    const avgScore = cvsWithScore.length > 0
+      ? Math.round(cvsWithScore.reduce((sum, c) => sum + (c.analysisResult as any)?.score, 0) / cvsWithScore.length)
+      : 0;
+
+    // Total votes received
+    const totalVotes = cvs.reduce((sum, c) => sum + c.upvotes, 0);
+
+    // Latest CV date
+    const latestCV = cvs.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
+    const latestCVDate = latestCV?.createdAt || null;
+
+    return {
+      total,
+      completed,
+      failed,
+      processing,
+      publicCount,
+      privateCount: total - publicCount,
+      avgScore,
+      totalVotes,
+      latestCVDate,
+    };
+  },
+
   async findById(cvId: string) {
     return prisma.cV.findUnique({
       where: { id: cvId, deletedAt: null },
