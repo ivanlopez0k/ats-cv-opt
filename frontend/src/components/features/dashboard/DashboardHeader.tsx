@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { FileText } from 'lucide-react';
+import { FileText, BarChart3 } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { ProfileDropdown } from '@/components/ProfileDropdown';
 
@@ -14,6 +14,9 @@ export function DashboardHeader() {
         </Link>
         <nav className="flex items-center gap-3">
           <Link href="/community" className="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg hover:bg-secondary transition-colors">Comunidad</Link>
+          <Link href="/dashboard/stats" className="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg hover:bg-secondary transition-colors">
+            <BarChart3 className="h-4 w-4 mr-1" />Estadísticas
+          </Link>
           <ThemeToggle />
           <ProfileDropdown />
         </nav>
