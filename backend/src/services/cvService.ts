@@ -4,6 +4,7 @@ import { uploadToCloudinary, deleteFromCloudinary, getPublicIdFromUrl } from '..
 import { Queue } from 'bullmq';
 import IORedis from 'ioredis';
 import { logger } from '../utils/logger.js';
+import { getCache, setCache, generateCacheKey, cached } from './cacheService.js';
 
 const redis = new IORedis(config.redis.url, { maxRetriesPerRequest: null });
 export const aiQueue = new Queue('ai-processing', { connection: redis });
@@ -213,15 +214,19 @@ export const cvService = {
   },
 
   async getTopCVs(limit: number = 10) {
-    return prisma.cV.findMany({
-      where: { isPublic: true, status: 'COMPLETED', deletedAt: null },
-      take: limit,
-      orderBy: { upvotes: 'desc' },
-      include: {
-        user: { select: { id: true, name: true, avatarUrl: true } },
-        _count: { select: { votes: true } },
-      },
-    });
+    // Cache top CVs for 2 minutes (they don't change often)
+    const cacheKey = `top-cvs:${limit}`;
+    return cached(cacheKey, async () => {
+      return prisma.cV.findMany({
+        where: { isPublic: true, status: 'COMPLETED', deletedAt: null },
+        take: limit,
+        orderBy: { upvotes: 'desc' },
+        include: {
+          user: { select: { id: true, name: true, avatarUrl: true } },
+          _count: { select: { votes: true } },
+        },
+      });
+    }, 120);
   },
 
   async getDeletedByUser(userId: string) {

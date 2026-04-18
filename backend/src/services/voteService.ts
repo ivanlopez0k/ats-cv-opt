@@ -1,4 +1,5 @@
 import { prisma } from './userService.js';
+import { deleteCache } from './cacheService.js';
 
 export const voteService = {
   async vote(userId: string, cvId: string) {
@@ -19,6 +20,9 @@ export const voteService = {
         data: { upvotes: { increment: 1 } },
       }),
     ]);
+
+    // Invalidate top CVs cache when voting changes order
+    await deleteCache('top-cvs:*');
 
     return { voted: true };
   },
@@ -41,6 +45,9 @@ export const voteService = {
         data: { upvotes: { decrement: 1 } },
       }),
     ]);
+
+    // Invalidate top CVs cache when voting changes order
+    await deleteCache('top-cvs:*');
 
     return { voted: false };
   },
