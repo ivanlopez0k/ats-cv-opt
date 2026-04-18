@@ -257,6 +257,7 @@ export default function CVDetailPage({ params }: { params: Promise<{ id: string 
               className="border-destructive/50 text-destructive hover:bg-destructive/10"
               onClick={() => setShowDeleteDialog(true)}
               disabled={deleteMutation.isPending}
+              aria-label="Eliminar CV"
             >
               <Trash2 className="h-4 w-4" />
             </Button>

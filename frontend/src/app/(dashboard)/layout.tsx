@@ -3,19 +3,23 @@
 import { AuthGuard } from '@/lib/guards';
 import { useAuthStore } from '@/lib/stores/authStore';
 import { EmailVerificationBanner } from '@/components/features/auth/EmailVerificationBanner';
+import { SkipLink } from '@/components/SkipLink';
 
 function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const { user, isEmailVerified } = useAuthStore();
 
   return (
     <>
+      <SkipLink />
       {user && !isEmailVerified && (
         <EmailVerificationBanner
           userEmail={user.email}
           onVerified={() => {}}
         />
       )}
-      <AuthGuard>{children}</AuthGuard>
+      <AuthGuard>
+        <main id="main-content">{children}</main>
+      </AuthGuard>
     </>
   );
 }
