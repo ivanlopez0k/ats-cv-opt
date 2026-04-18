@@ -7,6 +7,7 @@ import { aiService } from '../services/index.js';
 import { renderCVToHTML } from '../services/htmlTemplateService.js';
 import { renderHTMLToPDF } from '../services/pdfRenderer.js';
 import { uploadToCloudinary, uploadHtmlToCloudinary } from '../utils/cloudinary.js';
+import { publishCVStatus } from '../services/sseService.js';
 import { logger } from '../utils/logger.js';
 import https from 'https';
 import http from 'http';
@@ -157,6 +158,19 @@ const aiWorker = new Worker(
         },
       });
 
+      // Publish SSE event for real-time updates
+      await publishCVStatus(cvId, {
+        cvId,
+        status: 'COMPLETED',
+        message: 'CV procesado exitosamente',
+        analysisResult: improvement.analysis,
+        improvedPdfUrl: improvedPdfResult.url,
+        improvedJson: {
+          ...improvement.structuredCV,
+          htmlUrl: htmlResult.url,
+        },
+      });
+
       logger.info(`✅ CV ${cvId} processed successfully`);
     } catch (error: any) {
       logger.error(`❌ Error processing CV ${cvId}:`, error);
@@ -169,6 +183,14 @@ const aiWorker = new Worker(
           status: 'FAILED',
           analysisResult: { error: errorMessage },
         },
+      });
+
+      // Publish SSE event for real-time updates (error case)
+      await publishCVStatus(cvId, {
+        cvId,
+        status: 'FAILED',
+        message: errorMessage,
+        analysisResult: { error: errorMessage },
       });
 
       throw error;

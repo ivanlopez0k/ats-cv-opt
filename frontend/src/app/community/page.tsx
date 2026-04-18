@@ -81,7 +81,7 @@ function CVPreviewThumbnail({ htmlUrl }: { htmlUrl: string }) {
           srcDoc={content}
           className="w-full h-[800px] border-0"
           title="CV Preview"
-          sandbox="allow-same-origin"
+          sandbox="allow-same-origin allow-scripts"
           style={{ pointerEvents: 'none' }}
         />
       </div>

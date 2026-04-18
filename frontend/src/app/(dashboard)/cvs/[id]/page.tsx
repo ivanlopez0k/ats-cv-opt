@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { use } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
@@ -61,22 +61,105 @@ export default function CVDetailPage({ params }: { params: Promise<{ id: string 
       return apiClient.post('/ai/reanalyze', { cvId: id });
     },
     onSuccess: () => {
+      // Optimistically set CV to processing for immediate UI feedback
+      queryClient.setQueryData(['cv', id], (old: CV | undefined) => {
+        if (!old) return old;
+        return { ...old, status: 'PROCESSING' as const };
+      });
+      // Also invalidate to trigger refetch
       queryClient.invalidateQueries({ queryKey: ['cv', id] });
       toast.success('Re-análisis iniciado. La IA está trabajando en tu CV...');
     },
     onError: () => toast.error('Error al iniciar re-análisis'),
   });
 
-  // Polling when CV is processing (for re-analysis)
-  const { refetch } = useQuery({
-    queryKey: ['cv', id],
-    queryFn: async () => {
-      const r = await apiClient.get(`/cvs/${id}`);
-      return r.data.data as CV;
-    },
-    enabled: cv?.status === 'PROCESSING',
-    refetchInterval: cv?.status === 'PROCESSING' ? 5000 : false,
-  });
+  // SSE for real-time updates when CV is processing
+  const eventSourceRef = useRef<EventSource | null>(null);
+
+  console.log('🔍 CV status:', cv?.status); // Debug log
+
+  useEffect(() => {
+    // Debug: log the status
+    console.log('🔍 SSE effect running, CV status:', cv?.status);
+
+    // Only connect if CV is processing
+    if (cv?.status !== 'PROCESSING') {
+      console.log('⏭️ Skipping SSE - CV not processing');
+      return;
+    }
+
+    // Wait for auth to be ready
+    const token = localStorage.getItem('accessToken');
+    if (!token) {
+      // Retry after small delay for auth to initialize
+      const timer = setTimeout(() => {
+        const retryToken = localStorage.getItem('accessToken');
+        if (retryToken) {
+          // Trigger re-run of this effect
+          queryClient.invalidateQueries({ queryKey: ['cv', id] });
+        }
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+
+    const connectSSE = () => {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+      const sseUrl = `${apiUrl}/sse/cv/${id}?token=${encodeURIComponent(token)}`;
+      console.log('📡 Creating EventSource:', sseUrl);
+
+      try {
+        const eventSource = new EventSource(sseUrl, {
+          withCredentials: true,
+        });
+
+      eventSource.addEventListener('cv-status', (event) => {
+        const data = JSON.parse(event.data);
+        queryClient.setQueryData(['cv', id], (old: CV | undefined) => {
+          if (!old) return old;
+          return {
+            ...old,
+            status: data.status,
+            analysisResult: data.analysisResult,
+            improvedPdfUrl: data.improvedPdfUrl,
+            improvedJson: data.improvedJson,
+          };
+        });
+
+        // Show toast based on status
+        if (data.status === 'COMPLETED') {
+          toast.success('Tu CV está listo!');
+        } else if (data.status === 'FAILED') {
+          toast.error(data.message || 'Error al procesar el CV');
+        }
+      });
+
+      eventSource.addEventListener('connected', () => {
+        console.log('📡 SSE: Connected to event stream');
+      });
+
+      eventSource.onerror = (e) => {
+        console.error('SSE error:', e);
+      };
+
+      eventSource.onmessage = (e) => {
+        console.log('📨 SSE message received:', e.data);
+      };
+
+      eventSourceRef.current = eventSource;
+      } catch (err) {
+        console.error('❌ Failed to create EventSource:', err);
+      }
+    };
+
+    connectSSE();
+
+    return () => {
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+        eventSourceRef.current = null;
+      }
+    };
+  }, [cv?.status, id, queryClient]);
 
   if (isLoading) {
     return (
