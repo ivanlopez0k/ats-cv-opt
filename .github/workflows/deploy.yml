@@ -1,0 +1,30 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy-backend:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && contains(join(github.event.commits[*].message), 'deploy')
+    
+    steps:
+      - uses: actions/checkout@v4
+        
+      - name: Deploy to production
+        run: |
+          echo "Deploying backend to production..."
+          # Add your deployment commands here
+
+  deploy-frontend:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && contains(join(github.event.commits[*].message), 'deploy')
+    
+    steps:
+      - uses: actions/checkout@v4
+        
+      - name: Deploy to Vercel
+        run: |
+          echo "Deploying frontend to Vercel..."
+          # Add Vercel deployment here
