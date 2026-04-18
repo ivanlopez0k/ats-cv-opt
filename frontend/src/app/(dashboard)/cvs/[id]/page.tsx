@@ -11,7 +11,8 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Clock, CheckCircle, XCircle, FileText, Download, ArrowLeft, Globe, Lock, Trash2, AlertTriangle, Sparkles, RefreshCw } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Clock, CheckCircle, XCircle, FileText, Download, ArrowLeft, Globe, Lock, Trash2, AlertTriangle, Sparkles, RefreshCw, FileDown } from 'lucide-react';
 import Link from 'next/link';
 import { CVPreview } from '@/components/features/cv/CVPreview';
 import apiClient from '@/lib/api';
@@ -242,14 +243,25 @@ export default function CVDetailPage({ params }: { params: Promise<{ id: string 
               <FileText className="mr-2 h-4 w-4" /> Original
             </a>
             {improvedPdfUrl && (
-              <a
-                href={improvedPdfUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center px-3 py-2 text-sm font-medium text-background bg-foreground rounded-lg hover:bg-foreground/90 shadow-lg transition-all"
-              >
-                <Download className="mr-2 h-4 w-4" /> Mejorado
-              </a>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button className="bg-foreground text-background hover:bg-foreground/90">
+                    <Download className="mr-2 h-4 w-4" /> Descargar
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="bg-card border-border">
+                  <DropdownMenuItem asChild>
+                    <a href={`${process.env.NEXT_PUBLIC_API_URL}/cvs/${cv.id}/export?format=pdf`} className="flex items-center w-full">
+                      <FileText className="mr-2 h-4 w-4" /> PDF
+                    </a>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <a href={`${process.env.NEXT_PUBLIC_API_URL}/cvs/${cv.id}/export?format=docx`} className="flex items-center w-full">
+                      <FileDown className="mr-2 h-4 w-4" /> Word (DOCX)
+                    </a>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
             <Button
               variant="outline"
