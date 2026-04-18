@@ -235,4 +235,14 @@ export const cvService = {
       orderBy: { deletedAt: 'desc' },
     });
   },
+
+  async getPublicCVsByUser(userId: string, page: number = 1, limit: number = 12) {
+    const skip = (page - 1) * limit;
+    const where = { userId, isPublic: true, status: 'COMPLETED' as const, deletedAt: null };
+    const [cvs, total] = await Promise.all([
+      prisma.cV.findMany({ where, skip, take: limit, orderBy: { upvotes: 'desc' }, include: { user: { select: { id: true, name: true, avatarUrl: true } } } }),
+      prisma.cV.count({ where }),
+    ]);
+    return { cvs, pagination: { page, limit, total, totalPages: Math.ceil(total / limit) } };
+  },
 };

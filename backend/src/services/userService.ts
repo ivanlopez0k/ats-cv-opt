@@ -188,6 +188,23 @@ export const userService = {
     });
   },
 
+  async findByUsername(username: string) {
+    return prisma.user.findUnique({
+      where: { username },
+      select: { id: true, username: true, name: true, avatarUrl: true, isPremium: true, createdAt: true },
+    });
+  },
+
+  async findPublicProfile(userId: string) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, username: true, name: true, avatarUrl: true, isPremium: true, createdAt: true },
+    });
+    if (!user) return null;
+    const publicCVsCount = await prisma.cV.count({ where: { userId, isPublic: true, status: 'COMPLETED', deletedAt: null } });
+    return { ...user, publicCVsCount };
+  },
+
   async update(id: string, data: {
     name?: string;
     avatarUrl?: string;
