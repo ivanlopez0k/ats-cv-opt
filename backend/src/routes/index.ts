@@ -6,6 +6,7 @@ import aiRoutes from './aiRoutes.js';
 import adminRoutes from './adminRoutes.js';
 import sseRoutes from './sseRoutes.js';
 import userRoutes from './userRoutes.js';
+import swaggerRoutes from './swaggerRoutes.js';
 import { prisma } from '../services/userService.js';
 import { config } from '../config/index.js';
 import { logger } from '../utils/logger.js';
@@ -19,6 +20,7 @@ router.use('/ai', aiRoutes);
 router.use('/admin', adminRoutes);
 router.use('/sse', sseRoutes);
 router.use('/users', userRoutes);
+router.use('/docs', swaggerRoutes);
 
 // Enhanced health check with service status
 router.get('/health', async (req, res) => {
