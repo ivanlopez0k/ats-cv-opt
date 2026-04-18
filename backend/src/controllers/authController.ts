@@ -7,6 +7,7 @@ import { config } from '../config/index.js';
 import { uploadImageToCloudinary, deleteFromCloudinary, getPublicIdFromCloudinaryUrl } from '../utils/cloudinary.js';
 import { logger } from '../utils/logger.js';
 import { successResponse, errorResponse, createdResponse } from '../utils/response.js';
+import { isValidImage, validateFileType } from '../utils/fileValidator.js';
 
 // ============================================================
 // Zod schemas
@@ -556,6 +557,15 @@ export const authController = {
     if (!allowedTypes.includes(file.mimetype)) {
       errorResponse(res, 'Solo se permiten imágenes (JPG, PNG, WebP)', 400);
       return;
+    }
+
+    // Validate file type using magic bytes (not client-supplied mimetype)
+    if (file.buffer && file.buffer.length > 0) {
+      const validation = validateFileType(file.buffer, file.mimetype);
+      if (!validation.valid) {
+        errorResponse(res, validation.error!, 400);
+        return;
+      }
     }
 
     if (file.size > 2 * 1024 * 1024) {

@@ -140,17 +140,31 @@ export const cvService = {
   },
 
   async getPublicCVs(page: number = 1, limit: number = 12, filters?: {
+    search?: string;
     targetJob?: string;
     targetIndustry?: string;
     userId?: string;
     minScore?: string;
+    sort?: string;
   }) {
     const skip = (page - 1) * limit;
+
+    // Build search filter
+    const searchFilter = filters?.search
+      ? {
+          OR: [
+            { title: { contains: filters.search, mode: 'insensitive' as const } },
+            { targetJob: { contains: filters.search, mode: 'insensitive' as const } },
+            { user: { name: { contains: filters.search, mode: 'insensitive' as const } } },
+          ],
+        }
+      : {};
 
     const where: any = {
       isPublic: true,
       status: 'COMPLETED' as const,
       deletedAt: null,
+      ...searchFilter,
       ...(filters?.targetJob && { targetJob: { contains: filters.targetJob, mode: 'insensitive' as const } }),
       ...(filters?.targetIndustry && { targetIndustry: { contains: filters.targetIndustry, mode: 'insensitive' as const } }),
       ...(filters?.minScore === '90' && { analysisResult: { path: ['score'], gte: 90 } }),
@@ -158,12 +172,20 @@ export const cvService = {
       ...(filters?.minScore === 'low' && { analysisResult: { path: ['score'], lte: 69 } }),
     };
 
+    // Determine sort order
+    let orderBy: any = { upvotes: 'desc' };
+    if (filters?.sort === 'recent') {
+      orderBy = { createdAt: 'desc' };
+    } else if (filters?.sort === 'score') {
+      orderBy = { analysisResult: { path: ['score'], order: 'desc' as const } };
+    }
+
     const [cvs, total] = await Promise.all([
       prisma.cV.findMany({
         where,
         skip,
         take: limit,
-        orderBy: { upvotes: 'desc' },
+        orderBy,
         include: {
           user: { select: { id: true, name: true, avatarUrl: true } },
           votes: filters?.userId ? { where: { userId: filters.userId } } : false,

@@ -4,6 +4,7 @@ import { cvService, voteService } from '../services/index.js';
 import { AuthenticatedRequest } from '../types/index.js';
 import { logger } from '../utils/logger.js';
 import { successResponse, errorResponse, createdResponse, paginatedResponse } from '../utils/response.js';
+import { isValidPdf, validateFileType } from '../utils/fileValidator.js';
 export const createCVSchema = z.object({
   title: z.string().min(1, 'Título requerido'),
   targetJob: z.string().optional(),
@@ -37,6 +38,16 @@ export const cvController = {
     if (file.mimetype !== 'application/pdf') {
       res.status(400).json({ success: false, error: 'Solo se permiten archivos PDF' });
       return;
+    }
+
+    // Validate file type using magic bytes (not client-supplied mimetype)
+    // file.buffer may not be available if using multer diskStorage
+    if (file.buffer && file.buffer.length > 0) {
+      const validation = validateFileType(file.buffer, 'application/pdf');
+      if (!validation.valid) {
+        res.status(400).json({ success: false, error: validation.error });
+        return;
+      }
     }
 
     if (file.size > 10 * 1024 * 1024) {

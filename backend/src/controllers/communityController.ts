@@ -7,16 +7,20 @@ export const communityController = {
   async getPublicCVs(req: Request, res: Response): Promise<void> {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 12;
+    const search = req.query.search as string;
     const targetJob = req.query.targetJob as string;
     const targetIndustry = req.query.targetIndustry as string;
     const minScore = req.query.minScore as string;
+    const sort = req.query.sort as string; // 'votes', 'recent', 'score'
     const userId = (req as AuthenticatedRequest).user?.userId;
 
     const result = await cvService.getPublicCVs(page, limit, {
+      search,
       targetJob,
       targetIndustry,
       userId,
       minScore,
+      sort,
     });
 
     res.json({

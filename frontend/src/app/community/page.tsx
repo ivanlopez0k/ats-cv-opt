@@ -158,15 +158,18 @@ export default function CommunityPage() {
   const [selectedIndustry, setSelectedIndustry] = useState<string | null>(null);
   const [selectedJob, setSelectedJob] = useState<string | null>(null);
   const [selectedScore, setSelectedScore] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<string>('votes');
   const { isAuthenticated } = useAuthStore();
 
   const { data, isLoading } = useQuery({
-    queryKey: ['community-cvs', page, searchTerm, selectedIndustry, selectedJob, selectedScore],
+    queryKey: ['community-cvs', page, searchTerm, selectedIndustry, selectedJob, selectedScore, sortBy],
     queryFn: async () => {
       const params: Record<string, string> = { page: String(page), limit: String(PAGE_SIZE) };
-      if (searchTerm) params.targetJob = searchTerm;
+      if (searchTerm) params.search = searchTerm;
       if (selectedIndustry) params.targetIndustry = selectedIndustry;
+      if (selectedJob) params.targetJob = selectedJob;
       if (selectedScore) params.minScore = selectedScore;
+      if (sortBy) params.sort = sortBy;
       const r = await apiClient.get('/community/cvs', { params });
       return r.data;
     },
@@ -246,7 +249,24 @@ export default function CommunityPage() {
         <Tabs defaultValue="explore" className="space-y-6">
           <TabsList className="bg-card border-border"><TabsTrigger value="explore" className="text-foreground data-[state=active]:bg-foreground data-[state=active]:text-background">Explorar</TabsTrigger><TabsTrigger value="top" className="text-foreground data-[state=active]:bg-foreground data-[state=active]:text-background">Top CVs</TabsTrigger></TabsList>
           <TabsContent value="explore">
-            <div className="relative mb-6"><Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground/70" /><Input placeholder="Buscar por puesto..." value={searchTerm} onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }} className="pl-10 bg-muted/50 border-border text-foreground placeholder:text-muted-foreground" /></div>
+            <div className="relative mb-6"><Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground/70" /><Input placeholder="Buscar por puesto, título o nombre..." value={searchTerm} onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }} className="pl-10 bg-muted/50 border-border text-foreground placeholder:text-muted-foreground" /></div>
+
+            {/* Sort + Clear */}
+            <div className="mb-4 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">Ordenar por:</span>
+                <select value={sortBy} onChange={(e) => { setSortBy(e.target.value); setPage(1); }} className="bg-muted border border-border text-foreground text-sm rounded px-3 py-1.5">
+                  <option value="votes">Más votados</option>
+                  <option value="recent">Más recientes</option>
+                  <option value="score">Mejor score</option>
+                </select>
+              </div>
+              {hasActiveFilters && (
+                <button onClick={clearFilters} className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1">
+                  <X className="h-4 w-4" /> Limpiar filtros
+                </button>
+              )}
+            </div>
 
             {/* Industry + Score Filters Row */}
             <div className="mb-4 flex items-end gap-6">
