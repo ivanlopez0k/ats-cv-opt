@@ -1,0 +1,157 @@
+{
+  "common": {
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "back": "Volver",
+    "continue": "Continuar"
+  },
+  "landing": {
+    "header": {
+      "login": "Iniciar sesión",
+      "register": "Crear cuenta",
+      "switch": "Cambiar idioma",
+      "community": "Comunidad",
+      "startFree": "Empezar gratis"
+    },
+    "hero": {
+      "title": "Optimizá tu CV con inteligencia artificial",
+      "subtitle": "La forma más rápida de crear un CV que pasa los filtros ATS y conquista reclutadores",
+      "cta": "Subir mi CV gratis",
+      "features": {
+        "fast": "Análisis en segundos",
+        "ats": "Optimizado para ATS",
+        "ai": "Mejoras con IA"
+      }
+    },
+    "stats": {
+      "title": "Números que hablan"
+    },
+    "howItWorks": {
+      "title": "Cómo funciona",
+      "steps": {
+        "upload": {
+          "title": "Subí tu CV",
+          "description": "Sube tu currículum en PDF"
+        },
+        "target": {
+          "title": "Indicá el puesto",
+          "description": "Decinos qué puesto buscás"
+        },
+        "optimize": {
+          "title": "La IA lo optimiza",
+          "description": "Mejoramos tu CV automáticamente"
+        }
+      }
+    },
+    "features": {
+      "title": "Por qué CVMaster"
+    },
+    "faq": {
+      "title": "Preguntas frecuentes"
+    },
+    "cta": {
+      "title": "Empezá hoy",
+      "subtitle": "Tu primer CV optimizado en minutos",
+      "button": "Subir mi CV gratis"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Iniciar sesión",
+      "email": "Email",
+      "password": "Contraseña",
+      "submit": "Iniciar sesión",
+      "forgotPassword": "¿Olvidaste tu contraseña?",
+      "noAccount": "¿No tenés cuenta?",
+      "register": "Crear cuenta"
+    },
+    "register": {
+      "title": "Crear cuenta",
+      "name": "Nombre completo",
+      "email": "Email",
+      "password": "Contraseña",
+      "confirmPassword": "Confirmar contraseña",
+      "submit": "Crear cuenta",
+      "hasAccount": "¿Ya tenés cuenta?",
+      "login": "Iniciar sesión"
+    },
+    "forgotPassword": {
+      "title": "Olvidaste tu contraseña",
+      "description": "Ingresá tu email y te enviamos un link para resetear",
+      "email": "Email",
+      "submit": "Enviar email",
+      "rememberPassword": "¿Recordaste tu contraseña?",
+      "login": "Iniciar sesión"
+    },
+    "resetPassword": {
+      "title": "Nueva contraseña",
+      "description": "Ingresá tu nueva contraseña",
+      "password": "Nueva contraseña",
+      "confirmPassword": "Confirmar contraseña",
+      "submit": "Cambiar contraseña"
+    },
+    "verifyEmail": {
+      "title": "Verificar email",
+      "sent": "Te enviamos un email de verificación",
+      "checkEmail": "Revisá tu bandeja de entrada",
+      "resend": "Reenviar email",
+      "success": "¡Email verificado!"
+    }
+  },
+  "dashboard": {
+    "title": "Mi Dashboard",
+    "cvs": {
+      "title": "Mis CVs",
+      "new": "Subir nuevo CV",
+      "empty": "No tenés CVs todavía",
+      "processing": "Procesando",
+      "completed": "Completado",
+      "failed": "Fallido"
+    },
+    "stats": {
+      "title": "Mis Estadísticas"
+    },
+    "settings": {
+      "title": "Configuración",
+      "profile": "Perfil",
+      "workspace": "Área de trabajo",
+      "security": "Seguridad",
+      "deleted": "Eliminados"
+    },
+    "notifications": {
+      "title": "Notificaciones",
+      "unreadCount": "{{count}} sin leer",
+      "markAllRead": "Marcar todas como leídas",
+      "empty": "No tenés notificaciones"
+    }
+  },
+  "community": {
+    "title": "Comunidad",
+    "explore": "Explorar",
+    "top": "Top CVs",
+    "filters": {
+      "industry": "Industria",
+      "job": "Puesto",
+      "score": "Score ATS",
+      "clear": "Limpiar filtros"
+    },
+    "empty": "No hay CVs que coincidan"
+  },
+  "cv": {
+    "upload": {
+      "title": "Subir nuevo CV",
+      "selectFile": "Seleccionar archivo PDF",
+      "or": "o",
+      "drop": "Arrastrá tu archivo aquí",
+      "job": "¿Qué puesto aplicás?",
+      "industry": "¿En qué industria?",
+      "template": "Elegí un template",
+      "submit": "Subir CV"
+    }
+  }
+}
