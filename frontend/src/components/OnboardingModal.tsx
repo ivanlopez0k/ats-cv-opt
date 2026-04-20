@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FileUp, Target, Sparkles, ArrowRight, X } from 'lucide-react';
@@ -25,29 +25,39 @@ const STEPS = [
   },
 ];
 
+const ONBOARDING_KEY = 'hasSeenOnboarding';
+
 export function OnboardingModal() {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const router = useRouter();
   const { user } = useAuthStore();
 
-  // Don't show if no user
-  if (!user) return null;
+  // Check localStorage on mount
+  useEffect(() => {
+    if (user) {
+      const seen = localStorage.getItem(ONBOARDING_KEY);
+      if (!seen) {
+        setIsOpen(true);
+      }
+    }
+  }, [user]);
 
-  // Check if user has already seen onboarding (skip for now)
-  // TODO: Store this in user preferences
-  if (!isOpen) return null;
+  // Don't show if no user or already closed
+  if (!user || !isOpen) return null;
 
   const handleNext = () => {
     if (currentStep < STEPS.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
+      localStorage.setItem(ONBOARDING_KEY, 'true');
       setIsOpen(false);
-      router.push('/dashboard/cvs/new');
+      router.push('/dashboard');
     }
   };
 
   const handleSkip = () => {
+    localStorage.setItem(ONBOARDING_KEY, 'true');
     setIsOpen(false);
   };
 
