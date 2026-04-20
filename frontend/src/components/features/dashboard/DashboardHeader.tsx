@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { FileText, BarChart3 } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { ProfileDropdown } from '@/components/ProfileDropdown';
+import { NotificationBell } from '@/components/features/notification/NotificationBell';
 
 export function DashboardHeader() {
   return (
@@ -17,6 +18,7 @@ export function DashboardHeader() {
           <Link href="/dashboard/stats" className="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg hover:bg-secondary transition-colors">
             <BarChart3 className="h-4 w-4 mr-1" />Estadísticas
           </Link>
+          <NotificationBell />
           <ThemeToggle />
           <ProfileDropdown />
         </nav>

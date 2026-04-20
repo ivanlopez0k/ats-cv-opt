@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
-import { cvService, voteService } from '../services/index.js';
+import { cvService, voteService, userService } from '../services/index.js';
+import { notifyVoteReceived } from '../services/notificationService.js';
 import { AuthenticatedRequest } from '../types/index.js';
 import { successResponse, errorResponse, paginatedResponse } from '../utils/response.js';
 
@@ -88,6 +89,13 @@ export const communityController = {
     try {
       await voteService.vote(userId, id);
       const updatedCV = await cvService.findById(id);
+      
+      // Notify CV owner
+      if (updatedCV && updatedCV.userId !== userId) {
+        const voter = await userService.findById(userId);
+        notifyVoteReceived(id, updatedCV.userId, voter?.username || 'Alguien');
+      }
+      
       res.json({
         success: true,
         data: { upvotes: updatedCV?.upvotes },

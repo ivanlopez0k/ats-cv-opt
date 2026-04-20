@@ -33,6 +33,7 @@ model User {
   votes         Vote[]
   sessions      Session[]
   auditLogs     AuditLog[]
+  notifications Notification[]
 }
 
 enum Role {
@@ -110,4 +111,28 @@ model AuditLog {
   @@index([userId])
   @@index([event])
   @@index([createdAt])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  title     String
+  message   String
+  data      Json?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId, isRead])
+  @@index([userId, createdAt])
+}
+
+enum NotificationType {
+  CV_UPLOADED
+  CV_COMPLETED
+  CV_FAILED
+  VOTE_RECEIVED
+  PROFILE_UPDATED
+  SECURITY_ALERT
 }

@@ -8,6 +8,7 @@ import { renderCVToHTML } from '../services/htmlTemplateService.js';
 import { renderHTMLToPDF } from '../services/pdfRenderer.js';
 import { uploadToCloudinary, uploadHtmlToCloudinary } from '../utils/cloudinary.js';
 import { publishCVStatus } from '../services/sseService.js';
+import { notifyCVCompleted, notifyCVFailed } from '../services/notificationService.js';
 import { logger } from '../utils/logger.js';
 import https from 'https';
 import http from 'http';
@@ -158,6 +159,12 @@ const aiWorker = new Worker(
         },
       });
 
+      // Create notification
+      const cv = await prisma.cV.findUnique({ where: { id: cvId } });
+      if (cv) {
+        notifyCVCompleted(cvId, cv.userId, cv.title);
+      }
+
       // Publish SSE event for real-time updates
       await publishCVStatus(cvId, {
         cvId,
@@ -184,6 +191,12 @@ const aiWorker = new Worker(
           analysisResult: { error: errorMessage },
         },
       });
+
+      // Create notification for failure
+      const failedCv = await prisma.cV.findUnique({ where: { id: cvId } });
+      if (failedCv) {
+        notifyCVFailed(cvId, failedCv.userId, failedCv.title, errorMessage);
+      }
 
       // Publish SSE event for real-time updates (error case)
       await publishCVStatus(cvId, {
