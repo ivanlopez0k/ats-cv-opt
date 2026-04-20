@@ -3,13 +3,14 @@
 import Link from 'next/link';
 import { ArrowRight, FileText, BarChart3, Sparkles } from 'lucide-react';
 import { useAuthStore } from '@/lib/stores/authStore';
+import { useI18n } from '@/i18n';
 import { motion } from 'framer-motion';
 
-const TITLE_LINE_1 = ['Tu', 'CV', 'listo', 'para', 'pasar'];
-const TITLE_LINE_2 = ['los', 'filtros', 'ATS'];
-
 function TypewriterTitle() {
-  const words = [...TITLE_LINE_1, null, ...TITLE_LINE_2];
+  const { t } = useI18n();
+  const title1 = String(t('landing.hero.title1')).split(',');
+  const title2 = String(t('landing.hero.title2')).split(',');
+  const words = [...title1, null, ...title2];
 
   return (
     <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight text-foreground">
@@ -112,6 +113,7 @@ function DashboardMockup() {
 
 export function HeroSection() {
   const { isAuthenticated } = useAuthStore();
+  const { t } = useI18n();
 
   return (
     <section className="py-16 md:py-24 px-4">
@@ -123,7 +125,7 @@ export function HeroSection() {
         >
           <div className="inline-flex items-center gap-2 bg-secondary text-foreground px-4 py-2 rounded-full text-sm font-medium mb-6 border border-border">
             <Sparkles className="h-4 w-4" />
-            Optimizado con IA GPT-4
+            {t('landing.hero.badge')}
           </div>
         </motion.div>
 
@@ -135,8 +137,7 @@ export function HeroSection() {
           transition={{ duration: 0.4, delay: 0.7 }}
           className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto"
         >
-          Sube tu CV, indicá el puesto y nuestra IA lo optimizará para superar
-          los sistemas de seguimiento de candidatos que usan el 98% de las empresas.
+          {t('landing.hero.subtitle')}
         </motion.p>
 
         <motion.div
@@ -150,7 +151,7 @@ export function HeroSection() {
               href="/dashboard"
               className="inline-flex items-center px-8 py-4 text-base font-semibold text-primary-foreground bg-primary rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
             >
-              Ir al Dashboard
+              {t('landing.hero.dashboard')}
               <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
           ) : (
@@ -158,7 +159,7 @@ export function HeroSection() {
               href="/register"
               className="inline-flex items-center px-8 py-4 text-base font-semibold text-primary-foreground bg-primary rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
             >
-              Crear cuenta gratis
+              {t('landing.hero.ctaPrimary')}
               <ArrowRight className="ml-2 h-5 w-5" />
             </a>
           )}
@@ -166,7 +167,7 @@ export function HeroSection() {
             href="#como-funciona"
             className="inline-flex items-center px-6 py-4 text-base font-medium text-foreground border border-border rounded-lg hover:bg-secondary transition-colors"
           >
-            Cómo funciona
+            {t('landing.hero.ctaSecondary')}
           </a>
         </motion.div>
 
