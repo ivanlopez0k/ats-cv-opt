@@ -1,10 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useI18n } from '@/i18n';
 
-const FAQS = [
+const FAQS_ES = [
   {
     question: '¿Qué es un ATS y por qué importa?',
     answer: 'Un ATS (Applicant Tracking System) es el software que usan las empresas para filtrar CVs automáticamente. Más del 75% de los CVs nunca son vistos por un humano porque el ATS los descarta. Optimizar tu CV para ATS es fundamental para llegar a una entrevista.',
@@ -24,6 +25,29 @@ const FAQS = [
   {
     question: '¿Cuánto tarda el análisis?',
     answer: 'El análisis con IA tarda entre 30 segundos y 2 minutos dependiendo de la carga del servidor. Recibís una notificación cuando tu CV optimizado está listo.',
+  },
+];
+
+const FAQS_EN = [
+  {
+    question: 'What is an ATS and why does it matter?',
+    answer: 'An ATS (Applicant Tracking System) is the software companies use to filter CVs automatically. More than 75% of CVs are never seen by a human because the ATS discards them. Optimizing your CV for ATS is essential to get an interview.',
+  },
+  {
+    question: 'How does AI optimization work?',
+    answer: 'You upload your CV in PDF, specify the position you\'re applying for, and our AI analyzes the text, identifies keyword gaps, restructures the content with action verbs, adds metrics, and optimizes the format to pass ATS filters.',
+  },
+  {
+    question: 'Is my data safe?',
+    answer: 'Yes. Your CV is processed securely and we never share your information without your consent. You can choose to keep your CV private or share it anonymously with the community.',
+  },
+  {
+    question: 'Is it free?',
+    answer: 'Yes, you can optimize your first CV completely free. No credit card or commitment required.',
+  },
+  {
+    question: 'How long does the analysis take?',
+    answer: 'AI analysis takes between 30 seconds and 2 minutes depending on server load. You receive a notification when your optimized CV is ready.',
   },
 ];
 
@@ -63,19 +87,26 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
 }
 
 export function FAQSection() {
+  const { locale } = useI18n();
+  const faqs = locale === 'en' ? FAQS_EN : FAQS_ES;
+  const title = locale === 'en' ? 'Frequently asked questions' : 'Preguntas frecuentes';
+  const subtitle = locale === 'en' 
+    ? 'Everything you need to know about CVMaster and ATS' 
+    : 'Todo lo que necesitás saber sobre CVMaster y los ATS';
+
   return (
     <section className="py-20 px-4">
       <div className="container mx-auto max-w-3xl">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Preguntas frecuentes
+            {title}
           </h2>
           <p className="text-muted-foreground">
-            Todo lo que necesitás saber sobre CVMaster y los ATS
+            {subtitle}
           </p>
         </div>
         <div className="space-y-3">
-          {FAQS.map((faq, i) => (
+          {faqs.map((faq, i) => (
             <FAQItem key={i} question={faq.question} answer={faq.answer} />
           ))}
         </div>

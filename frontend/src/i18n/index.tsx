@@ -106,10 +106,12 @@ const es: TranslationContent = {
     cta: {
       title: "Empezá hoy",
       subtitle: "Tu primer CV optimizado en minutos",
+      subtitleAuth: "Gestioná y optimizá tus CVs desde el dashboard",
       button: "Subir mi CV gratis"
     },
     footer: {
-      rights: "Todos los derechos reservados"
+      rights: "Todos los derechos reservados",
+      tagline: "Optimizá tu CV, conseguí más entrevistas."
     }
   },
   dashboard: {
@@ -249,10 +251,12 @@ const en: TranslationContent = {
     cta: {
       title: "Start today",
       subtitle: "Your first optimized CV in minutes",
+      subtitleAuth: "Manage and optimize your CVs from the dashboard",
       button: "Upload my CV for free"
     },
     footer: {
-      rights: "All rights reserved"
+      rights: "All rights reserved",
+      tagline: "Optimize your CV, get more interviews."
     }
   },
   dashboard: {
