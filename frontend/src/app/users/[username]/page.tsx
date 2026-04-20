@@ -1,60 +1,26 @@
-'use client';
-import { use } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { User, ThumbsUp, FileText, Calendar } from 'lucide-react';
+import { User, FileText, Calendar } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
-import apiClient from '@/lib/api';
+import { getUserProfile, getUserCVs } from '@/lib/server/data';
+import { CVActions } from './CVActions';
 import Link from 'next/link';
-import type { CV } from '@/lib/types';
 
-interface UserProfile {
-  id: string;
-  username: string;
-  name: string | null;
-  avatarUrl: string | null;
-  isPremium: boolean;
-  createdAt: string;
-  publicCVsCount: number;
-}
-
+/**
+ * User Profile Page - Server Component
+ * Renders user data server-side and embeds client islands for interactivity
+ */
 interface PageProps {
   params: Promise<{ username: string }>;
 }
 
-export default function UserProfilePage({ params }: PageProps) {
-  const { username } = use(params);
+export default async function UserProfilePage({ params }: PageProps) {
+  const { username } = await params;
 
-  const { data: profile, isLoading } = useQuery({
-    queryKey: ['user', username],
-    queryFn: async () => {
-      const r = await apiClient.get(`/users/${username}`);
-      return r.data.data as UserProfile;
-    },
-  });
+  // Fetch data on server
+  const profile = await getUserProfile(username);
+  const cvs = await getUserCVs(username);
 
-  const { data: cvsData } = useQuery({
-    queryKey: ['user-cvs', username],
-    queryFn: async () => {
-      const r = await apiClient.get(`/users/${username}/cvs`);
-      return r.data.data as CV[];
-    },
-    enabled: !!profile,
-  });
-
-  const cvs = cvsData as CV[] | undefined;
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen container mx-auto px-4 py-8">
-        <Skeleton className="h-48 w-full mb-6" />
-        <Skeleton className="h-64 w-full" />
-      </div>
-    );
-  }
-
+  // Handle not found
   if (!profile) {
     return (
       <div className="min-h-screen container mx-auto px-4 py-8">
@@ -73,7 +39,7 @@ export default function UserProfilePage({ params }: PageProps) {
     <div className="min-h-screen">
       <div className="bg-gradient-to-b from-muted/50 to-background">
         <div className="container mx-auto px-4 py-12">
-          {/* Profile Header */}
+          {/* Profile Header - Server Rendered */}
           <div className="flex items-center gap-6 mb-8">
             <Avatar className="h-24 w-24">
               <AvatarImage src={profile.avatarUrl || undefined} />
@@ -97,7 +63,7 @@ export default function UserProfilePage({ params }: PageProps) {
             </div>
           </div>
 
-          {/* Public CVs */}
+          {/* Public CVs - Server Rendered */}
           <h2 className="text-xl font-semibold text-foreground mb-4">CVs públicos ({profile.publicCVsCount})</h2>
 
           {cvs && cvs.length > 0 ? (
@@ -113,15 +79,8 @@ export default function UserProfilePage({ params }: PageProps) {
                       {cv.targetJob && cv.targetIndustry && <span> · </span>}
                       {cv.targetIndustry && <span>{cv.targetIndustry}</span>}
                     </p>
-                    <div className="flex items-center justify-between">
-                      <span className="flex items-center gap-1 text-sm text-muted-foreground">
-                        <ThumbsUp className="h-4 w-4" />
-                        {cv.upvotes}
-                      </span>
-                      <Link href={`/community/${cv.id}`}>
-                        <Button variant="outline" size="sm">Ver CV</Button>
-                      </Link>
-                    </div>
+                    {/* Client Island for interactive actions */}
+                    <CVActions cv={cv} />
                   </CardContent>
                 </Card>
               ))}
@@ -137,4 +96,21 @@ export default function UserProfilePage({ params }: PageProps) {
       </div>
     </div>
   );
+}
+
+/**
+ * Generate static metadata for the page
+ */
+export async function generateMetadata({ params }: PageProps) {
+  const { username } = await params;
+  const profile = await getUserProfile(username);
+  
+  if (!profile) {
+    return { title: 'Usuario no encontrado' };
+  }
+
+  return {
+    title: `${profile.name || profile.username} (@${profile.username}) | CVMaster`,
+    description: `Perfil público de ${profile.name || profile.username} en CVMaster. ${profile.publicCVsCount} CVs publicados.`,
+  };
 }

@@ -1,40 +1,30 @@
-'use client';
-
-import { use } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { notFound } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { ArrowLeft, CheckCircle, XCircle, Download, FileText, Users } from 'lucide-react';
+import { ArrowLeft, CheckCircle, XCircle, Download, FileText, Users, ThumbsUp } from 'lucide-react';
 import Link from 'next/link';
-import apiClient from '@/lib/api';
+import { getCVDetail } from '@/lib/server/data';
 import type { CV } from '@/lib/types';
+import { CVVoting } from './CVVoting';
 
-export default function PublicCVDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+/**
+ * Public CV Detail Page - Server Component
+ * Renders CV data server-side, embeds client islands for interactivity
+ */
+interface PageProps {
+  params: Promise<{ id: string }>;
+}
 
-  const { data: cv, isLoading } = useQuery({
-    queryKey: ['community-cv', id],
-    queryFn: async () => {
-      const r = await apiClient.get(`/community/cvs/${id}`);
-      return r.data.data as CV;
-    },
-  });
+export default async function PublicCVDetailPage({ params }: PageProps) {
+  const { id } = await params;
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <main className="container mx-auto px-4 py-8 max-w-4xl">
-          <Skeleton className="h-10 w-32 mb-6 bg-muted" />
-          <Skeleton className="h-48 bg-muted mb-6" />
-          <Skeleton className="h-96 bg-muted" />
-        </main>
-      </div>
-    );
-  }
+  // Fetch data on server
+  const cv = await getCVDetail(id);
 
+  // Handle not found
   if (!cv) {
     return (
       <div className="min-h-screen bg-background">
@@ -85,16 +75,17 @@ export default function PublicCVDetailPage({ params }: { params: Promise<{ id: s
                 <span>{cv.user?.name || 'Anónimo'}</span>
               </div>
 
-              {/* Votes */}
-              {cv.upvotes > 0 && (
-                <div className="flex items-center gap-1">
-                  <Users className="h-4 w-4" />
-                  <span>{cv.upvotes} votos</span>
-                </div>
-              )}
+              {/* Votes - Server rendered count */}
+              <div className="flex items-center gap-1">
+                <Users className="h-4 w-4" />
+                <span>{cv.upvotes} votos</span>
+              </div>
             </div>
           </CardContent>
         </Card>
+
+        {/* Interactive voting - Client Island */}
+        {cv.status === 'COMPLETED' && <CVVoting cv={cv} />}
 
         {/* Stats */}
         {cv.status === 'COMPLETED' && cv.analysisResult && (
@@ -191,7 +182,7 @@ export default function PublicCVDetailPage({ params }: { params: Promise<{ id: s
           </div>
         )}
 
-        {/* Download buttons */}
+        {/* Download buttons - Server rendered links */}
         {cv.status === 'COMPLETED' && (
           <Card className="bg-card">
             <CardContent className="py-6">
@@ -215,7 +206,7 @@ export default function PublicCVDetailPage({ params }: { params: Promise<{ id: s
           </Card>
         )}
 
-        {/* Processing/Failed states */}
+        {/* Processing/Failed states - Server rendered */}
         {cv.status === 'PROCESSING' && (
           <Card className="bg-card">
             <CardContent className="py-12 text-center text-muted-foreground">
@@ -236,4 +227,21 @@ export default function PublicCVDetailPage({ params }: { params: Promise<{ id: s
       </main>
     </div>
   );
+}
+
+/**
+ * Generate static metadata for the page
+ */
+export async function generateMetadata({ params }: PageProps) {
+  const { id } = await params;
+  const cv = await getCVDetail(id);
+  
+  if (!cv) {
+    return { title: 'CV no encontrado' };
+  }
+
+  return {
+    title: `${cv.title} | CVMaster`,
+    description: cv.targetJob ? `CV de ${cv.targetJob} - Score ATS: ${cv.analysisResult?.score || 'N/A'}` : 'CV optimizado con IA',
+  };
 }

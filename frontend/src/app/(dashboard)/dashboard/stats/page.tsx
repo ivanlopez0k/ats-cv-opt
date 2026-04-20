@@ -19,7 +19,7 @@ interface Stats {
   latestCVDate: string | null;
 }
 
-const statCards = [
+const statCards: Array<{key: string; label: string; icon: React.ElementType; color: string; suffix?: string}> = [
   { key: 'total', label: 'Total CVs', icon: FileText, color: 'text-blue-500' },
   { key: 'completed', label: 'Completados', icon: CheckCircle, color: 'text-emerald-500' },
   { key: 'processing', label: 'En proceso', icon: Clock, color: 'text-yellow-500' },
@@ -28,7 +28,7 @@ const statCards = [
   { key: 'privateCount', label: 'Privados', icon: Lock, color: 'text-gray-500' },
   { key: 'avgScore', label: 'Score promedio', icon: TrendingUp, color: 'text-orange-500', suffix: 'pts' },
   { key: 'totalVotes', label: 'Votos recibidos', icon: ThumbsUp, color: 'text-pink-500' },
-] as const;
+];
 
 export default function StatsPage() {
   const { user } = useAuthStore();
@@ -71,7 +71,7 @@ export default function StatsPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {statCards.map((stat) => {
             const Icon = stat.icon;
-            const value = stats?.[stat.key] ?? 0;
+            const value = (stats as any)?.[stat.key] ?? 0;
             const displayValue = stat.suffix ? `${value}${stat.suffix}` : value;
 
             return (
