@@ -1,10 +1,12 @@
 'use client';
 
+import Link from 'next/link';
 import { useNotifications, useMarkAsRead, useMarkAllAsRead } from '@/hooks/useNotifications';
+import { DashboardHeader } from '@/components/features/dashboard/DashboardHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { CheckCircle, XCircle, FileText, AlertTriangle, Shield, Bell, Check } from 'lucide-react';
+import { ArrowLeft, CheckCircle, XCircle, FileText, AlertTriangle, Shield, Bell, Check } from 'lucide-react';
 
 // Icon mapping for notification types
 const typeIcons: Record<string, React.ElementType> = {
@@ -53,16 +55,25 @@ export default function NotificationsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
+      <DashboardHeader />
       <main className="container mx-auto px-4 py-8 max-w-3xl">
+        {/* Header */}
         <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Notificaciones</h1>
-            {unreadCount > 0 && (
-              <p className="text-muted-foreground mt-1">
-                {unreadCount} sin leer
-              </p>
-            )}
+          <div className="flex items-center gap-4">
+            <Link href="/dashboard">
+              <Button variant="ghost" size="icon">
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+            </Link>
+            <div>
+              <h1 className="text-3xl font-bold text-foreground">Notificaciones</h1>
+              {unreadCount > 0 && (
+                <p className="text-muted-foreground mt-1">
+                  {unreadCount} sin leer
+                </p>
+              )}
+            </div>
           </div>
           {unreadCount > 0 && (
             <Button 
@@ -76,6 +87,7 @@ export default function NotificationsPage() {
           )}
         </div>
 
+        {/* Notifications List */}
         {isLoading ? (
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
