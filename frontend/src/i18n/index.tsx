@@ -136,24 +136,117 @@ const es: TranslationContent = {
     }
   },
   auth: {
+    common: {
+      back: "Volver",
+      showPassword: "Mostrar contraseña",
+      hidePassword: "Ocultar contraseña",
+      emailPlaceholder: "tu@email.com",
+      passwordPlaceholder: "••••••••",
+      processing: "Procesando..."
+    },
     login: {
       title: "Iniciar sesión",
+      subtitle: "Ingresá tus credenciales",
       email: "Email",
       password: "Contraseña",
       submit: "Iniciar sesión",
       forgotPassword: "¿Olvidaste tu contraseña?",
       noAccount: "¿No tenés cuenta?",
-      register: "Crear cuenta"
+      register: "Crear cuenta",
+      loggingIn: "Ingresando...",
+      welcome: "¡Bienvenido!"
     },
     register: {
       title: "Crear cuenta",
+      subtitle: "Completá tus datos para empezar",
       name: "Nombre completo",
+      namePlaceholder: "Juan Pérez",
       email: "Email",
       password: "Contraseña",
       confirmPassword: "Confirmar contraseña",
       submit: "Crear cuenta",
       hasAccount: "¿Ya tenés cuenta?",
-      login: "Iniciar sesión"
+      login: "Iniciar sesión",
+      creating: "Creando...",
+      username: "Username *",
+      usernamePlaceholder: "tu_nombre",
+      nationality: "Nacionalidad",
+      nationalityPlaceholder: "Seleccionar...",
+      optional: "(opcional)",
+      targetJob: "Puesto objetivo",
+      targetJobPlaceholder: "Ej: Desarrollador Full Stack",
+      industry: "Industria",
+      industryPlaceholder: "Ej: Tecnología",
+      usernameAvailable: "Username disponible",
+      usernameTaken: "El username no está disponible",
+      usernameCheckError: "Error al verificar el username"
+    },
+    forgotPassword: {
+      title: "¿Olvidaste tu contraseña?",
+      subtitle: "Ingresá tu email y te enviaremos un link para resetearla",
+      email: "Email",
+      submit: "Enviar link de reset",
+      sending: "Enviando...",
+      submitted: {
+        title: "Email enviado",
+        message: "Si el email existe, recibirás un link para resetear tu contraseña.",
+        note: "El enlace expira en 1 hora. Revisá tu bandeja de entrada y spam.",
+        backToLogin: "Volver al login"
+      },
+      enterEmail: "Ingresá tu email",
+      successMessage: "Si el email existe, recibirás un link para resetear tu contraseña"
+    },
+    resetPassword: {
+      title: "Resetear contraseña",
+      subtitle: "Ingresá tu nueva contraseña",
+      newPassword: "Nueva contraseña",
+      confirmPassword: "Confirmar contraseña",
+      passwordMinLength: "Mínimo 8 caracteres",
+      passwordPlaceholder: "Mínimo 8 caracteres",
+      confirmPlaceholder: "Repetí tu nueva contraseña",
+      submit: "Actualizar contraseña",
+      updating: "Actualizando...",
+      verifyingToken: "Verificando token...",
+      success: "Contraseña actualizada exitosamente",
+      mismatch: "Las contraseñas no coinciden",
+      minLength: "La contraseña debe tener al menos 8 caracteres",
+      invalidToken: "Token de reset inválido",
+      errorReset: "Error al resetear contraseña"
+    },
+    verifyEmail: {
+      verifying: {
+        title: "Verificando tu email...",
+        subtitle: "Esto tomará un momento"
+      },
+      success: {
+        title: "¡Email verificado!",
+        message: "Tu email fue verificado exitosamente. Ya podés iniciar sesión.",
+        redirect: "Serás redirigido al login en unos segundos...",
+        goToLogin: "Ir al login"
+      },
+      error: {
+        title: "No se pudo verificar",
+        resend: "Reenviar email de verificación",
+        resending: "Reenviando...",
+        backToLogin: "Volver al login"
+      },
+      sent: {
+        title: "Revisá tu email",
+        message: "Te enviamos un link de verificación. Hacé click en el link para activar tu cuenta.",
+        hint: "El enlace expira en 24 horas. Revisá también tu carpeta de spam.",
+        resend: "Reenviar email",
+        resending: "Reenviando...",
+        backToLogin: "Volver al login"
+      },
+      noToken: {
+        message: "No se encontró un token de verificación",
+        goToLogin: "Ir al login"
+      },
+      emailVerified: "Email verificado exitosamente!",
+      verifyFailed: "No se pudo verificar el email",
+      invalidToken: "Token inválido o expirado",
+      resendSuccess: "Email de verificación reenviado. Revisá tu bandeja de entrada.",
+      resendError: "Error al reenviar email"
     }
   },
   community: {
@@ -281,24 +374,117 @@ const en: TranslationContent = {
     }
   },
   auth: {
+    common: {
+      back: "Back",
+      showPassword: "Show password",
+      hidePassword: "Hide password",
+      emailPlaceholder: "your@email.com",
+      passwordPlaceholder: "••••••••",
+      processing: "Processing..."
+    },
     login: {
       title: "Log in",
+      subtitle: "Enter your credentials",
       email: "Email",
       password: "Password",
       submit: "Log in",
       forgotPassword: "Forgot your password?",
       noAccount: "Don't have an account?",
-      register: "Sign up"
+      register: "Sign up",
+      loggingIn: "Logging in...",
+      welcome: "Welcome!"
     },
     register: {
       title: "Create account",
+      subtitle: "Fill in your details to get started",
       name: "Full name",
+      namePlaceholder: "John Smith",
       email: "Email",
       password: "Password",
       confirmPassword: "Confirm password",
       submit: "Create account",
       hasAccount: "Already have an account?",
-      login: "Log in"
+      login: "Log in",
+      creating: "Creating...",
+      username: "Username *",
+      usernamePlaceholder: "your_name",
+      nationality: "Nationality",
+      nationalityPlaceholder: "Select...",
+      optional: "(optional)",
+      targetJob: "Target job",
+      targetJobPlaceholder: "Ex: Full Stack Developer",
+      industry: "Industry",
+      industryPlaceholder: "Ex: Technology",
+      usernameAvailable: "Username available",
+      usernameTaken: "Username not available",
+      usernameCheckError: "Error checking username"
+    },
+    forgotPassword: {
+      title: "Forgot your password?",
+      subtitle: "Enter your email and we'll send you a link to reset it",
+      email: "Email",
+      submit: "Send reset link",
+      sending: "Sending...",
+      submitted: {
+        title: "Email sent",
+        message: "If the email exists, you'll receive a link to reset your password.",
+        note: "The link expires in 1 hour. Check your inbox and spam folder.",
+        backToLogin: "Back to login"
+      },
+      enterEmail: "Enter your email",
+      successMessage: "If the email exists, you'll receive a link to reset your password"
+    },
+    resetPassword: {
+      title: "Reset password",
+      subtitle: "Enter your new password",
+      newPassword: "New password",
+      confirmPassword: "Confirm password",
+      passwordMinLength: "Minimum 8 characters",
+      passwordPlaceholder: "minimum 8 characters",
+      confirmPlaceholder: "Repeat your new password",
+      submit: "Update password",
+      updating: "Updating...",
+      verifyingToken: "Verifying token...",
+      success: "Password updated successfully",
+      mismatch: "Passwords don't match",
+      minLength: "Password must be at least 8 characters",
+      invalidToken: "Invalid reset token",
+      errorReset: "Error resetting password"
+    },
+    verifyEmail: {
+      verifying: {
+        title: "Verifying your email...",
+        subtitle: "This will take a moment"
+      },
+      success: {
+        title: "Email verified!",
+        message: "Your email was verified successfully. You can now log in.",
+        redirect: "You'll be redirected to login in a few seconds...",
+        goToLogin: "Go to login"
+      },
+      error: {
+        title: "Could not verify",
+        resend: "Resend verification email",
+        resending: "Resending...",
+        backToLogin: "Back to login"
+      },
+      sent: {
+        title: "Check your email",
+        message: "We sent you a verification link. Click the link to activate your account.",
+        hint: "The link expires in 24 hours. Check your spam folder as well.",
+        resend: "Resend email",
+        resending: "Resending...",
+        backToLogin: "Back to login"
+      },
+      noToken: {
+        message: "No verification token found",
+        goToLogin: "Go to login"
+      },
+      emailVerified: "Email verified successfully!",
+      verifyFailed: "Could not verify email",
+      invalidToken: "Invalid or expired token",
+      resendSuccess: "Verification email resent. Check your inbox.",
+      resendError: "Error resending email"
     }
   },
   community: {
