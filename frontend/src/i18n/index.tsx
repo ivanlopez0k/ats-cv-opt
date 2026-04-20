@@ -39,6 +39,8 @@ const es: TranslationContent = {
     },
     hero: {
       badge: "Optimizado con IA GPT-4",
+      title1: "Tu,CV,listo,para,pasar",
+      title2: "ATS,filtros",
       subtitle: "Sube tu CV, indicá el puesto y nuestra IA lo optimizará para superar los sistemas de seguimiento de candidatos que usan el 98% de las empresas.",
       ctaPrimary: "Crear cuenta gratis",
       ctaSecondary: "Cómo funciona",
