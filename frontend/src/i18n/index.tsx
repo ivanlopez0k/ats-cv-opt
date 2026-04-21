@@ -1576,6 +1576,7 @@ function getNestedValue(obj: TranslationContent, path: string): string {
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>('es');
   const [mounted, setMounted] = useState(false);
+  const [, setForceUpdate] = useState(0);
 
   useEffect(() => {
     setMounted(true);
@@ -1591,6 +1592,8 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   const setLocale = (newLocale: Locale) => {
     setLocaleState(newLocale);
     document.cookie = `locale=${newLocale};path=/;max-age=31536000`;
+    // Force re-render so all components pick up new translations
+    setForceUpdate(n => n + 1);
   };
 
   const t = (key: string): string => {

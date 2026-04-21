@@ -502,7 +502,7 @@ export function CVUploadDialog({ trigger }: { trigger?: React.ReactNode }) {
                 disabled={!context.targetJob.trim() || !context.experienceLevel}
                 onClick={handleSubmit}
               >
-                <Sparkles className="mr-2 h-4 w-4" /> Analizar con IA
+                <Sparkles className="mr-2 h-4 w-4" /> {t('dashboard.cvList.uploadDialog.submit')}
               </Button>
             </div>
           </div>
