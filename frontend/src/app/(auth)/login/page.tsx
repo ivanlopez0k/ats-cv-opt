@@ -11,7 +11,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="absolute top-4 left-4 flex items-center gap-3">
-        <Link href="/register" className="inline-flex items-center text-muted-foreground hover:text-foreground transition-colors">
+        <Link href="/" className="inline-flex items-center text-muted-foreground hover:text-foreground transition-colors">
           <ArrowLeft className="mr-1 h-4 w-4" />
           <span className="text-sm">{t('auth.common.back')}</span>
         </Link>
