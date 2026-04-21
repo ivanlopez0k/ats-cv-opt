@@ -14,14 +14,20 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 import type { CV } from '@/lib/types';
 import { useCVs, useTogglePublic, useDeleteCV } from '@/hooks';
+import { useI18n } from '@/i18n';
 
 function CVCardSkeleton() {
   return <Card className="bg-card"><CardHeader><Skeleton className="h-6 w-48 bg-secondary" /><Skeleton className="h-4 w-32 mt-2 bg-secondary" /></CardHeader><CardContent><Skeleton className="h-4 w-full bg-secondary" /></CardContent></Card>;
 }
 
 function CVCard({ cv }: { cv: CV }) {
+  const { t } = useI18n();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const statusConfig = { PROCESSING: { icon: Clock, variant: 'secondary' as const, text: 'Procesando' }, COMPLETED: { icon: CheckCircle, variant: 'default' as const, text: 'Listo' }, FAILED: { icon: XCircle, variant: 'destructive' as const, text: 'Fallido' } };
+  const statusConfig = { 
+    PROCESSING: { icon: Clock, variant: 'secondary' as const, text: t('dashboard.cvList.status.processing') }, 
+    COMPLETED: { icon: CheckCircle, variant: 'default' as const, text: t('dashboard.cvList.status.completed') }, 
+    FAILED: { icon: XCircle, variant: 'destructive' as const, text: t('dashboard.cvList.status.failed') } 
+  };
   const status = statusConfig[cv.status];
 
   const togglePublicMutation = useTogglePublic(cv.id);
@@ -43,13 +49,13 @@ function CVCard({ cv }: { cv: CV }) {
         <CardContent>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
-              {cv.isPublic ? <span className="flex items-center gap-1"><Globe className="h-4 w-4" />Público</span> : <span className="flex items-center gap-1"><Lock className="h-4 w-4" />Privado</span>}
-              {cv.upvotes > 0 && <span>{cv.upvotes} votos</span>}
+              {cv.isPublic ? <span className="flex items-center gap-1"><Globe className="h-4 w-4" />{t('dashboard.cvList.visibility.public')}</span> : <span className="flex items-center gap-1"><Lock className="h-4 w-4" />{t('dashboard.cvList.visibility.private')}</span>}
+              {cv.upvotes > 0 && <span>{cv.upvotes} {t('dashboard.cvList.votes')}</span>}
             </div>
             <div className="flex items-center gap-2">
               {cv.improvedPdfUrl && (
                 <a href={cv.improvedPdfUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 transition-colors" onClick={(e) => e.stopPropagation()}>
-                  <ExternalLink className="h-3 w-3" /> Ver mejorado
+                  <ExternalLink className="h-3 w-3" /> {t('dashboard.cvList.actions.viewImproved')}
                 </a>
               )}
               <DropdownMenu>
@@ -59,9 +65,9 @@ function CVCard({ cv }: { cv: CV }) {
                   </span>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="bg-card border-border" align="end">
-                  <DropdownMenuItem onClick={() => window.location.href = `/cvs/${cv.id}`}><FileText className="mr-2 h-4 w-4" /><span className="text-foreground">Ver detalle</span></DropdownMenuItem>
-                  <DropdownMenuItem><a href={cv.originalPdfUrl} target="_blank" rel="noopener noreferrer" className="text-foreground">PDF original</a></DropdownMenuItem>
-                  {cv.improvedPdfUrl && <DropdownMenuItem><a href={cv.improvedPdfUrl} target="_blank" rel="noopener noreferrer" className="text-foreground">PDF mejorado</a></DropdownMenuItem>}
+                  <DropdownMenuItem onClick={() => window.location.href = `/cvs/${cv.id}`}><FileText className="mr-2 h-4 w-4" /><span className="text-foreground">{t('dashboard.cvList.actions.viewDetail')}</span></DropdownMenuItem>
+                  <DropdownMenuItem><a href={cv.originalPdfUrl} target="_blank" rel="noopener noreferrer" className="text-foreground">{t('dashboard.cvList.actions.originalPdf')}</a></DropdownMenuItem>
+                  {cv.improvedPdfUrl && <DropdownMenuItem><a href={cv.improvedPdfUrl} target="_blank" rel="noopener noreferrer" className="text-foreground">{t('dashboard.cvList.actions.improvedPdf')}</a></DropdownMenuItem>}
                   {cv.status === 'COMPLETED' && (
                     <DropdownMenuItem
                       onClick={(e) => {
@@ -71,9 +77,9 @@ function CVCard({ cv }: { cv: CV }) {
                       disabled={togglePublicMutation.isPending}
                     >
                       {cv.isPublic ? (
-                        <><Lock className="mr-2 h-4 w-4" /><span className="text-foreground">Volver privado</span></>
+                        <><Lock className="mr-2 h-4 w-4" /><span className="text-foreground">{t('dashboard.cvList.actions.makePrivate')}</span></>
                       ) : (
-                        <><Globe className="mr-2 h-4 w-4" /><span className="text-foreground">Compartir en la comunidad</span></>
+                        <><Globe className="mr-2 h-4 w-4" /><span className="text-foreground">{t('dashboard.cvList.actions.shareCommunity')}</span></>
                       )}
                     </DropdownMenuItem>
                   )}
@@ -84,7 +90,7 @@ function CVCard({ cv }: { cv: CV }) {
                       setShowDeleteDialog(true);
                     }}
                   >
-                    <Trash2 className="mr-2 h-4 w-4" /><span>Eliminar</span>
+                    <Trash2 className="mr-2 h-4 w-4" /><span>{t('dashboard.cvList.actions.delete')}</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -92,7 +98,7 @@ function CVCard({ cv }: { cv: CV }) {
           </div>
           {cv.analysisResult && cv.status === 'COMPLETED' && (
             <div className="mt-4 pt-4 border-t border-border/50">
-              <span className="text-sm text-muted-foreground">Score ATS: </span>
+              <span className="text-sm text-muted-foreground">{t('dashboard.cvList.atsScore')}: </span>
               <span className={`font-semibold ${cv.analysisResult.score >= 70 ? 'text-emerald-600 dark:text-emerald-400' : cv.analysisResult.score >= 40 ? 'text-yellow-500' : 'text-destructive'}`}>{cv.analysisResult.score}/100</span>
             </div>
           )}
@@ -106,10 +112,10 @@ function CVCard({ cv }: { cv: CV }) {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-destructive">
             <AlertTriangle className="h-5 w-5" />
-            Eliminar CV
+            {t('dashboard.cvList.deleteDialog.title')}
           </DialogTitle>
           <DialogDescription>
-            ¿Estás seguro de que querés eliminar <strong>"{cv.title}"</strong>? Esta acción no se puede deshacer.
+            {t('dashboard.cvList.deleteDialog.message')} <strong>"{cv.title}"</strong>{t('dashboard.cvList.deleteDialog.messageEnd')}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
@@ -118,14 +124,14 @@ function CVCard({ cv }: { cv: CV }) {
             onClick={() => setShowDeleteDialog(false)}
             disabled={deleteMutation.isPending}
           >
-            Cancelar
+            {t('dashboard.cvList.deleteDialog.cancel')}
           </Button>
           <Button
             variant="destructive"
             onClick={() => deleteMutation.mutate(cv.id)}
             disabled={deleteMutation.isPending}
           >
-            {deleteMutation.isPending ? 'Eliminando...' : 'Eliminar'}
+            {deleteMutation.isPending ? t('dashboard.cvList.deleteDialog.deleting') : t('dashboard.cvList.deleteDialog.confirm')}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -135,6 +141,7 @@ function CVCard({ cv }: { cv: CV }) {
 }
 
 export function CVList() {
+  const { t } = useI18n();
   const [page, setPage] = useState(1);
   const [allCVs, setAllCVs] = useState<CV[]>([]);
   const LIMIT = 20;
@@ -156,16 +163,16 @@ export function CVList() {
   const totalPages = pagination?.totalPages || 0;
 
   if (isLoading) return <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{[1, 2, 3].map((i) => <CVCardSkeleton key={i} />)}</div>;
-  if (error) return <Card className="bg-card"><CardContent className="py-8 text-center text-muted-foreground">Error al cargar</CardContent></Card>;
+  if (error) return <Card className="bg-card"><CardContent className="py-8 text-center text-muted-foreground">{t('dashboard.cvList.error')}</CardContent></Card>;
   if (!allCVs.length) return (
     <Card className="bg-card">
       <CardContent className="py-12 text-center">
         <FileText className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-        <h3 className="text-lg font-medium mb-2 text-foreground">Sin CVs</h3>
-        <p className="text-muted-foreground mb-4">Subí tu primer CV para empezar</p>
+        <h3 className="text-lg font-medium mb-2 text-foreground">{t('dashboard.cvList.empty.title')}</h3>
+        <p className="text-muted-foreground mb-4">{t('dashboard.cvList.empty.description')}</p>
         <CVUploadDialog trigger={
           <Button className="bg-foreground text-background hover:bg-foreground/90">
-            Subir CV
+            {t('dashboard.cvList.empty.button')}
           </Button>
         } />
       </CardContent>
@@ -182,7 +189,7 @@ export function CVList() {
       {hasMore && (
         <div className="flex flex-col items-center gap-3 mt-8">
           <p className="text-sm text-muted-foreground">
-            Mostrando {allCVs.length} de {pagination?.total || 0} CVs (página {page} de {totalPages})
+            {t('dashboard.cvList.pagination.showing')} {allCVs.length} {t('dashboard.cvList.pagination.of')} {pagination?.total || 0} {t('dashboard.cvList.pagination.cvs')} ({t('dashboard.cvList.pagination.page')} {page} {t('dashboard.cvList.pagination.of2')} {totalPages})
           </p>
           <Button
             variant="outline"
@@ -190,7 +197,7 @@ export function CVList() {
             disabled={isFetching}
             className="border-border text-foreground hover:bg-secondary"
           >
-            {isFetching ? 'Cargando...' : 'Cargar más'}
+            {isFetching ? t('dashboard.cvList.pagination.loading') : t('dashboard.cvList.pagination.loadMore')}
           </Button>
         </div>
       )}

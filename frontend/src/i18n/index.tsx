@@ -116,6 +116,54 @@ const es: TranslationContent = {
   },
   dashboard: {
     title: "Mi Dashboard",
+    myCvs: "Mis CVs",
+    manageCvs: "Gestiona tus currículums",
+    newCv: "Nuevo CV",
+    cvList: {
+      status: {
+        processing: "Procesando",
+        completed: "Listo",
+        failed: "Fallido"
+      },
+      visibility: {
+        public: "Público",
+        private: "Privado"
+      },
+      votes: "votos",
+      actions: {
+        viewImproved: "Ver mejorado",
+        viewDetail: "Ver detalle",
+        originalPdf: "PDF original",
+        improvedPdf: "PDF mejorado",
+        makePrivate: "Volver privado",
+        shareCommunity: "Compartir en la comunidad",
+        delete: "Eliminar"
+      },
+      atsScore: "Score ATS",
+      deleteDialog: {
+        title: "Eliminar CV",
+        message: "¿Estás seguro de que querés eliminar",
+        messageEnd: "? Esta acción no se puede deshacer.",
+        cancel: "Cancelar",
+        deleting: "Eliminando...",
+        confirm: "Eliminar"
+      },
+      empty: {
+        title: "Sin CVs",
+        description: "Subí tu primer CV para empezar",
+        button: "Subir CV"
+      },
+      pagination: {
+        showing: "Mostrando",
+        of: "de",
+        cvs: "CVs",
+        page: "página",
+        of2: "de",
+        loading: "Cargando...",
+        loadMore: "Cargar más"
+      },
+      error: "Error al cargar"
+    },
     stats: {
       title: "Mis Estadísticas",
       total: "Total CVs",
@@ -442,6 +490,54 @@ const en: TranslationContent = {
   },
   dashboard: {
     title: "My Dashboard",
+    myCvs: "My CVs",
+    manageCvs: "Manage your resumes",
+    newCv: "New CV",
+    cvList: {
+      status: {
+        processing: "Processing",
+        completed: "Done",
+        failed: "Failed"
+      },
+      visibility: {
+        public: "Public",
+        private: "Private"
+      },
+      votes: "votes",
+      actions: {
+        viewImproved: "View improved",
+        viewDetail: "View details",
+        originalPdf: "Original PDF",
+        improvedPdf: "Improved PDF",
+        makePrivate: "Make private",
+        shareCommunity: "Share to community",
+        delete: "Delete"
+      },
+      atsScore: "ATS Score",
+      deleteDialog: {
+        title: "Delete CV",
+        message: "Are you sure you want to delete",
+        messageEnd: "? This action cannot be undone.",
+        cancel: "Cancel",
+        deleting: "Deleting...",
+        confirm: "Delete"
+      },
+      empty: {
+        title: "No CVs",
+        description: "Upload your first CV to get started",
+        button: "Upload CV"
+      },
+      pagination: {
+        showing: "Showing",
+        of: "of",
+        cvs: "CVs",
+        page: "page",
+        of2: "of",
+        loading: "Loading...",
+        loadMore: "Load more"
+      },
+      error: "Error loading"
+    },
     stats: {
       title: "My Statistics",
       total: "Total CVs",
