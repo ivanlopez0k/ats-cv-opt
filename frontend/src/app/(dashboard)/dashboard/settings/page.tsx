@@ -17,6 +17,7 @@ import { AvatarUpload } from '@/components/features/auth/AvatarUpload';
 import apiClient from '@/lib/api';
 import { toast } from 'sonner';
 import { useDeletedCVs, useRestoreCV } from '@/hooks';
+import { useI18n } from '@/i18n';
 import type { CV } from '@/lib/types';
 
 const NATIONALITIES = [
@@ -47,6 +48,7 @@ const INDUSTRIES = [
 export default function SettingsPage() {
   const router = useRouter();
   const { user, updateUser, logout } = useAuthStore();
+  const { t } = useI18n();
   const [isSaving, setIsSaving] = useState(false);
   const [isSavingUsername, setIsSavingUsername] = useState(false);
   const [isSavingWorkspace, setIsSavingWorkspace] = useState(false);
@@ -77,7 +79,7 @@ export default function SettingsPage() {
 
   const handleSaveProfile = async () => {
     if (!name.trim() || name.length < 2) {
-      toast.error('El nombre debe tener al menos 2 caracteres');
+      toast.error(t('dashboard.settings.toasts.nameMinLength'));
       return;
     }
     setIsSaving(true);
@@ -87,9 +89,9 @@ export default function SettingsPage() {
         nationality: nationality || undefined,
       });
       updateUser(response.data.data);
-      toast.success('Perfil actualizado');
+      toast.success(t('dashboard.settings.toasts.profileUpdated'));
     } catch (e: any) {
-      toast.error(e.response?.data?.error || 'Error al actualizar');
+      toast.error(e.response?.data?.error || t('dashboard.settings.toasts.errorUpdating'));
     } finally {
       setIsSaving(false);
     }
@@ -97,16 +99,16 @@ export default function SettingsPage() {
 
   const handleSaveUsername = async () => {
     if (!username.trim() || username.length < 3) {
-      toast.error('El username debe tener al menos 3 caracteres');
+      toast.error(t('dashboard.settings.toasts.usernameMinLength'));
       return;
     }
     setIsSavingUsername(true);
     try {
       const response = await apiClient.patch('/auth/username', { username: username.trim() });
       updateUser(response.data.data);
-      toast.success('Username actualizado');
+      toast.success(t('dashboard.settings.toasts.usernameUpdated'));
     } catch (e: any) {
-      toast.error(e.response?.data?.error || 'Error al actualizar username');
+      toast.error(e.response?.data?.error || t('dashboard.settings.toasts.errorUpdatingUsername'));
     } finally {
       setIsSavingUsername(false);
     }
@@ -120,9 +122,9 @@ export default function SettingsPage() {
         defaultTargetIndustry: defaultTargetIndustry || undefined,
       });
       updateUser(response.data.data);
-      toast.success('Área de trabajo actualizada');
+      toast.success(t('dashboard.settings.toasts.workspaceUpdated'));
     } catch (e: any) {
-      toast.error(e.response?.data?.error || 'Error al actualizar');
+      toast.error(e.response?.data?.error || t('dashboard.settings.toasts.errorUpdating'));
     } finally {
       setIsSavingWorkspace(false);
     }
@@ -130,15 +132,15 @@ export default function SettingsPage() {
 
   const handleChangePassword = async () => {
     if (!currentPassword) {
-      toast.error('Ingresá tu contraseña actual');
+      toast.error(t('dashboard.settings.toasts.enterCurrentPassword'));
       return;
     }
     if (newPassword.length < 8) {
-      toast.error('La nueva contraseña debe tener al menos 8 caracteres');
+      toast.error(t('dashboard.settings.toasts.newPasswordMinLength'));
       return;
     }
     if (newPassword !== confirmPassword) {
-      toast.error('Las contraseñas no coinciden');
+      toast.error(t('dashboard.settings.toasts.passwordsMismatch'));
       return;
     }
     setIsChangingPassword(true);
@@ -147,12 +149,12 @@ export default function SettingsPage() {
         currentPassword,
         newPassword,
       });
-      toast.success('Contraseña actualizada correctamente');
+      toast.success(t('dashboard.settings.toasts.passwordUpdated'));
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
     } catch (e: any) {
-      toast.error(e.response?.data?.error || 'Error al cambiar la contraseña');
+      toast.error(e.response?.data?.error || t('dashboard.settings.toasts.errorChangingPassword'));
     } finally {
       setIsChangingPassword(false);
     }
@@ -162,22 +164,22 @@ export default function SettingsPage() {
     <div className="min-h-screen">
       <DashboardHeader />
       <main className="container mx-auto px-4 py-8 max-w-3xl">
-        <h1 className="text-3xl font-bold mb-2 text-foreground">Configuración</h1>
-        <p className="text-muted-foreground mb-8">Gestioná tu perfil y preferencias</p>
+        <h1 className="text-3xl font-bold mb-2 text-foreground">{t('dashboard.settings.title')}</h1>
+        <p className="text-muted-foreground mb-8">{t('dashboard.settings.subtitle')}</p>
 
         <Tabs defaultValue="profile" className="space-y-6">
           <TabsList className="bg-card border-border">
             <TabsTrigger value="profile" className="text-foreground data-[state=active]:bg-foreground data-[state=active]:text-background">
-              <User className="mr-2 h-4 w-4" /> Perfil
+              <User className="mr-2 h-4 w-4" /> {t('dashboard.settings.tabs.profile')}
             </TabsTrigger>
             <TabsTrigger value="workspace" className="text-foreground data-[state=active]:bg-foreground data-[state=active]:text-background">
-              <Briefcase className="mr-2 h-4 w-4" /> Área de trabajo
+              <Briefcase className="mr-2 h-4 w-4" /> {t('dashboard.settings.tabs.workspace')}
             </TabsTrigger>
             <TabsTrigger value="security" className="text-foreground data-[state=active]:bg-foreground data-[state=active]:text-background">
-              <Shield className="mr-2 h-4 w-4" /> Seguridad
+              <Shield className="mr-2 h-4 w-4" /> {t('dashboard.settings.tabs.security')}
             </TabsTrigger>
             <TabsTrigger value="deleted" className="text-foreground data-[state=active]:bg-foreground data-[state=active]:text-background">
-              <Trash2 className="mr-2 h-4 w-4" /> Eliminados
+              <Trash2 className="mr-2 h-4 w-4" /> {t('dashboard.settings.tabs.deleted')}
             </TabsTrigger>
           </TabsList>
 
@@ -186,8 +188,8 @@ export default function SettingsPage() {
             <div className="space-y-6">
               <Card className="bg-card">
                 <CardHeader>
-                  <CardTitle className="text-foreground">Información personal</CardTitle>
-                  <CardDescription className="text-muted-foreground">Datos básicos de tu perfil público</CardDescription>
+                  <CardTitle className="text-foreground">{t('dashboard.settings.profile.personalInfo')}</CardTitle>
+                  <CardDescription className="text-muted-foreground">{t('dashboard.settings.profile.personalInfoDesc')}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   {/* Avatar */}
@@ -205,28 +207,28 @@ export default function SettingsPage() {
                   {/* Name */}
                   <div className="space-y-2">
                     <Label htmlFor="name" className="text-foreground flex items-center gap-2">
-                      <User className="h-4 w-4 text-muted-foreground" /> Nombre completo
+                      <User className="h-4 w-4 text-muted-foreground" /> {t('dashboard.settings.profile.fullName')}
                     </Label>
                     <Input
                       id="name"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      placeholder="Juan Pérez"
+                      placeholder={t('auth.register.namePlaceholder')}
                       className="bg-muted/50 border-border text-foreground"
                     />
                   </div>
 
                   {/* Email (read-only) */}
                   <div className="space-y-2">
-                    <Label className="text-foreground">Email</Label>
+                    <Label className="text-foreground">{t('dashboard.settings.profile.email')}</Label>
                     <Input value={user?.email} disabled className="bg-muted/50 border-border text-muted-foreground" />
-                    <p className="text-xs text-muted-foreground">No se puede cambiar</p>
+                    <p className="text-xs text-muted-foreground">{t('dashboard.settings.profile.emailChange')}</p>
                   </div>
 
                   {/* Nationality */}
                   <div className="space-y-2">
                     <Label htmlFor="nationality" className="text-foreground flex items-center gap-2">
-                      <Globe className="h-4 w-4 text-muted-foreground" /> Nacionalidad <span className="text-muted-foreground/70 font-normal">(opcional)</span>
+                      <Globe className="h-4 w-4 text-muted-foreground" /> {t('dashboard.settings.profile.nationality')} <span className="text-muted-foreground/70 font-normal">{t('dashboard.settings.profile.optional')}</span>
                     </Label>
                     <select
                       id="nationality"
@@ -234,7 +236,7 @@ export default function SettingsPage() {
                       onChange={(e) => setNationality(e.target.value)}
                       className="flex h-9 w-full rounded-md border border-border bg-muted/50 px-3 py-1 text-sm text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                     >
-                      <option value="">Seleccionar...</option>
+                      <option value="">{t('dashboard.settings.profile.selectPlaceholder')}</option>
                       {NATIONALITIES.map((n) => (
                         <option key={n} value={n}>{n}</option>
                       ))}
@@ -243,7 +245,7 @@ export default function SettingsPage() {
 
                   <Button onClick={handleSaveProfile} disabled={isSaving} className="bg-foreground text-background font-medium hover:bg-foreground/90">
                     {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    {isSaving ? 'Guardando...' : 'Guardar cambios'}
+                    {isSaving ? t('dashboard.settings.profile.saving') : t('dashboard.settings.profile.saveChanges')}
                   </Button>
                 </CardContent>
               </Card>
@@ -251,24 +253,24 @@ export default function SettingsPage() {
               {/* Username Card */}
               <Card className="bg-card">
                 <CardHeader>
-                  <CardTitle className="text-foreground flex items-center gap-2"><AtSign className="h-5 w-5" /> Username</CardTitle>
-                  <CardDescription className="text-muted-foreground">Tu nombre de usuario público</CardDescription>
+                  <CardTitle className="text-foreground flex items-center gap-2"><AtSign className="h-5 w-5" /> {t('dashboard.settings.profile.username.title')}</CardTitle>
+                  <CardDescription className="text-muted-foreground">{t('dashboard.settings.profile.username.titleDesc')}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="username" className="text-foreground">Nuevo username</Label>
+                    <Label htmlFor="username" className="text-foreground">{t('dashboard.settings.profile.username.newUsername')}</Label>
                     <Input
                       id="username"
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
-                      placeholder="juan_perez"
+                      placeholder={t('auth.register.usernamePlaceholder')}
                       className="bg-muted/50 border-border text-foreground"
                     />
-                    <p className="text-xs text-muted-foreground">Se muestra en tu perfil público</p>
+                    <p className="text-xs text-muted-foreground">{t('dashboard.settings.profile.username.shownPublic')}</p>
                   </div>
                   <Button onClick={handleSaveUsername} disabled={isSavingUsername} className="bg-foreground text-background font-medium hover:bg-foreground/90">
                     {isSavingUsername && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    {isSavingUsername ? 'Guardando...' : 'Cambiar username'}
+                    {isSavingUsername ? t('dashboard.settings.profile.saving') : t('dashboard.settings.profile.changeUsername')}
                   </Button>
                 </CardContent>
               </Card>
@@ -279,29 +281,29 @@ export default function SettingsPage() {
           <TabsContent value="workspace">
             <Card className="bg-card">
               <CardHeader>
-                <CardTitle className="text-foreground">Área de trabajo</CardTitle>
-                <CardDescription className="text-muted-foreground">Tu información laboral por defecto</CardDescription>
+                <CardTitle className="text-foreground">{t('dashboard.settings.workspace.title')}</CardTitle>
+                <CardDescription className="text-muted-foreground">{t('dashboard.settings.workspace.titleDesc')}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Default Target Job */}
                 <div className="space-y-2">
                   <Label htmlFor="defaultTargetJob" className="text-foreground flex items-center gap-2">
-                    <Briefcase className="h-4 w-4 text-muted-foreground" /> Puesto objetivo <span className="text-muted-foreground/70 font-normal">(opcional)</span>
+                    <Briefcase className="h-4 w-4 text-muted-foreground" /> {t('dashboard.settings.workspace.targetJob')} <span className="text-muted-foreground/70 font-normal">{t('dashboard.settings.workspace.optional')}</span>
                   </Label>
                   <Input
                     id="defaultTargetJob"
                     value={defaultTargetJob}
                     onChange={(e) => setDefaultTargetJob(e.target.value)}
-                    placeholder="Ej: Desarrollador Full Stack"
+                    placeholder={t('dashboard.settings.workspace.placeholder.targetJob')}
                     className="bg-muted/50 border-border text-foreground"
                   />
-                  <p className="text-xs text-muted-foreground">Se usará como valor por defecto al subir un nuevo CV</p>
+                  <p className="text-xs text-muted-foreground">{t('dashboard.settings.workspace.hintTargetJob')}</p>
                 </div>
 
                 {/* Default Target Industry */}
                 <div className="space-y-2">
                   <Label htmlFor="defaultTargetIndustry" className="text-foreground flex items-center gap-2">
-                    <Building2 className="h-4 w-4 text-muted-foreground" /> Industria <span className="text-muted-foreground/70 font-normal">(opcional)</span>
+                    <Building2 className="h-4 w-4 text-muted-foreground" /> {t('dashboard.settings.workspace.industry')} <span className="text-muted-foreground/70 font-normal">{t('dashboard.settings.workspace.optional')}</span>
                   </Label>
                   <select
                     id="defaultTargetIndustry"
@@ -309,7 +311,7 @@ export default function SettingsPage() {
                     onChange={(e) => setDefaultTargetIndustry(e.target.value)}
                     className="flex h-9 w-full rounded-md border border-border bg-muted/50 px-3 py-1 text-sm text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                   >
-                    <option value="">Seleccionar...</option>
+                    <option value="">{t('dashboard.settings.profile.selectPlaceholder')}</option>
                     {INDUSTRIES.map((ind) => (
                       <option key={ind} value={ind}>{ind}</option>
                     ))}
@@ -318,7 +320,7 @@ export default function SettingsPage() {
 
                 <Button onClick={handleSaveWorkspace} disabled={isSavingWorkspace} className="bg-foreground text-background font-medium hover:bg-foreground/90">
                   {isSavingWorkspace && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  {isSavingWorkspace ? 'Guardando...' : 'Guardar área de trabajo'}
+                  {isSavingWorkspace ? t('dashboard.settings.workspace.saving') : t('dashboard.settings.workspace.saveWorkspace')}
                 </Button>
               </CardContent>
             </Card>
@@ -331,21 +333,21 @@ export default function SettingsPage() {
               <Card className="bg-card">
                 <CardHeader>
                   <CardTitle className="text-foreground flex items-center gap-2">
-                    <Shield className="h-5 w-5" /> Cambiar contraseña
+                    <Shield className="h-5 w-5" /> {t('dashboard.settings.security.title')}
                   </CardTitle>
                   <CardDescription className="text-muted-foreground">
-                    Ingresá tu contraseña actual y la nueva contraseña
+                    {t('dashboard.settings.security.titleDesc')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="currentPassword" className="text-foreground">Contraseña actual</Label>
+                    <Label htmlFor="currentPassword" className="text-foreground">{t('dashboard.settings.security.currentPassword')}</Label>
                     <Input
                       id="currentPassword"
                       type="password"
                       value={currentPassword}
                       onChange={(e) => setCurrentPassword(e.target.value)}
-                      placeholder="••••••••"
+                      placeholder={t('dashboard.settings.security.placeholder.current')}
                       className="bg-muted/50 border-border text-foreground"
                     />
                   </div>
@@ -354,24 +356,24 @@ export default function SettingsPage() {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="newPassword" className="text-foreground">Nueva contraseña</Label>
+                      <Label htmlFor="newPassword" className="text-foreground">{t('dashboard.settings.security.newPassword')}</Label>
                       <Input
                         id="newPassword"
                         type="password"
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
-                        placeholder="Mínimo 8 caracteres"
+                        placeholder={t('dashboard.settings.security.placeholder.minLength')}
                         className="bg-muted/50 border-border text-foreground"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="confirmPassword" className="text-foreground">Confirmar contraseña</Label>
+                      <Label htmlFor="confirmPassword" className="text-foreground">{t('dashboard.settings.security.confirmPassword')}</Label>
                       <Input
                         id="confirmPassword"
                         type="password"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
-                        placeholder="Repetí la nueva contraseña"
+                        placeholder={t('dashboard.settings.security.placeholder.repeat')}
                         className="bg-muted/50 border-border text-foreground"
                       />
                     </div>
@@ -383,7 +385,7 @@ export default function SettingsPage() {
                     className="bg-foreground text-background font-medium hover:bg-foreground/90"
                   >
                     {isChangingPassword && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    {isChangingPassword ? 'Cambiando...' : 'Cambiar contraseña'}
+                    {isChangingPassword ? t('dashboard.settings.security.changing') : t('dashboard.settings.security.changePassword')}
                   </Button>
                 </CardContent>
               </Card>
@@ -391,11 +393,11 @@ export default function SettingsPage() {
               {/* Logout Card */}
               <Card className="bg-card border-destructive/30">
                 <CardHeader>
-                  <CardTitle className="text-destructive flex items-center gap-2"><LogOut className="h-5 w-5" /> Cerrar sesión</CardTitle>
-                  <CardDescription className="text-muted-foreground">Salí de tu cuenta en este dispositivo</CardDescription>
+                  <CardTitle className="text-destructive flex items-center gap-2"><LogOut className="h-5 w-5" /> {t('dashboard.settings.security.logout.title')}</CardTitle>
+                  <CardDescription className="text-muted-foreground">{t('dashboard.settings.security.logout.desc')}</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Button variant="destructive" onClick={() => { logout(); router.push('/login'); }}>Cerrar sesión</Button>
+                  <Button variant="destructive" onClick={() => { logout(); router.push('/login'); }}>{t('dashboard.settings.security.logout.button')}</Button>
                 </CardContent>
               </Card>
             </div>
@@ -406,19 +408,19 @@ export default function SettingsPage() {
             <Card className="bg-card">
               <CardHeader>
                 <CardTitle className="text-foreground flex items-center gap-2">
-                  <Trash2 className="h-5 w-5" /> CVs eliminados
+                  <Trash2 className="h-5 w-5" /> {t('dashboard.settings.deleted.title')}
                 </CardTitle>
                 <CardDescription className="text-muted-foreground">
-                  Recuperá CVs que eliminaste recientemente
+                  {t('dashboard.settings.deleted.titleDesc')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 {loadingDeleted ? (
-                  <p className="text-muted-foreground">Cargando...</p>
+                  <p className="text-muted-foreground">{t('dashboard.settings.deleted.loading')}</p>
                 ) : deletedCVs.length === 0 ? (
                   <div className="text-center py-8">
                     <FileText className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-                    <p className="text-muted-foreground">No tenés CVs eliminados</p>
+                    <p className="text-muted-foreground">{t('dashboard.settings.deleted.empty')}</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
@@ -430,7 +432,7 @@ export default function SettingsPage() {
                         <div className="flex-1">
                           <p className="font-medium text-foreground">{cv.title}</p>
                           <p className="text-sm text-muted-foreground">
-                            Eliminado el {cv.deletedAt ? new Date(cv.deletedAt).toLocaleDateString('es-AR') : 'fecha unknown'}
+                            {t('dashboard.settings.deleted.deletedOn')} {cv.deletedAt ? new Date(cv.deletedAt).toLocaleDateString() : 'fecha unknown'}
                           </p>
                         </div>
                         <Button
@@ -443,7 +445,7 @@ export default function SettingsPage() {
                           className="border-border text-foreground hover:bg-secondary"
                         >
                           <RotateCcw className="mr-2 h-4 w-4" />
-                          Restaurar
+                          {t('dashboard.settings.deleted.restore')}
                         </Button>
                       </div>
                     ))}
@@ -460,10 +462,10 @@ export default function SettingsPage() {
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2 text-foreground">
                 <RotateCcw className="h-5 w-5" />
-                Restaurar CV
+                {t('dashboard.settings.deleted.restoreConfirm.title')}
               </DialogTitle>
               <DialogDescription className="text-muted-foreground">
-                ¿Estás seguro de que querés restaurar <strong>"{selectedCV?.title}"</strong>? Volverá a aparecer en tu lista de CVs.
+                {t('dashboard.settings.deleted.restoreConfirm.message')} <strong>"{selectedCV?.title}"</strong>{t('dashboard.settings.deleted.restoreConfirm.messageEnd')}
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
@@ -472,14 +474,14 @@ export default function SettingsPage() {
                 onClick={() => setShowRestoreDialog(false)}
                 disabled={restoreMutation.isPending}
               >
-                Cancelar
+                {t('dashboard.settings.deleted.restoreConfirm.cancel')}
               </Button>
               <Button
                 onClick={handleRestore}
                 disabled={restoreMutation.isPending}
                 className="bg-foreground text-background hover:bg-foreground/90"
               >
-                {restoreMutation.isPending ? 'Restaurando...' : 'Restaurar'}
+                {restoreMutation.isPending ? t('dashboard.settings.deleted.restoring') : t('dashboard.settings.deleted.restore')}
               </Button>
             </DialogFooter>
           </DialogContent>

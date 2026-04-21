@@ -132,7 +132,95 @@ const es: TranslationContent = {
       empty: "No tenés notificaciones"
     },
     settings: {
-      title: "Configuración"
+      title: "Configuración",
+      subtitle: "Gestioná tu perfil y preferencias",
+      tabs: {
+        profile: "Perfil",
+        workspace: "Área de trabajo",
+        security: "Seguridad",
+        deleted: "Eliminados"
+      },
+      profile: {
+        personalInfo: "Información personal",
+        personalInfoDesc: "Datos básicos de tu perfil público",
+        fullName: "Nombre completo",
+        email: "Email",
+        emailChange: "No se puede cambiar",
+        nationality: "Nacionalidad",
+        optional: "(opcional)",
+        selectPlaceholder: "Seleccionar...",
+        saving: "Guardando...",
+        saveChanges: "Guardar cambios",
+        username: {
+          title: "Username",
+          titleDesc: "Tu nombre de usuario público",
+          newUsername: "Nuevo username",
+          shownPublic: "Se muestra en tu perfil público"
+        },
+        changeUsername: "Cambiar username"
+      },
+      workspace: {
+        title: "Área de trabajo",
+        titleDesc: "Tu información laboral por defecto",
+        targetJob: "Puesto objetivo",
+        industry: "Industria",
+        optional: "(opcional)",
+        placeholder: {
+          targetJob: "Ej: Desarrollador Full Stack",
+          industry: "Ej: Tecnología"
+        },
+        hintTargetJob: "Se usará como valor por defecto al subir un nuevo CV",
+        saving: "Guardando...",
+        saveWorkspace: "Guardar área de trabajo"
+      },
+      security: {
+        title: "Cambiar contraseña",
+        titleDesc: "Ingresá tu contraseña actual y la nueva contraseña",
+        currentPassword: "Contraseña actual",
+        newPassword: "Nueva contraseña",
+        confirmPassword: "Confirmar contraseña",
+        placeholder: {
+          current: "••••••••",
+          minLength: "Mínimo 8 caracteres",
+          repeat: "Repetí la nueva contraseña"
+        },
+        changing: "Cambiando...",
+        changePassword: "Cambiar contraseña",
+        logout: {
+          title: "Cerrar sesión",
+          desc: "Salí de tu cuenta en este dispositivo",
+          button: "Cerrar sesión"
+        }
+      },
+      deleted: {
+        title: "CVs eliminados",
+        titleDesc: "Recuperá CVs que eliminaste recientemente",
+        loading: "Cargando...",
+        empty: "No tenés CVs eliminados",
+        deletedOn: "Eliminado el",
+        restore: "Restaurar",
+        restoring: "Restaurando...",
+        restoreConfirm: {
+          title: "Restaurar CV",
+          message: "¿Estás seguro de que querés restaurar",
+          messageEnd: "? Volverá a aparecer en tu lista de CVs.",
+          cancel: "Cancelar"
+        }
+      },
+      toasts: {
+        nameMinLength: "El nombre debe tener al menos 2 caracteres",
+        profileUpdated: "Perfil actualizado",
+        errorUpdating: "Error al actualizar",
+        usernameMinLength: "El username debe tener al menos 3 caracteres",
+        usernameUpdated: "Username actualizado",
+        errorUpdatingUsername: "Error al actualizar username",
+        workspaceUpdated: "Área de trabajo actualizada",
+        enterCurrentPassword: "Ingresá tu contraseña actual",
+        newPasswordMinLength: "La nueva contraseña debe tener al menos 8 caracteres",
+        passwordsMismatch: "Las contraseñas no coinciden",
+        passwordUpdated: "Contraseña actualizada correctamente",
+        errorChangingPassword: "Error al cambiar la contraseña"
+      }
     }
   },
   auth: {
@@ -370,7 +458,95 @@ const en: TranslationContent = {
       empty: "You have no notifications"
     },
     settings: {
-      title: "Settings"
+      title: "Settings",
+      subtitle: "Manage your profile and preferences",
+      tabs: {
+        profile: "Profile",
+        workspace: "Workspace",
+        security: "Security",
+        deleted: "Deleted"
+      },
+      profile: {
+        personalInfo: "Personal information",
+        personalInfoDesc: "Basic data for your public profile",
+        fullName: "Full name",
+        email: "Email",
+        emailChange: "Cannot be changed",
+        nationality: "Nationality",
+        optional: "(optional)",
+        selectPlaceholder: "Select...",
+        saving: "Saving...",
+        saveChanges: "Save changes",
+        username: {
+          title: "Username",
+          titleDesc: "Your public username",
+          newUsername: "New username",
+          shownPublic: "Shown on your public profile"
+        },
+        changeUsername: "Change username"
+      },
+      workspace: {
+        title: "Workspace",
+        titleDesc: "Your default work information",
+        targetJob: "Target job",
+        industry: "Industry",
+        optional: "(optional)",
+        placeholder: {
+          targetJob: "Ex: Full Stack Developer",
+          industry: "Ex: Technology"
+        },
+        hintTargetJob: "Will be used as default when uploading a new CV",
+        saving: "Saving...",
+        saveWorkspace: "Save workspace"
+      },
+      security: {
+        title: "Change password",
+        titleDesc: "Enter your current password and new password",
+        currentPassword: "Current password",
+        newPassword: "New password",
+        confirmPassword: "Confirm password",
+        placeholder: {
+          current: "••••••••",
+          minLength: "Minimum 8 characters",
+          repeat: "Repeat new password"
+        },
+        changing: "Changing...",
+        changePassword: "Change password",
+        logout: {
+          title: "Log out",
+          desc: "Sign out of your account on this device",
+          button: "Log out"
+        }
+      },
+      deleted: {
+        title: "Deleted CVs",
+        titleDesc: "Recover CVs you deleted recently",
+        loading: "Loading...",
+        empty: "You have no deleted CVs",
+        deletedOn: "Deleted on",
+        restore: "Restore",
+        restoring: "Restoring...",
+        restoreConfirm: {
+          title: "Restore CV",
+          message: "Are you sure you want to restore",
+          messageEnd: "? It will appear again in your CV list.",
+          cancel: "Cancel"
+        }
+      },
+      toasts: {
+        nameMinLength: "Name must be at least 2 characters",
+        profileUpdated: "Profile updated",
+        errorUpdating: "Error updating",
+        usernameMinLength: "Username must be at least 3 characters",
+        usernameUpdated: "Username updated",
+        errorUpdatingUsername: "Error updating username",
+        workspaceUpdated: "Workspace updated",
+        enterCurrentPassword: "Enter your current password",
+        newPasswordMinLength: "New password must be at least 8 characters",
+        passwordsMismatch: "Passwords don't match",
+        passwordUpdated: "Password updated successfully",
+        errorChangingPassword: "Error changing password"
+      }
     }
   },
   auth: {
