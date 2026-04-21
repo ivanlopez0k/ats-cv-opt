@@ -20,11 +20,15 @@ export const updateCVSchema = z.object({
   isPublic: z.boolean().optional(),
 });
 
+import { config } from '../config/index.js';
+
 export const cvController = {
   async upload(req: AuthenticatedRequest, res: Response): Promise<void> {
     const userId = req.user?.userId;
     const file = req.file;
     const isMock = req.query.mock === 'true';
+    // Auto-mock if no OpenAI key configured
+    const hasOpenAI = config.openai?.apiKey && config.openai.apiKey.startsWith('sk-');
 
     if (!userId) {
       res.status(401).json({ success: false, error: 'No autenticado' });
@@ -32,9 +36,11 @@ export const cvController = {
     }
 
     // MOCK MODE: Return a demo CV without calling AI
-    if (isMock) {
+    // Or auto-mock if no OpenAI key is configured
+    const shouldMock = isMock || !config.openai?.apiKey || !config.openai.apiKey.startsWith('sk-');
+    if (shouldMock) {
       const mockCV = await cvService.createMock(userId, req.body);
-      createdResponse(res, mockCV, 'CV de demo creado (sin IA)');
+      createdResponse(res, mockCV, config.openai?.apiKey ? 'CV de demo (test)' : 'CV creado (sin OpenAI - modo demo)');
       return;
     }
 
