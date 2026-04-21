@@ -34,13 +34,14 @@ export const cvController = {
     }
 
     // MOCK MODE: Return a demo CV without calling AI
-    // Or auto-mock if no valid OpenAI key is configured
+    // Auto-mock if no valid OpenAI key is configured
     const apiKey = config.openai?.apiKey;
-    const hasValidOpenAI = apiKey && apiKey.trim().startsWith('sk-');
-    const shouldMock = isMock || !hasValidOpenAI;
+    // Valid OpenAI keys are sk-... (not sk-proj-...)
+    const isValidKey = apiKey && apiKey.trim().startsWith('sk-') && !apiKey.includes('proj-');
+    const shouldMock = isMock || !isValidKey;
     if (shouldMock) {
       const mockCV = await cvService.createMock(userId, req.body);
-      createdResponse(res, mockCV, hasValidOpenAI ? 'CV de demo (test)' : 'CV creado (sin OpenAI - modo demo)');
+      createdResponse(res, mockCV, isValidKey ? 'CV de demo (test)' : 'CV creado (sin OpenAI - modo demo)');
       return;
     }
 
