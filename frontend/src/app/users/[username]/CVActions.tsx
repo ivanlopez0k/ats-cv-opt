@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import apiClient from '@/lib/api';
 import type { CV } from '@/lib/types';
 import { useAuthStore } from '@/lib/stores/authStore';
+import { useI18n } from '@/i18n';
 import Link from 'next/link';
 
 interface CVActionsProps {
@@ -18,6 +19,7 @@ interface CVActionsProps {
  * This component handles voting and navigation - requires client-side JS
  */
 export function CVActions({ cv }: CVActionsProps) {
+  const { t } = useI18n();
   const queryClient = useQueryClient();
   const { isAuthenticated } = useAuthStore();
 
@@ -32,19 +34,19 @@ export function CVActions({ cv }: CVActionsProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-cvs'] });
       if (cv.hasVoted) {
-        toast.success('Voto eliminado');
+        toast.success(t('cvDetail.cvActions.voteRemoved'));
       } else {
-        toast.success('¡Votado!');
+        toast.success(t('cvDetail.cvActions.votedSuccess'));
       }
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.error || 'Error al votar');
+      toast.error(error.response?.data?.error || t('cvDetail.cvActions.voteError'));
     },
   });
 
   const handleVote = () => {
     if (!isAuthenticated) {
-      toast.error('Debes iniciar sesión para votar');
+      toast.error(t('cvDetail.cvActions.mustLogin'));
       return;
     }
     voteMutation.mutate();
@@ -70,15 +72,15 @@ export function CVActions({ cv }: CVActionsProps) {
             className={cv.hasVoted ? 'bg-foreground/70 text-background' : ''}
           >
             <ThumbsUp className={`h-4 w-4 mr-1 ${cv.hasVoted ? 'fill-current' : ''}`} />
-            {cv.hasVoted ? 'Votado' : 'Votar'}
+            {cv.hasVoted ? t('cvDetail.cvActions.votedLabel') : t('cvDetail.cvActions.vote')}
           </Button>
         ) : (
           <Link href="/login">
-            <Button variant="outline" size="sm">Votar</Button>
+            <Button variant="outline" size="sm">{t('cvDetail.cvActions.vote')}</Button>
           </Link>
         )}
         <Button variant="outline" size="sm" onClick={handleView}>
-          Ver CV
+          {t('cvDetail.cvActions.viewCv')}
         </Button>
       </div>
     </div>

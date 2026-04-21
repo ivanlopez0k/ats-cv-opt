@@ -472,7 +472,107 @@ const es: TranslationContent = {
       resendError: "Error al reenviar email"
     }
   },
-  cvDetail: {
+cvDetail: {
+    userProfile: {
+      notFound: "Usuario no encontrado",
+      notFoundDesc: "El usuario",
+      notFoundDescEnd: "no existe",
+      publicCvs: "CVs públicos",
+      memberSince: "Desde",
+      noPublicCvs: "Este usuario no tiene CVs públicos todavía."
+    },
+    cvActions: {
+      voteRemoved: "Voto eliminado",
+      votedSuccess: "¡Votado!",
+      voteError: "Error al votar",
+      mustLogin: "Debes iniciar sesión para votar",
+      votedLabel: "Votado",
+      vote: "Votar",
+      viewCv: "Ver CV"
+    },
+    newCv: {
+      step1: "Subí tu CV",
+      step2: "Contexto para la IA",
+      step3: "Elegí tu plantilla",
+      uploadStep: "Paso 1 de 3",
+      contextStep: "Paso 2 de 3",
+      templateStep: "Paso 3 de 3",
+      dragDrop: "Arrastrá tu CV acá o",
+      browse: "buscá en tu computadora",
+      maxSize: "Solo PDF — máximo 10MB",
+      remove: "Quitar",
+      titleLabel: "Título del CV *",
+      titlePlaceholder: "Ej: Mi CV — Desarrollador Full Stack",
+      continue: "Continuar",
+      back: "Volver",
+      contextDesc: "Respondé estas preguntas para que la IA optimice mejor tu CV",
+      change: "Cambiar",
+      targetJob: {
+        label: "¿A qué puesto querés aplicar? *",
+        placeholder: "Ej: Desarrollador Full Stack, Data Scientist, Product Manager"
+      },
+      targetCompany: {
+        label: "¿A qué empresa va dirigido?",
+        optional: "(opcional)",
+        placeholder: "Ej: Google, MercadoLibre, Accenture"
+      },
+      targetIndustry: {
+        label: "¿A qué industria/sector pertenece?",
+        optional: "(opcional)",
+        placeholder: "Seleccionar industria..."
+      },
+      experienceLevel: {
+        label: "¿Cuál es tu nivel de experiencia? *"
+      },
+      optimizationFocus: {
+        label: "¿Qué querés destacar en tu CV?"
+      },
+      additionalNotes: {
+        label: "¿Hay algo específico que quieras mejorar?",
+        optional: "(opcional)",
+        placeholder: "Ej: Quiero que destaque más mi experiencia en liderazgo..."
+      },
+      templateStyle: "¿Qué estilo preferí?",
+      analyzeWithAi: "Analizar y Mejorar con IA",
+      uploading: "Subiendo tu CV...",
+      uploaded: "¡CV subido!",
+      uploadingDesc: "Esto puede tomar unos momentos",
+      analyzingDesc: "La IA está analizando y optimizando tu CV",
+      levels: {
+        junior: "Junior / Trainee",
+        juniorDesc: "0-2 años de experiencia",
+        mid: "Semi-Senior",
+        midDesc: "2-5 años de experiencia",
+        senior: "Senior",
+        seniorDesc: "5-10 años de experiencia",
+        lead: "Lead / Manager",
+        leadDesc: "10+ años o gestión de equipos"
+      },
+      focuses: {
+        technical: "Experiencia técnica",
+        technicalDesc: "Destacar habilidades técnicas y proyectos",
+        soft: "Habilidades blandas",
+        softDesc: "Liderazgo, comunicación, trabajo en equipo",
+        both: "Ambas",
+        bothDesc: "Balance entre técnica y habilidades blandas",
+        careerChange: "Cambio de carrera",
+        careerChangeDesc: "Transición a un nuevo rol o industria"
+      },
+      templates: {
+        modern: "Moderno",
+        modernDesc: "Diseño profesional de dos columnas",
+        classic: "Clásico",
+        classicDesc: "Estilo tradicional y elegante",
+        minimal: "Minimalista",
+        minimalDesc: "Limpio y moderno"
+      },
+      toasts: {
+        invalidFile: "Solo se aceptan archivos PDF",
+        fileTooBig: "El archivo debe ser menor a 10MB",
+        uploadSuccess: "¡CV subido! La IA lo está analizando...",
+        uploadError: "Error al subir el CV"
+      }
+    },
     notFound: "CV no encontrado",
     processing: "Procesando...",
     completed: "Completado",
@@ -1042,6 +1142,106 @@ const en: TranslationContent = {
     }
   },
   cvDetail: {
+    userProfile: {
+      notFound: "User not found",
+      notFoundDesc: "User",
+      notFoundDescEnd: "does not exist",
+      publicCvs: "Public CVs",
+      memberSince: "Since",
+      noPublicCvs: "This user doesn't have any public CVs yet."
+    },
+    cvActions: {
+      voteRemoved: "Vote removed",
+      votedSuccess: "Voted!",
+      voteError: "Error voting",
+      mustLogin: "You must log in to vote",
+      votedLabel: "Voted",
+      vote: "Vote",
+      viewCv: "View CV"
+    },
+    newCv: {
+      step1: "Upload your CV",
+      step2: "AI Context",
+      step3: "Choose your template",
+      uploadStep: "Step 1 of 3",
+      contextStep: "Step 2 of 3",
+      templateStep: "Step 3 of 3",
+      dragDrop: "Drag your CV here or",
+      browse: "browse on your computer",
+      maxSize: "PDF only — max 10MB",
+      remove: "Remove",
+      titleLabel: "CV Title *",
+      titlePlaceholder: "Ex: My CV — Full Stack Developer",
+      continue: "Continue",
+      back: "Back",
+      contextDesc: "Answer these questions so the AI can better optimize your CV",
+      change: "Change",
+      targetJob: {
+        label: "What position are you applying for? *",
+        placeholder: "Ex: Full Stack Developer, Data Scientist, Product Manager"
+      },
+      targetCompany: {
+        label: "What company is it for?",
+        optional: "(optional)",
+        placeholder: "Ex: Google, MercadoLibre, Accenture"
+      },
+      targetIndustry: {
+        label: "What industry/sector does it belong to?",
+        optional: "(optional)",
+        placeholder: "Select industry..."
+      },
+      experienceLevel: {
+        label: "What is your experience level? *"
+      },
+      optimizationFocus: {
+        label: "What do you want to highlight in your CV?"
+      },
+      additionalNotes: {
+        label: "Is there anything specific you want to improve?",
+        optional: "(optional)",
+        placeholder: "Ex: I want you to highlight my leadership experience..."
+      },
+      templateStyle: "What style do you prefer?",
+      analyzeWithAi: "Analyze and Improve with AI",
+      uploading: "Uploading your CV...",
+      uploaded: "CV uploaded!",
+      uploadingDesc: "This may take a few moments",
+      analyzingDesc: "The AI is analyzing and optimizing your CV",
+      levels: {
+        junior: "Junior / Trainee",
+        juniorDesc: "0-2 years of experience",
+        mid: "Mid-Level",
+        midDesc: "2-5 years of experience",
+        senior: "Senior",
+        seniorDesc: "5-10 years of experience",
+        lead: "Lead / Manager",
+        leadDesc: "10+ years or team management"
+      },
+      focuses: {
+        technical: "Technical experience",
+        technicalDesc: "Highlight technical skills and projects",
+        soft: "Soft skills",
+        softDesc: "Leadership, communication, teamwork",
+        both: "Both",
+        bothDesc: "Balance between technical and soft skills",
+        careerChange: "Career change",
+        careerChangeDesc: "Transition to a new role or industry"
+      },
+      templates: {
+        modern: "Modern",
+        modernDesc: "Professional two-column design",
+        classic: "Classic",
+        classicDesc: "Traditional and elegant style",
+        minimal: "Minimalist",
+        minimalDesc: "Clean and modern"
+      },
+      toasts: {
+        invalidFile: "Only PDF files are accepted",
+        fileTooBig: "File must be less than 10MB",
+        uploadSuccess: "CV uploaded! AI is analyzing it...",
+        uploadError: "Error uploading CV"
+      }
+    },
     notFound: "CV not found",
     processing: "Processing...",
     completed: "Completed",
