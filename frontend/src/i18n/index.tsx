@@ -478,7 +478,49 @@ const es: TranslationContent = {
     }
   },
   community: {
-    title: "Comunidad"
+    title: "Comunidad",
+    subtitle: "Descubre los mejores CVs",
+    tabs: {
+      explore: "Explorar",
+      top: "Top CVs"
+    },
+    search: {
+      placeholder: "Buscar por puesto, título o nombre..."
+    },
+    filters: {
+      sortBy: "Ordenar por:",
+      options: {
+        votes: "Más votados",
+        recent: "Más recientes",
+        score: "Mejor score"
+      },
+      clearFilters: "Limpiar filtros",
+      activeFilters: "Filtros activos:",
+      clearAll: "Limpiar todo",
+      industry: "Industria",
+      scoreAts: "Score ATS",
+      job: "Puesto",
+      noResults: "No hay CVs que coincidan con los filtros",
+      noVoted: "No hay CVs votados"
+    },
+    card: {
+      votes: "votos",
+      voted: "Votado",
+      vote: "Votar",
+      viewCv: "Ver CV",
+      toast: {
+        voteRemoved: "Voto eliminado",
+        voted: "¡Votado!",
+        error: "Error al votar"
+      }
+    },
+    notAuthenticated: {
+      title: "Iniciá sesión para ver la comunidad",
+      description: "Descubrí los mejores CVs de otros usuarios, votá los que más te gusten y aprendé de lo que funciona.",
+      login: "Iniciar sesión",
+      register: "Crear cuenta"
+    },
+    dashboard: "Mi Dashboard"
   }
 };
 
@@ -944,7 +986,49 @@ const en: TranslationContent = {
     }
   },
   community: {
-    title: "Community"
+    title: "Community",
+    subtitle: "Discover the best CVs",
+    tabs: {
+      explore: "Explore",
+      top: "Top CVs"
+    },
+    search: {
+      placeholder: "Search by job, title or name..."
+    },
+    filters: {
+      sortBy: "Sort by:",
+      options: {
+        votes: "Most voted",
+        recent: "Most recent",
+        score: "Best score"
+      },
+      clearFilters: "Clear filters",
+      activeFilters: "Active filters:",
+      clearAll: "Clear all",
+      industry: "Industry",
+      scoreAts: "ATS Score",
+      job: "Job",
+      noResults: "No CVs match the filters",
+      noVoted: "No voted CVs"
+    },
+    card: {
+      votes: "votes",
+      voted: "Voted",
+      vote: "Vote",
+      viewCv: "View CV",
+      toast: {
+        voteRemoved: "Vote removed",
+        voted: "Voted!",
+        error: "Error voting"
+      }
+    },
+    notAuthenticated: {
+      title: "Log in to see the community",
+      description: "Discover the best CVs from other users, vote for the ones you like most, and learn from what works.",
+      login: "Log in",
+      register: "Sign up"
+    },
+    dashboard: "My Dashboard"
   }
 };
 
