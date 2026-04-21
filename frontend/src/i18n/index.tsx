@@ -1596,10 +1596,11 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   const t = (key: string): string => {
     if (!mounted) return key;
     
-    let result = getNestedValue(translations[locale], key);
+    const result = getNestedValue(translations[locale], key);
     
+    // If key not found in current locale, return key (not fallback to another language)
     if (result === key) {
-      result = getNestedValue(translations.es, key);
+      return key;
     }
     
     return result;
