@@ -157,6 +157,7 @@ export const userService = {
   async findByUsername(username: string) {
     return prisma.user.findUnique({
       where: { username: username.toLowerCase() },
+      select: { id: true, username: true, name: true, avatarUrl: true, isPremium: true, createdAt: true },
     });
   },
 
@@ -166,33 +167,6 @@ export const userService = {
       select: { id: true },
     });
     return !existing;
-  },
-
-  async findById(id: string) {
-    return prisma.user.findUnique({
-      where: { id },
-      select: {
-        id: true,
-        username: true,
-        email: true,
-        name: true,
-        nationality: true,
-        defaultTargetJob: true,
-        defaultTargetIndustry: true,
-        role: true,
-        isPremium: true,
-        isEmailVerified: true,
-        avatarUrl: true,
-        createdAt: true,
-      },
-    });
-  },
-
-  async findByUsername(username: string) {
-    return prisma.user.findUnique({
-      where: { username },
-      select: { id: true, username: true, name: true, avatarUrl: true, isPremium: true, createdAt: true },
-    });
   },
 
   async findPublicProfile(userId: string) {

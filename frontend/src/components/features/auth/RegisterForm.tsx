@@ -49,12 +49,14 @@ export function RegisterForm() {
     setUsernameStatus('checking');
     try {
       const response = await apiClient.get(`/auth/check-username/${encodeURIComponent(username)}`);
-      if (response.data.available) {
+      // Backend returns { success: true, data: { available: boolean } }
+      const isAvailable = response.data.data?.available;
+      if (isAvailable) {
         setUsernameStatus('available');
         setUsernameError('');
       } else {
         setUsernameStatus('taken');
-        setUsernameError(response.data.error || t('auth.register.usernameTaken'));
+        setUsernameError(response.data.data?.error || t('auth.register.usernameTaken'));
       }
     } catch {
       setUsernameStatus('error');
