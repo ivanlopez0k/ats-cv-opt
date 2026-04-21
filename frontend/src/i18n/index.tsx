@@ -245,6 +245,19 @@ const es: TranslationContent = {
     },
     stats: {
       title: "Mis Estadísticas",
+      subtitle: "Resumen de tu actividad en CVMaster",
+      cards: {
+        total: "Total CVs",
+        completed: "Completados",
+        processing: "En proceso",
+        failed: "Fallidos",
+        publicCount: "Públicos",
+        privateCount: "Privados",
+        avgScore: "Score promedio",
+        totalVotes: "Votos recibidos",
+        suffix: "pts"
+      },
+      latestCv: "último CV subido",
       total: "Total CVs",
       completed: "Completados",
       processing: "En proceso",
@@ -698,6 +711,19 @@ const en: TranslationContent = {
     },
     stats: {
       title: "My Statistics",
+      subtitle: "Summary of your activity on CVMaster",
+      cards: {
+        total: "Total CVs",
+        completed: "Completed",
+        processing: "Processing",
+        failed: "Failed",
+        publicCount: "Public",
+        privateCount: "Private",
+        avgScore: "Avg score",
+        totalVotes: "Votes received",
+        suffix: "pts"
+      },
+      latestCv: "latest CV uploaded",
       total: "Total CVs",
       completed: "Completed",
       processing: "Processing",

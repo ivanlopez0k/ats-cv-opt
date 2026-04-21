@@ -6,6 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { DashboardHeader } from '@/components/features/dashboard/DashboardHeader';
 import apiClient from '@/lib/api';
 import { useAuthStore } from '@/lib/stores/authStore';
+import { useI18n } from '@/i18n';
 
 interface Stats {
   total: number;
@@ -19,19 +20,20 @@ interface Stats {
   latestCVDate: string | null;
 }
 
-const statCards: Array<{key: string; label: string; icon: React.ElementType; color: string; suffix?: string}> = [
-  { key: 'total', label: 'Total CVs', icon: FileText, color: 'text-blue-500' },
-  { key: 'completed', label: 'Completados', icon: CheckCircle, color: 'text-emerald-500' },
-  { key: 'processing', label: 'En proceso', icon: Clock, color: 'text-yellow-500' },
-  { key: 'failed', label: 'Fallidos', icon: XCircle, color: 'text-red-500' },
-  { key: 'publicCount', label: 'Públicos', icon: Globe, color: 'text-purple-500' },
-  { key: 'privateCount', label: 'Privados', icon: Lock, color: 'text-gray-500' },
-  { key: 'avgScore', label: 'Score promedio', icon: TrendingUp, color: 'text-orange-500', suffix: 'pts' },
-  { key: 'totalVotes', label: 'Votos recibidos', icon: ThumbsUp, color: 'text-pink-500' },
-];
-
 export default function StatsPage() {
   const { user } = useAuthStore();
+  const { t } = useI18n();
+
+  const statCards = [
+    { key: 'total', label: t('dashboard.stats.cards.total'), icon: FileText, color: 'text-blue-500' },
+    { key: 'completed', label: t('dashboard.stats.cards.completed'), icon: CheckCircle, color: 'text-emerald-500' },
+    { key: 'processing', label: t('dashboard.stats.cards.processing'), icon: Clock, color: 'text-yellow-500' },
+    { key: 'failed', label: t('dashboard.stats.cards.failed'), icon: XCircle, color: 'text-red-500' },
+    { key: 'publicCount', label: t('dashboard.stats.cards.publicCount'), icon: Globe, color: 'text-purple-500' },
+    { key: 'privateCount', label: t('dashboard.stats.cards.privateCount'), icon: Lock, color: 'text-gray-500' },
+    { key: 'avgScore', label: t('dashboard.stats.cards.avgScore'), icon: TrendingUp, color: 'text-orange-500', suffix: t('dashboard.stats.cards.suffix') },
+    { key: 'totalVotes', label: t('dashboard.stats.cards.totalVotes'), icon: ThumbsUp, color: 'text-pink-500' },
+  ];
 
   const { data, isLoading } = useQuery({
     queryKey: ['cv-stats'],
@@ -63,9 +65,9 @@ export default function StatsPage() {
     <div className="min-h-screen">
       <DashboardHeader />
       <main className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-2 text-foreground">Mis Estadísticas</h1>
+        <h1 className="text-3xl font-bold mb-2 text-foreground">{t('dashboard.stats.title')}</h1>
         <p className="text-muted-foreground mb-8">
-          Resumen de tu actividad en CVMaster
+          {t('dashboard.stats.subtitle')}
         </p>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -95,7 +97,7 @@ export default function StatsPage() {
             <CardHeader>
               <CardTitle className="text-lg text-foreground flex items-center gap-2">
                 <Calendar className="h-5 w-5" />
-                último CV subido
+                {t('dashboard.stats.latestCv')}
               </CardTitle>
             </CardHeader>
             <CardContent>
