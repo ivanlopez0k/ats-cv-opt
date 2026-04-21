@@ -27,8 +27,6 @@ export const cvController = {
     const userId = req.user?.userId;
     const file = req.file;
     const isMock = req.query.mock === 'true';
-    // Auto-mock if no OpenAI key configured
-    const hasOpenAI = config.openai?.apiKey && config.openai.apiKey.startsWith('sk-');
 
     if (!userId) {
       res.status(401).json({ success: false, error: 'No autenticado' });
@@ -36,11 +34,13 @@ export const cvController = {
     }
 
     // MOCK MODE: Return a demo CV without calling AI
-    // Or auto-mock if no OpenAI key is configured
-    const shouldMock = isMock || !config.openai?.apiKey || !config.openai.apiKey.startsWith('sk-');
+    // Or auto-mock if no valid OpenAI key is configured
+    const apiKey = config.openai?.apiKey;
+    const hasValidOpenAI = apiKey && apiKey.trim().startsWith('sk-');
+    const shouldMock = isMock || !hasValidOpenAI;
     if (shouldMock) {
       const mockCV = await cvService.createMock(userId, req.body);
-      createdResponse(res, mockCV, config.openai?.apiKey ? 'CV de demo (test)' : 'CV creado (sin OpenAI - modo demo)');
+      createdResponse(res, mockCV, hasValidOpenAI ? 'CV de demo (test)' : 'CV creado (sin OpenAI - modo demo)');
       return;
     }
 
