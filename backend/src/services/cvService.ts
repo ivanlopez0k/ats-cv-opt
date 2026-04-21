@@ -73,33 +73,41 @@ export const cvService = {
       : Boolean(data.isPublic);
     
     // Create a mock CV with fake URLs and completed status (no AI processing)
+    // Use a real publicly available PDF for demo purposes
+    const demoPdfUrl = 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf';
+    
     const mockCV = await prisma.cV.create({
       data: {
         userId,
         title: data.title || 'CV de Demo',
-        originalPdfUrl: 'https://res.cloudinary.com/demo/sample.pdf',
-        improvedPdfUrl: 'https://res.cloudinary.com/demo/sample-improved.pdf',
+        originalPdfUrl: demoPdfUrl,
+        improvedPdfUrl: demoPdfUrl,
         targetJob: data.targetJob || 'Desarrollador Full Stack',
         targetIndustry: data.targetIndustry || 'Tecnología',
         isPublic: isPublicBool,
         template: data.template || 'MODERN',
         status: 'COMPLETED',
-        atsScore: 85,
         analysisResult: {
           score: 85,
+          issues: ['Falta experiencia con microservices', 'Falta AWS en habilidades'],
           missingKeywords: ['microservices', 'AWS'],
           suggestions: ['Agregar experiencia con Microservices', 'Añadir AWS en habilidades'],
         },
         improvedJson: {
           summary: 'Desarrollador Full Stack con 5 años de experiencia...',
+          personalInfo: { name: 'Agustina Lopez', email: 'agustina@demo.com' },
           experience: [
             {
+              title: 'Desarrollador Full Stack',
               company: 'Empresa Demo',
-              position: 'Desarrollador Full Stack',
-              period: '2020 - Presente',
-              description: 'Desarrollo de aplicaciones web...',
+              duration: '2020 - Presente',
+              achievements: ['Desarrollo de aplicaciones web'],
             },
           ],
+          education: [
+            { degree: 'Licenciatura en Sistemas', institution: 'Universidad Demo', year: '2019' },
+          ],
+          skills: ['JavaScript', 'TypeScript', 'React', 'Node.js'],
         },
       },
     });

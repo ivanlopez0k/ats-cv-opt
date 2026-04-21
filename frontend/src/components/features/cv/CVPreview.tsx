@@ -52,24 +52,23 @@ export function CVPreview({ cvId, userId, improvedHtmlUrl, improvedPdfUrl }: CVP
     }
   }, [showPreview, improvedHtmlUrl, htmlContent]);
 
-  if (!improvedHtmlUrl && !improvedPdfUrl) {
+  // Show even without URLs - allow manual download if CV exists
+  if (!cvId) {
     return null;
   }
 
   return (
     <div className="space-y-4">
-      {/* Action buttons */}
+      {/* Action buttons - always show if CV exists */}
       <div className="flex gap-3">
-        {improvedHtmlUrl && (
-          <Button
-            variant="outline"
-            className="border-border text-foreground hover:bg-secondary"
-            onClick={() => setShowPreview(!showPreview)}
-          >
-            <Eye className="mr-2 h-4 w-4" />
-            {showPreview ? 'Ocultar preview' : 'Ver preview'}
-          </Button>
-        )}
+        <Button
+          variant="outline"
+          className="border-border text-foreground hover:bg-secondary"
+          onClick={() => setShowPreview(!showPreview)}
+        >
+          <Eye className="mr-2 h-4 w-4" />
+          {showPreview ? 'Ocultar preview' : 'Ver preview'}
+        </Button>
         {improvedPdfUrl && (
           <a href={improvedPdfUrl} target="_blank" rel="noopener noreferrer">
             <Button className="bg-foreground text-background font-medium hover:bg-foreground/90">
@@ -77,10 +76,15 @@ export function CVPreview({ cvId, userId, improvedHtmlUrl, improvedPdfUrl }: CVP
             </Button>
           </a>
         )}
+        {!improvedPdfUrl && (
+          <Button disabled className="opacity-50 cursor-not-allowed">
+            <Download className="mr-2 h-4 w-4" /> PDF no disponible
+          </Button>
+        )}
       </div>
 
-      {/* HTML Preview */}
-      {showPreview && improvedHtmlUrl && (
+      {/* HTML Preview - show message if no HTML URL */}
+      {showPreview && (
         <Card className="bg-card overflow-hidden">
           <CardHeader className="pb-3">
             <CardTitle className="text-foreground flex items-center gap-2">
@@ -91,25 +95,42 @@ export function CVPreview({ cvId, userId, improvedHtmlUrl, improvedPdfUrl }: CVP
             </CardDescription>
           </CardHeader>
           <CardContent className="p-0">
-            {loading ? (
-              <div className="flex items-center justify-center h-[800px]">
-                <div className="text-center">
-                  <Loader2 className="h-8 w-8 text-muted-foreground animate-spin mx-auto mb-3" />
-                  <p className="text-muted-foreground text-sm">Cargando preview...</p>
+            {improvedHtmlUrl ? (
+              loading ? (
+                <div className="flex items-center justify-center h-[800px]">
+                  <div className="text-center">
+                    <Loader2 className="h-8 w-8 text-muted-foreground animate-spin mx-auto mb-3" />
+                    <p className="text-muted-foreground text-sm">Cargando preview...</p>
+                  </div>
                 </div>
-              </div>
-            ) : htmlContent ? (
-              <div className="w-full h-[800px] bg-white">
-                <iframe
-                  srcDoc={htmlContent}
-                  className="w-full h-full border-0"
-                  title="CV Preview"
-                  sandbox="allow-same-origin allow-scripts"
-                />
-              </div>
+              ) : htmlContent ? (
+                <div className="w-full h-[800px] bg-white">
+                  <iframe
+                    srcDoc={htmlContent}
+                    className="w-full h-full border-0"
+                    title="CV Preview"
+                    sandbox="allow-same-origin allow-scripts"
+                  />
+                </div>
+              ) : (
+                <div className="flex items-center justify-center h-[800px]">
+                  <p className="text-muted-foreground text-sm">No se pudo cargar el preview</p>
+                </div>
+              )
             ) : (
-              <div className="flex items-center justify-center h-[800px]">
-                <p className="text-muted-foreground text-sm">No se pudo cargar el preview</p>
+              <div className="flex flex-col items-center justify-center h-[800px] p-8 text-center">
+                <FileText className="h-16 w-16 text-muted-foreground mb-4" />
+                <p className="text-muted-foreground text-lg mb-2">Vista previa no disponible</p>
+                <p className="text-muted-foreground text-sm">
+                  El CV aún está siendo procesado o no hay una versión HTML disponible.
+                </p>
+                {improvedPdfUrl && (
+                  <a href={improvedPdfUrl} target="_blank" rel="noopener noreferrer">
+                    <Button className="mt-4">
+                      <Download className="mr-2 h-4 w-4" /> Descargar PDF
+                    </Button>
+                  </a>
+                )}
               </div>
             )}
           </CardContent>

@@ -248,7 +248,7 @@ export default function CVDetailPage({ params }: { params: Promise<{ id: string 
                 href={`${process.env.NEXT_PUBLIC_API_URL}/cvs/${cv.id}/export?format=pdf`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center px-3 py-2 text-sm font-medium text-foreground border border-border rounded-lg hover:bg-secondary transition-colors bg-foreground text-background hover:bg-foreground/90"
+                className="inline-flex items-center px-3 py-2 text-sm font-medium text-foreground border border-border rounded-lg hover:bg-secondary transition-colors"
               >
                 <Download className="mr-2 h-4 w-4" /> {t('cvDetail.downloadPdf')}
               </a>
@@ -302,8 +302,8 @@ export default function CVDetailPage({ params }: { params: Promise<{ id: string 
         {/* Completed state */}
         {cv.status === 'COMPLETED' && cv.analysisResult && (
           <div className="space-y-6">
-            {/* Preview section */}
-            {improvedHtmlUrl && user && (
+            {/* Preview section - always show if CV exists */}
+            {user && (
               <CVPreview
                 cvId={cv.id}
                 userId={user.id}
