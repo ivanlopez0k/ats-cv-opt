@@ -6,9 +6,10 @@ import { config } from '../src/config/index.js';
 // ============================================================
 
 // Ensure we're using a test database (or at least warn)
-if (!config.database.url.includes('test') && config.nodeEnv !== 'test') {
+const dbUrl = config.database?.url || process.env.DATABASE_URL || '';
+if (!dbUrl.includes('test') && config.nodeEnv !== 'test') {
   console.warn('⚠️  WARNING: Running tests against non-test database!');
-  console.warn(`   Database URL: ${config.database.url}`);
+  console.warn(`   Database URL: ${dbUrl}`);
 }
 
 // ============================================================
