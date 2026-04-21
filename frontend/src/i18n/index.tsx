@@ -125,6 +125,85 @@ const es: TranslationContent = {
         completed: "Listo",
         failed: "Fallido"
       },
+      uploadDialog: {
+        experienceLevels: {
+          junior: "Junior / Trainee",
+          mid: "Semi-Senior",
+          senior: "Senior",
+          lead: "Lead / Manager"
+        },
+        optimizationFocuses: {
+          technical: "Experiencia técnica",
+          soft: "Habilidades blandas",
+          both: "Ambas",
+          careerChange: "Cambio de carrera"
+        },
+        title: {
+          uploading: "Procesando tu CV...",
+          step1: "Subí tu CV",
+          step2: "Contexto para la IA"
+        },
+        description: {
+          uploading: "La IA está analizando y optimizando tu CV",
+          step1: "Arrastrá tu CV en PDF o seleccionalo",
+          step2: "Respondé para que la IA optimice mejor"
+        },
+        dropzone: {
+          clickToSelect: "Hacé click para",
+          selectPdf: "seleccionar tu PDF",
+          maxSize: "Máximo 10MB"
+        },
+        title: {
+          label: "Título *",
+          placeholder: "Ej: Mi CV — Desarrollador Full Stack"
+        },
+        next: "Siguiente",
+        step2: {
+          changeFile: "Cambiar",
+          targetJob: {
+            label: "¿A qué puesto querés aplicar? *",
+            placeholder: "Ej: Desarrollador Full Stack"
+          },
+          targetCompany: {
+            label: "¿A qué empresa?",
+            optional: "(opcional)",
+            placeholder: "Ej: Google, MercadoLibre"
+          },
+          industry: {
+            label: "Industria",
+            optional: "(opcional)",
+            selectPlaceholder: "Seleccionar..."
+          },
+          experienceLevel: {
+            label: "Nivel de experiencia *"
+          },
+          optimizationFocus: {
+            label: "Enfoque de optimización"
+          },
+          additionalNotes: {
+            label: "Notas adicionales",
+            optional: "(opcional)",
+            placeholder: "Ej: Destacar experiencia en React..."
+          },
+          shareCommunity: "Compartir en la comunidad"
+        },
+        back: "Volver",
+        submit: "Analizar con IA",
+        toasts: {
+          invalidFile: "Solo se aceptaan archivos PDF",
+          fileTooBig: "El archivo debe ser menor a 10MB",
+          missingFields: "Subí un archivo PDF y poné un título",
+          missingTargetJob: "Decí a qué puesto querés aplicar",
+          uploadSuccess: "¡CV subido! La IA lo está analizando...",
+          uploadError: "Error al subir el CV"
+        },
+        trigger: "Subir CV"
+      },
+      status: {
+        processing: "Procesando",
+        completed: "Listo",
+        failed: "Fallido"
+      },
       visibility: {
         public: "Público",
         private: "Privado"
@@ -494,6 +573,85 @@ const en: TranslationContent = {
     manageCvs: "Manage your resumes",
     newCv: "New CV",
     cvList: {
+      status: {
+        processing: "Processing",
+        completed: "Done",
+        failed: "Failed"
+      },
+      uploadDialog: {
+        experienceLevels: {
+          junior: "Junior / Trainee",
+          mid: "Mid-Level",
+          senior: "Senior",
+          lead: "Lead / Manager"
+        },
+        optimizationFocuses: {
+          technical: "Technical experience",
+          soft: "Soft skills",
+          both: "Both",
+          careerChange: "Career change"
+        },
+        title: {
+          uploading: "Processing your CV...",
+          step1: "Upload your CV",
+          step2: "AI Context"
+        },
+        description: {
+          uploading: "The AI is analyzing and optimizing your CV",
+          step1: "Drag and drop your PDF or select it",
+          step2: "Answer so the AI can optimize better"
+        },
+        dropzone: {
+          clickToSelect: "Click to",
+          selectPdf: "select your PDF",
+          maxSize: "Max 10MB"
+        },
+        title: {
+          label: "Title *",
+          placeholder: "Ex: My CV — Full Stack Developer"
+        },
+        next: "Next",
+        step2: {
+          changeFile: "Change",
+          targetJob: {
+            label: "What position are you applying for? *",
+            placeholder: "Ex: Full Stack Developer"
+          },
+          targetCompany: {
+            label: "What company?",
+            optional: "(optional)",
+            placeholder: "Ex: Google, MercadoLibre"
+          },
+          industry: {
+            label: "Industry",
+            optional: "(optional)",
+            selectPlaceholder: "Select..."
+          },
+          experienceLevel: {
+            label: "Experience level *"
+          },
+          optimizationFocus: {
+            label: "Optimization focus"
+          },
+          additionalNotes: {
+            label: "Additional notes",
+            optional: "(optional)",
+            placeholder: "Ex: Highlight React experience..."
+          },
+          shareCommunity: "Share with community"
+        },
+        back: "Back",
+        submit: "Analyze with AI",
+        toasts: {
+          invalidFile: "Only PDF files are accepted",
+          fileTooBig: "File must be less than 10MB",
+          missingFields: "Upload a PDF file and add a title",
+          missingTargetJob: "Tell us what position you're applying for",
+          uploadSuccess: "CV uploaded! AI is analyzing it...",
+          uploadError: "Error uploading CV"
+        },
+        trigger: "Upload CV"
+      },
       status: {
         processing: "Processing",
         completed: "Done",
