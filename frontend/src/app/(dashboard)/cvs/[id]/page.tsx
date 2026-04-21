@@ -18,8 +18,10 @@ import apiClient from '@/lib/api';
 import { toast } from 'sonner';
 import type { CV } from '@/lib/types';
 import { useAuthStore } from '@/lib/stores/authStore';
+import { useI18n } from '@/i18n';
 
 export default function CVDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { t } = useI18n();
   const { id } = use(params);
   const router = useRouter();
   const { user } = useAuthStore();
@@ -40,9 +42,9 @@ export default function CVDetailPage({ params }: { params: Promise<{ id: string 
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cv', id] });
-      toast.success(cv?.isPublic ? 'CV vuelto privado' : 'CV compartido con la comunidad');
+      toast.success(cv?.isPublic ? t('cvDetail.toasts.madePrivate') : t('cvDetail.toasts.shared'));
     },
-    onError: () => toast.error('Error al actualizar'),
+    onError: () => toast.error(t('cvDetail.toasts.updateError')),
   });
 
   const deleteMutation = useMutation({
@@ -50,10 +52,10 @@ export default function CVDetailPage({ params }: { params: Promise<{ id: string 
       return apiClient.delete(`/cvs/${id}`);
     },
     onSuccess: () => {
-      toast.success('CV eliminado');
+      toast.success(t('cvDetail.toasts.deleted'));
       router.push('/dashboard');
     },
-    onError: () => toast.error('Error al eliminar el CV'),
+    onError: () => toast.error(t('cvDetail.toasts.deleteError')),
   });
 
   const reanalyzeMutation = useMutation({
@@ -68,9 +70,9 @@ export default function CVDetailPage({ params }: { params: Promise<{ id: string 
       });
       // Also invalidate to trigger refetch
       queryClient.invalidateQueries({ queryKey: ['cv', id] });
-      toast.success('Re-análisis iniciado. La IA está trabajando en tu CV...');
+      toast.success(t('cvDetail.toasts.reanalyzeStarted'));
     },
-    onError: () => toast.error('Error al iniciar re-análisis'),
+    onError: () => toast.error(t('cvDetail.toasts.reanalyzeError')),
   });
 
   // SSE for real-time updates when CV is processing
@@ -127,9 +129,9 @@ export default function CVDetailPage({ params }: { params: Promise<{ id: string 
 
         // Show toast based on status
         if (data.status === 'COMPLETED') {
-          toast.success('Tu CV está listo!');
+          toast.success(t('cvDetail.toasts.cvReady'));
         } else if (data.status === 'FAILED') {
-          toast.error(data.message || 'Error al procesar el CV');
+          toast.error(data.message || t('cvDetail.toasts.processingError'));
         }
       });
 
@@ -178,7 +180,7 @@ export default function CVDetailPage({ params }: { params: Promise<{ id: string 
         <DashboardHeader />
         <main className="container mx-auto px-4 py-8">
           <Card className="bg-card">
-            <CardContent className="py-12 text-center text-muted-foreground">CV no encontrado</CardContent>
+            <CardContent className="py-12 text-center text-muted-foreground">{t('cvDetail.notFound')}</CardContent>
           </Card>
         </main>
       </div>
@@ -186,9 +188,9 @@ export default function CVDetailPage({ params }: { params: Promise<{ id: string 
   }
 
   const statusConfig = {
-    PROCESSING: { icon: Clock, color: 'text-yellow-500', bg: 'bg-yellow-500/10', text: 'Procesando...' },
-    COMPLETED: { icon: CheckCircle, color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-500/10', text: 'Completado' },
-    FAILED: { icon: XCircle, color: 'text-destructive', bg: 'bg-destructive/10', text: 'Fallido' },
+    PROCESSING: { icon: Clock, color: 'text-yellow-500', bg: 'bg-yellow-500/10', text: t('cvDetail.processing') },
+    COMPLETED: { icon: CheckCircle, color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-500/10', text: t('cvDetail.completed') },
+    FAILED: { icon: XCircle, color: 'text-destructive', bg: 'bg-destructive/10', text: t('cvDetail.failed') },
   };
   const status = statusConfig[cv.status as keyof typeof statusConfig];
 
@@ -201,7 +203,7 @@ export default function CVDetailPage({ params }: { params: Promise<{ id: string 
       <DashboardHeader />
       <main className="container mx-auto px-4 py-8">
         <Link href="/dashboard" className="inline-flex items-center text-muted-foreground hover:text-foreground mb-6 transition-colors">
-          <ArrowLeft className="mr-2 h-4 w-4" /> Volver
+          <ArrowLeft className="mr-2 h-4 w-4" /> {t('cvDetail.back')}
         </Link>
 
         {/* Header */}
@@ -227,9 +229,9 @@ export default function CVDetailPage({ params }: { params: Promise<{ id: string 
                 disabled={togglePublicMutation.isPending}
               >
                 {cv.isPublic ? (
-                  <><Lock className="mr-1 h-3 w-3" /> Volver privado</>
+                  <><Lock className="mr-1 h-3 w-3" /> {t('cvDetail.makePrivate')}</>
                 ) : (
-                  <><Globe className="mr-1 h-3 w-3" /> Compartir</>
+                  <><Globe className="mr-1 h-3 w-3" /> {t('cvDetail.share')}</>
                 )}
               </Button>
             )}
@@ -239,7 +241,7 @@ export default function CVDetailPage({ params }: { params: Promise<{ id: string 
               rel="noopener noreferrer"
               className="inline-flex items-center px-3 py-2 text-sm font-medium text-foreground border-border rounded-lg hover:bg-secondary transition-colors"
             >
-              <FileText className="mr-2 h-4 w-4" /> Original
+              <FileText className="mr-2 h-4 w-4" /> {t('cvDetail.original')}
             </a>
             {improvedPdfUrl && (
               <a
@@ -248,7 +250,7 @@ export default function CVDetailPage({ params }: { params: Promise<{ id: string 
                 rel="noopener noreferrer"
                 className="inline-flex items-center px-3 py-2 text-sm font-medium text-foreground border border-border rounded-lg hover:bg-secondary transition-colors bg-foreground text-background hover:bg-foreground/90"
               >
-                <Download className="mr-2 h-4 w-4" /> Descargar PDF
+                <Download className="mr-2 h-4 w-4" /> {t('cvDetail.downloadPdf')}
               </a>
             )}
             <Button
@@ -275,9 +277,9 @@ export default function CVDetailPage({ params }: { params: Promise<{ id: string 
               disabled={reanalyzeMutation.isPending}
             >
               {reanalyzeMutation.isPending ? (
-                <><RefreshCw className="mr-2 h-4 w-4 animate-spin" />Re-analizando...</>
+                <><RefreshCw className="mr-2 h-4 w-4 animate-spin" />{t('cvDetail.reanalizing')}</>
               ) : (
-                <><Sparkles className="mr-2 h-4 w-4" />Re-analizar con IA</>
+                <><Sparkles className="mr-2 h-4 w-4" />{t('cvDetail.reanalyze')}</>
               )}
             </Button>
           </div>
@@ -290,8 +292,8 @@ export default function CVDetailPage({ params }: { params: Promise<{ id: string 
               <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full ${status.bg} mb-4`}>
                 <Clock className={`h-8 w-8 ${status.color}`} />
               </div>
-              <h2 className="text-xl font-semibold mb-2 text-foreground">Procesando</h2>
-              <p className="text-muted-foreground">La IA está analizando y optimizando tu CV...</p>
+              <h2 className="text-xl font-semibold mb-2 text-foreground">{t('cvDetail.processing')}</h2>
+              <p className="text-muted-foreground">{t('cvDetail.processingCv')}</p>
               <Progress value={66} className="max-w-md mx-auto mt-4" />
             </CardContent>
           </Card>
@@ -314,13 +316,13 @@ export default function CVDetailPage({ params }: { params: Promise<{ id: string 
             <Tabs defaultValue="analysis" className="space-y-6">
               <TabsList className="bg-card border border-border">
                 <TabsTrigger value="context" className="text-foreground data-[state=active]:bg-foreground data-[state=active]:text-background">
-                  Contexto
+                  {t('cvDetail.tabs.context')}
                 </TabsTrigger>
                 <TabsTrigger value="analysis" className="text-foreground data-[state=active]:bg-foreground data-[state=active]:text-background">
-                  Análisis ATS
+                  {t('cvDetail.tabs.analysis')}
                 </TabsTrigger>
                 <TabsTrigger value="suggestions" className="text-foreground data-[state=active]:bg-foreground data-[state=active]:text-background">
-                  Sugerencias
+                  {t('cvDetail.tabs.suggestions')}
                 </TabsTrigger>
               </TabsList>
 
@@ -328,9 +330,9 @@ export default function CVDetailPage({ params }: { params: Promise<{ id: string 
               <TabsContent value="context">
                 <Card className="bg-card">
                   <CardHeader>
-                    <CardTitle className="text-foreground">Contexto de la IA</CardTitle>
+                    <CardTitle className="text-foreground">{t('cvDetail.contextTitle')}</CardTitle>
                     <CardDescription className="text-muted-foreground">
-                      Respuestas que usó la IA para optimizar tu CV
+                      {t('cvDetail.contextDesc')}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -339,22 +341,22 @@ export default function CVDetailPage({ params }: { params: Promise<{ id: string 
                         {Object.entries((cv as any).contextAnswers).map(([key, value]) => {
                           if (!value || key === 'targetJob' || key === 'targetIndustry') return null;
                           const labels: Record<string, string> = {
-                            targetCompany: 'Empresa objetivo',
-                            experienceLevel: 'Nivel de experiencia',
-                            optimizationFocus: 'Enfoque de optimización',
-                            additionalNotes: 'Notas adicionales',
+                            targetCompany: t('cvDetail.labels.targetCompany'),
+                            experienceLevel: t('cvDetail.labels.experienceLevel'),
+                            optimizationFocus: t('cvDetail.labels.optimizationFocus'),
+                            additionalNotes: t('cvDetail.labels.additionalNotes'),
                           };
                           const levelLabels: Record<string, string> = {
-                            junior: 'Junior / Trainee',
-                            mid: 'Semi-Senior',
-                            senior: 'Senior',
-                            lead: 'Lead / Manager',
+                            junior: t('cvDetail.levels.junior'),
+                            mid: t('cvDetail.levels.mid'),
+                            senior: t('cvDetail.levels.senior'),
+                            lead: t('cvDetail.levels.lead'),
                           };
                           const focusLabels: Record<string, string> = {
-                            technical: 'Experiencia técnica',
-                            soft: 'Habilidades blandas',
-                            both: 'Ambas',
-                            'career-change': 'Cambio de carrera',
+                            technical: t('cvDetail.focuses.technical'),
+                            soft: t('cvDetail.focuses.soft'),
+                            both: t('cvDetail.focuses.both'),
+                            'career-change': t('cvDetail.focuses.careerChange'),
                           };
                           let displayValue = value as string;
                           if (key === 'experienceLevel') displayValue = levelLabels[displayValue] || displayValue;
@@ -370,7 +372,7 @@ export default function CVDetailPage({ params }: { params: Promise<{ id: string 
                         })}
                       </div>
                     ) : (
-                      <p className="text-muted-foreground">No se proporcionó contexto adicional para este CV.</p>
+                      <p className="text-muted-foreground">{t('cvDetail.noContext')}</p>
                     )}
                   </CardContent>
                 </Card>
@@ -380,9 +382,9 @@ export default function CVDetailPage({ params }: { params: Promise<{ id: string 
               <TabsContent value="analysis">
                 <Card className="bg-card">
                   <CardHeader>
-                    <CardTitle className="text-foreground">Puntuación ATS</CardTitle>
+                    <CardTitle className="text-foreground">{t('cvDetail.atsScore')}</CardTitle>
                     <CardDescription className="text-muted-foreground">
-                      Qué tan bien está optimizado tu CV para sistemas ATS
+                      {t('cvDetail.atsScoreDesc')}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -404,7 +406,7 @@ export default function CVDetailPage({ params }: { params: Promise<{ id: string 
                     </div>
                     {cv.analysisResult.missingKeywords.length > 0 && (
                       <div className="mt-4">
-                        <h3 className="font-semibold mb-2 text-foreground">Keywords faltantes</h3>
+                        <h3 className="font-semibold mb-2 text-foreground">{t('cvDetail.missingKeywords')}</h3>
                         <div className="flex flex-wrap gap-2">
                           {cv.analysisResult.missingKeywords.map((kw, i) => (
                             <Badge key={i} variant="outline" className="border-border text-foreground">
@@ -422,7 +424,7 @@ export default function CVDetailPage({ params }: { params: Promise<{ id: string 
               <TabsContent value="suggestions">
                 <Card className="bg-card">
                   <CardHeader>
-                    <CardTitle className="text-foreground">Sugerencias de mejora</CardTitle>
+                    <CardTitle className="text-foreground">{t('cvDetail.suggestionsTitle')}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
@@ -459,9 +461,9 @@ export default function CVDetailPage({ params }: { params: Promise<{ id: string 
               <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full ${status.bg} mb-4`}>
                 <XCircle className={`h-8 w-8 ${status.color}`} />
               </div>
-              <h2 className="text-xl font-semibold mb-2 text-foreground">Error al procesar</h2>
+              <h2 className="text-xl font-semibold mb-2 text-foreground">{t('cvDetail.errorProcessing')}</h2>
               <p className="text-muted-foreground mb-4">
-                {(cv.analysisResult as any)?.error || 'Ocurrió un error al procesar tu CV'}
+                {(cv.analysisResult as any)?.error || t('cvDetail.errorMessage')}
               </p>
               <Button
                 variant="default"
@@ -471,9 +473,9 @@ export default function CVDetailPage({ params }: { params: Promise<{ id: string 
                 disabled={reanalyzeMutation.isPending}
               >
                 {reanalyzeMutation.isPending ? (
-                  <><RefreshCw className="mr-2 h-4 w-4 animate-spin" />Reintentando...</>
+                  <><RefreshCw className="mr-2 h-4 w-4 animate-spin" />{t('cvDetail.retrying')}</>
                 ) : (
-                  <><RefreshCw className="mr-2 h-4 w-4" />Reintentar</>
+                  <><RefreshCw className="mr-2 h-4 w-4" />{t('cvDetail.retry')}</>
                 )}
               </Button>
             </CardContent>
@@ -486,10 +488,10 @@ export default function CVDetailPage({ params }: { params: Promise<{ id: string 
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2 text-destructive">
                 <AlertTriangle className="h-5 w-5" />
-                Eliminar CV
+                {t('cvDetail.deleteCv')}
               </DialogTitle>
               <DialogDescription>
-                ¿Estás seguro de que querés eliminar <strong>"{cv.title}"</strong>? Esta acción no se puede deshacer.
+                {t('cvDetail.deleteConfirm')} <strong>"{cv.title}"</strong>{t('cvDetail.deleteConfirmEnd')}
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
@@ -498,14 +500,14 @@ export default function CVDetailPage({ params }: { params: Promise<{ id: string 
                 onClick={() => setShowDeleteDialog(false)}
                 disabled={deleteMutation.isPending}
               >
-                Cancelar
+                {t('cvDetail.cancel')}
               </Button>
               <Button
                 variant="destructive"
                 onClick={() => deleteMutation.mutate()}
                 disabled={deleteMutation.isPending}
               >
-                {deleteMutation.isPending ? 'Eliminando...' : 'Eliminar'}
+                {deleteMutation.isPending ? t('cvDetail.deleting') : t('cvDetail.delete')}
               </Button>
             </DialogFooter>
           </DialogContent>

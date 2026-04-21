@@ -472,6 +472,72 @@ const es: TranslationContent = {
       resendError: "Error al reenviar email"
     }
   },
+  cvDetail: {
+    notFound: "CV no encontrado",
+    processing: "Procesando...",
+    completed: "Completado",
+    failed: "Fallido",
+    analyzing: "Analizando...",
+    errorProcessing: "Error al procesar",
+    errorMessage: "Ocurrió un error al procesar tu CV",
+    retry: "Reintentar",
+    reanalizing: "Reanalizando...",
+    reanalyze: "Re-analizar con IA",
+    retrying: "Reintentando...",
+    deleteCv: "Eliminar CV",
+    deleteConfirm: "¿Estás seguro de que querés eliminar",
+    deleteConfirmEnd: "? Esta acción no se puede deshacer.",
+    cancel: "Cancelar",
+    deleting: "Eliminando...",
+    delete: "Eliminar",
+    back: "Volver",
+    makePrivate: "Volver privado",
+    share: "Compartir",
+    original: "Original",
+    downloadPdf: "Descargar PDF",
+    processingCv: "La IA está analizando y optimizando tu CV...",
+    tabs: {
+      context: "Contexto",
+      analysis: "Análisis ATS",
+      suggestions: "Sugerencias"
+    },
+    atsScore: "Puntuación ATS",
+    atsScoreDesc: "Qué tan bien está optimizado tu CV para sistemas ATS",
+    missingKeywords: "Keywords faltantes",
+    suggestionsTitle: "Sugerencias de mejora",
+    contextTitle: "Contexto de la IA",
+    contextDesc: "Respuestas que usó la IA para optimizar tu CV",
+    noContext: "No se proporcionó contexto adicional para este CV.",
+    toasts: {
+      madePrivate: "CV vuelto privado",
+      shared: "CV compartido con la comunidad",
+      updateError: "Error al actualizar",
+      deleted: "CV eliminado",
+      deleteError: "Error al eliminar el CV",
+      reanalyzeStarted: "Re-análisis iniciado. La IA está trabajando en tu CV...",
+      reanalyzeError: "Error al iniciar re-análisis",
+      cvReady: "¡Tu CV está listo!",
+      processingError: "Error al procesar el CV"
+    },
+    labels: {
+      targetCompany: "Empresa objetivo",
+      experienceLevel: "Nivel de experiencia",
+      optimizationFocus: "Enfoque de optimización",
+      additionalNotes: "Notas adicionales"
+    },
+    levels: {
+      junior: "Junior / Trainee",
+      mid: "Semi-Senior",
+      senior: "Senior",
+      lead: "Lead / Manager"
+    },
+    focuses: {
+      technical: "Experiencia técnica",
+      soft: "Habilidades blandas",
+      both: "Ambas",
+      careerChange: "Cambio de carrera"
+    }
+  },
   community: {
     title: "Comunidad",
     subtitle: "Descubre los mejores CVs",
@@ -973,6 +1039,72 @@ const en: TranslationContent = {
       invalidToken: "Invalid or expired token",
       resendSuccess: "Verification email resent. Check your inbox.",
       resendError: "Error resending email"
+    }
+  },
+  cvDetail: {
+    notFound: "CV not found",
+    processing: "Processing...",
+    completed: "Completed",
+    failed: "Failed",
+    analyzing: "Analyzing...",
+    errorProcessing: "Processing error",
+    errorMessage: "An error occurred while processing your CV",
+    retry: "Retry",
+    reanalizing: "Reanalyzing...",
+    reanalyze: "Re-analyze with AI",
+    retrying: "Retrying...",
+    deleteCv: "Delete CV",
+    deleteConfirm: "Are you sure you want to delete",
+    deleteConfirmEnd: "? This action cannot be undone.",
+    cancel: "Cancel",
+    deleting: "Deleting...",
+    delete: "Delete",
+    back: "Back",
+    makePrivate: "Make private",
+    share: "Share",
+    original: "Original",
+    downloadPdf: "Download PDF",
+    processingCv: "The AI is analyzing and optimizing your CV...",
+    tabs: {
+      context: "Context",
+      analysis: "ATS Analysis",
+      suggestions: "Suggestions"
+    },
+    atsScore: "ATS Score",
+    atsScoreDesc: "How well your CV is optimized for ATS systems",
+    missingKeywords: "Missing keywords",
+    suggestionsTitle: "Improvement suggestions",
+    contextTitle: "AI Context",
+    contextDesc: "Answers the AI used to optimize your CV",
+    noContext: "No additional context was provided for this CV.",
+    toasts: {
+      madePrivate: "CV made private",
+      shared: "CV shared with the community",
+      updateError: "Error updating",
+      deleted: "CV deleted",
+      deleteError: "Error deleting the CV",
+      reanalyzeStarted: "Re-analysis started. AI is working on your CV...",
+      reanalyzeError: "Error starting re-analysis",
+      cvReady: "Your CV is ready!",
+      processingError: "Error processing the CV"
+    },
+    labels: {
+      targetCompany: "Target company",
+      experienceLevel: "Experience level",
+      optimizationFocus: "Optimization focus",
+      additionalNotes: "Additional notes"
+    },
+    levels: {
+      junior: "Junior / Trainee",
+      mid: "Mid-Level",
+      senior: "Senior",
+      lead: "Lead / Manager"
+    },
+    focuses: {
+      technical: "Technical experience",
+      soft: "Soft skills",
+      both: "Both",
+      careerChange: "Career change"
     }
   },
   community: {
