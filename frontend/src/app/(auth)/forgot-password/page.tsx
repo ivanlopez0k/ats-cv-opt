@@ -53,7 +53,7 @@ export default function ForgotPasswordPage() {
             <p className="text-sm text-muted-foreground text-center">
               {t('auth.forgotPassword.submitted.note')}
             </p>
-            <Link href="/auth/login">
+            <Link href="/login">
               <Button className="w-full" variant="outline">
                 <ArrowLeft className="mr-2 h-4 w-4" /> {t('auth.forgotPassword.submitted.backToLogin')}
               </Button>
@@ -101,7 +101,7 @@ export default function ForgotPasswordPage() {
                 </>
               )}
             </Button>
-            <Link href="/auth/login" className="block">
+            <Link href="/login" className="block">
               <Button type="button" variant="ghost" className="w-full">
                 <ArrowLeft className="mr-2 h-4 w-4" /> {t('auth.common.back')}
               </Button>

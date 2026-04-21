@@ -24,7 +24,7 @@ export default function ResetPasswordPage() {
   useEffect(() => {
     if (!token) {
       toast.error('Token de reset inválido');
-      router.push('/auth/forgot-password');
+      router.push('/forgot-password');
       return;
     }
     setIsValidToken(true);
@@ -50,7 +50,7 @@ export default function ResetPasswordPage() {
         newPassword,
       });
       toast.success('Contraseña actualizada exitosamente');
-      router.push('/auth/login');
+      router.push('/login');
     } catch (error: any) {
       toast.error(error.response?.data?.error || 'Error al resetear contraseña');
     } finally {
