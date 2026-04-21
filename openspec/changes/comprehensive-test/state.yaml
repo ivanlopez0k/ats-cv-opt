@@ -1,0 +1,41 @@
+name: comprehensive-test
+created: 2026-04-21
+description: Testeo comprehensivo y profundo de toda la app — funcionalidad + UX/UI
+
+execution_mode: interactive
+artifact_store_mode: openspec
+
+phases_completed:
+  - explore
+  - propose
+  - spec
+
+phases_in_progress:
+  - apply
+
+phases_pending:
+  - verify
+  - archive
+
+scope:
+  - Landing page (hero, features, FAQ, CTA, dark mode)
+  - Auth (register → verify → login → forgot → reset)
+  - Upload CV (upload → process → result)
+  - Community (browse, search, vote)
+  - Dashboard (stats, settings, deleted CVs)
+
+progress:
+  features_section: COMPLETE
+  faq_section: COMPLETE
+  cvupload_form: IN_PROGRESS (componente reescrito, FALTAN keys en i18n)
+  backend_logging: PENDING
+  manual_testing: PENDING
+
+notes: |
+  Me trabé en un loop al intentar agregar ~50 keys de CVUploadForm al i18n provider.
+  componente CVUploadForm.tsx ya migrado a usar t() pero las keys no existen en i18n.
+  
+  Quedó en: agregar las cvUpload keys al i18n provider (frontend/src/i18n/index.tsx)
+  + Fix backend console.* → logger.* en notifications.ts
+
+last_commit: NONE (no se hizo commit por trabarse en las keys)

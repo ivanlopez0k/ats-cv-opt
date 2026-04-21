@@ -71,6 +71,11 @@ const es: TranslationContent = {
     },
     features: {
       title: "Por qué CVMaster",
+      subtitle: {
+        highlight: "destacar",
+        desc: "Herramientas poderosas para optimizar tu CV y conseguir más entrevistas"
+      },
+      header: "Todo lo que necesitás para",
       items: {
         ats: {
           title: "Optimizado para ATS",
@@ -87,20 +92,29 @@ const es: TranslationContent = {
         templates: {
           title: "Múltiples templates",
           description: "Elegí el diseño que mejor se adapte a tu industria"
+        },
+        community: {
+          title: "Comunidad de CVs",
+          description: "Explorá CVs exitosos de otros usuarios, votá los mejores y aprendé de lo que realmente funciona."
+        },
+        privacy: {
+          title: "Privacidad Total",
+          description: "Tus datos están seguros. Podés elegir si compartir tu CV con la comunidad o mantenerlo privado."
         }
       }
     },
     faq: {
       title: "Preguntas frecuentes",
+      subtitle: "Todo lo que necesitás saber sobre CVMaster y los ATS",
       questions: {
-        q1: "Cuánto tiempo tarda el análisis?",
-        a1: "El análisis con IA tarda entre 30 segundos y 2 minutos dependiendo de la carga del servidor.",
-        q2: "Qué es ATS?",
-        a2: "ATS son las siglas de Applicant Tracking System, software que las empresas usan para filtrar candidatos.",
-        q3: "Es seguro subir mi CV?",
-        a3: "Sí, tus datos están seguros. No compartimos tu información con terceros.",
-        q4: "Cuántos CVs puedo subir?",
-        a4: "Podés subir CVs ilimitados en la versión gratuita!"
+        q1: "¿Qué es un ATS y por qué importa?",
+        q1Desc: "Un ATS (Applicant Tracking System) es el software que usan las empresas para filtrar CVs automáticamente. Más del 75% de los CVs nunca son vistos por un humano porque el ATS los descarta. Optimizar tu CV para ATS es fundamental para llegar a una entrevista.",
+        q2: "¿Cómo funciona la optimización con IA?",
+        q2Desc: "Subís tu CV en PDF, indicás el puesto al que querés aplicar, y nuestra IA analiza el texto, identifica gaps de keywords, reestructura el contenido con verbos de acción, agrega métricas y optimiza el formato para que pase los filtros ATS.",
+        q3: "¿Mis datos están seguros?",
+        q3Desc: "Sí. Tu CV se procesa de forma segura y nunca compartimos tu información sin tu consentimiento. Podés elegir mantener tu CV privado o compartirlo anónimamente con la comunidad.",
+        q4: "¿Es gratis?",
+        q4Desc: "Sí, podés optimizar tu primer CV completamente gratis. No necesitas tarjeta de crédito ni compromiso."
       }
     },
     cta: {
@@ -682,6 +696,93 @@ cvDetail: {
       register: "Crear cuenta"
     },
     dashboard: "Mi Dashboard"
+  },
+  cvUpload: {
+    step1: {
+      title: "Subí tu CV",
+      description: "Arrastrá tu CV en PDF o seleccionálo",
+      remove: "Quitar",
+      dropzone: {
+        dragText: "Arrastrá tu CV acá o",
+        browseText: "buscá en tu computadora",
+        maxSize: "Máximo 10MB"
+      },
+      titleLabel: "Título del CV *",
+      titlePlaceholder: "Ej: Mi CV — Desarrollador Full Stack",
+      continue: "Continuar"
+    },
+    step2: {
+      title: "Contexto para la IA",
+      description: "Respondé estas preguntas para que la IA optimice mejor tu CV",
+      stepIndicator: "Paso 2 de 3",
+      change: "Cambiar",
+      targetJob: "¿A qué puesto querés aplicar?",
+      targetJobPlaceholder: "Ej: Desarrollador Full Stack",
+      targetCompany: "¿A qué empresa?",
+      targetCompanyPlaceholder: "Ej: Google, MercadoLibre",
+      industry: "Industria",
+      industrySelect: "Seleccionar industria...",
+      experienceLevelLabel: "¿Cuál es tu nivel de experiencia?",
+      experienceLevelDesc: "Nivel de experiencia",
+      experienceLevel: {
+        junior: "Junior / Trainee",
+        juniorDesc: "0-2 años de experiencia",
+        mid: "Semi-Senior",
+        midDesc: "2-5 años de experiencia",
+        senior: "Senior",
+        seniorDesc: "5-10 años de experiencia",
+        lead: "Lead / Manager",
+        leadDesc: "10+ años o gestión de equipos"
+      },
+      optimizationFocusLabel: "¿Qué querés destacar en tu CV?",
+      optimizationFocus: {
+        technical: "Experiencia técnica",
+        technicalDesc: "Destacar habilidades técnicas y proyectos",
+        soft: "Habilidades blandas",
+        softDesc: "Liderazgo, comunicación, trabajo en equipo",
+        both: "Ambas",
+        bothDesc: "Balance entre técnica y habilidades blandas",
+        careerChange: "Cambio de carrera",
+        careerChangeDesc: "Transición a un nuevo rol o industria"
+      },
+      additionalNotes: "Notas adicionales",
+      additionalNotesPlaceholder: "Ej: Quiero que destaque más mi experiencia en liderazgo...",
+      optional: "(opcional)",
+      back: "Volver",
+      continue: "Continuar"
+    },
+    step3: {
+      title: "Elegí tu plantilla",
+      description: "Elegí el estilo que más te guste",
+      stepIndicator: "Paso 3 de 3",
+      change: "Cambiar",
+      templateStyle: "¿Qué estilo preferís?",
+      template: {
+        modern: "Moderno",
+        modernIcon: "💎",
+        modernDesc: "Diseño profesional",
+        classic: "Clásico",
+        classicIcon: "📋",
+        classicDesc: "Estilo tradicional",
+        minimal: "Minimalista",
+        minimalIcon: "⚪",
+        minimalDesc: "Limpio y moderno"
+      },
+      back: "Volver",
+      submit: "Analizar con IA"
+    },
+    uploading: {
+      titleUploading: "Subiendo tu CV...",
+      titleComplete: "¡CV subido!",
+      subtitleUploading: "Esto puede tomar unos momentos",
+      subtitleProcessing: "La IA está analizando y optimizando tu CV"
+    },
+    toasts: {
+      invalidFile: "Solo se aceptan archivos PDF",
+      fileTooBig: "El archivo debe ser menor a 10MB",
+      uploadSuccess: "¡CV subido! La IA lo está analizando...",
+      uploadError: "Error al subir el CV"
+    }
   }
 };
 
@@ -740,6 +841,11 @@ const en: TranslationContent = {
     },
     features: {
       title: "Why CVMaster",
+      subtitle: {
+        highlight: "stand out",
+        desc: "Powerful tools to optimize your CV and get more interviews"
+      },
+      header: "Everything you need to",
       items: {
         ats: {
           title: "ATS Optimized",
@@ -756,20 +862,29 @@ const en: TranslationContent = {
         templates: {
           title: "Multiple Templates",
           description: "Choose the design that best fits your industry"
+        },
+        community: {
+          title: "CV Community",
+          description: "Explore successful CVs from other users, vote for the best, and learn from what really works."
+        },
+        privacy: {
+          title: "Total Privacy",
+          description: "Your data is safe. You can choose to share your CV with the community or keep it private."
         }
       }
     },
     faq: {
       title: "Frequently asked questions",
+      subtitle: "Everything you need to know about CVMaster and ATS",
       questions: {
-        q1: "How long does the analysis take?",
-        a1: "AI analysis takes between 30 seconds and 2 minutes depending on server load.",
-        q2: "What is ATS?",
-        a2: "ATS stands for Applicant Tracking System, software companies use to filter candidates.",
-        q3: "Is it safe to upload my CV?",
-        a3: "Yes, your data is safe. We don't share your information with third parties.",
-        q4: "How many CVs can I upload?",
-        a4: "You can upload unlimited CVs in the free version!"
+        q1: "What is an ATS and why does it matter?",
+        q1Desc: "An ATS (Applicant Tracking System) is the software companies use to filter CVs automatically. More than 75% of CVs are never seen by a human because the ATS discards them. Optimizing your CV for ATS is essential to get an interview.",
+        q2: "How does AI optimization work?",
+        q2Desc: "You upload your CV in PDF, specify the position you're applying for, and our AI analyzes the text, identifies keyword gaps, restructures the content with action verbs, adds metrics, and optimizes the format to pass ATS filters.",
+        q3: "Is my data safe?",
+        q3Desc: "Yes. Your CV is processed securely and we never share your information without consent. You can choose to keep your CV private or share it anonymously with the community.",
+        q4: "Is it free?",
+        q4Desc: "Yes, you can optimize your first CV completely free. No credit card or commitment required."
       }
     },
     cta: {
@@ -1351,6 +1466,93 @@ const en: TranslationContent = {
       register: "Sign up"
     },
     dashboard: "My Dashboard"
+  },
+  cvUpload: {
+    step1: {
+      title: "Upload your CV",
+      description: "Drag and drop your PDF or select it",
+      remove: "Remove",
+      dropzone: {
+        dragText: "Drag your CV here or",
+        browseText: "browse on your computer",
+        maxSize: "Max 10MB"
+      },
+      titleLabel: "CV Title *",
+      titlePlaceholder: "Ex: My CV — Full Stack Developer",
+      continue: "Continue"
+    },
+    step2: {
+      title: "AI Context",
+      description: "Answer these questions so the AI can better optimize your CV",
+      stepIndicator: "Step 2 of 3",
+      change: "Change",
+      targetJob: "What position are you applying for?",
+      targetJobPlaceholder: "Ex: Full Stack Developer",
+      targetCompany: "What company?",
+      targetCompanyPlaceholder: "Ex: Google, MercadoLibre",
+      industry: "Industry",
+      industrySelect: "Select industry...",
+      experienceLevelLabel: "What is your experience level?",
+      experienceLevelDesc: "Experience level",
+      experienceLevel: {
+        junior: "Junior / Trainee",
+        juniorDesc: "0-2 years of experience",
+        mid: "Mid-Level",
+        midDesc: "2-5 years of experience",
+        senior: "Senior",
+        seniorDesc: "5-10 years of experience",
+        lead: "Lead / Manager",
+        leadDesc: "10+ years or team management"
+      },
+      optimizationFocusLabel: "What do you want to highlight?",
+      optimizationFocus: {
+        technical: "Technical experience",
+        technicalDesc: "Highlight technical skills and projects",
+        soft: "Soft skills",
+        softDesc: "Leadership, communication, teamwork",
+        both: "Both",
+        bothDesc: "Balance between technical and soft skills",
+        careerChange: "Career change",
+        careerChangeDesc: "Transition to a new role or industry"
+      },
+      additionalNotes: "Additional notes",
+      additionalNotesPlaceholder: "Ex: I want you to highlight my leadership experience...",
+      optional: "(optional)",
+      back: "Back",
+      continue: "Continue"
+    },
+    step3: {
+      title: "Choose your template",
+      description: "Choose the style you prefer",
+      stepIndicator: "Step 3 of 3",
+      change: "Change",
+      templateStyle: "What style do you prefer?",
+      template: {
+        modern: "Modern",
+        modernIcon: "💎",
+        modernDesc: "Professional design",
+        classic: "Classic",
+        classicIcon: "📋",
+        classicDesc: "Traditional style",
+        minimal: "Minimalist",
+        minimalIcon: "⚪",
+        minimalDesc: "Clean and modern"
+      },
+      back: "Back",
+      submit: "Analyze with AI"
+    },
+    uploading: {
+      titleUploading: "Uploading your CV...",
+      titleComplete: "CV uploaded!",
+      subtitleUploading: "This may take a few moments",
+      subtitleProcessing: "The AI is analyzing and optimizing your CV"
+    },
+    toasts: {
+      invalidFile: "Only PDF files are accepted",
+      fileTooBig: "File must be less than 10MB",
+      uploadSuccess: "CV uploaded! AI is analyzing it...",
+      uploadError: "Error uploading CV"
+    }
   }
 };
 

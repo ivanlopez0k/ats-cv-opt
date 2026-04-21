@@ -11,6 +11,7 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import apiClient from '@/lib/api';
 import { toast } from 'sonner';
+import { useI18n } from '@/i18n';
 
 const INDUSTRIES = [
   'Tecnología / Software',
@@ -30,25 +31,9 @@ const INDUSTRIES = [
   'Otro',
 ];
 
-const EXPERIENCE_LEVELS = [
-  { value: 'junior', label: 'Junior / Trainee', desc: '0-2 años de experiencia' },
-  { value: 'mid', label: 'Semi-Senior', desc: '2-5 años de experiencia' },
-  { value: 'senior', label: 'Senior', desc: '5-10 años de experiencia' },
-  { value: 'lead', label: 'Lead / Manager', desc: '10+ años o gestión de equipos' },
-];
-
-const OPTIMIZATION_FOCUSES = [
-  { value: 'technical', label: 'Experiencia técnica', icon: '💻', desc: 'Destacar habilidades técnicas y proyectos' },
-  { value: 'soft', label: 'Habilidades blandas', icon: '🤝', desc: 'Liderazgo, comunicación, trabajo en equipo' },
-  { value: 'both', label: 'Ambas', icon: '⚡', desc: 'Balance entre técnica y habilidades blandas' },
-  { value: 'career-change', label: 'Cambio de carrera', icon: '🔄', desc: 'Transición a un nuevo rol o industria' },
-];
-
-const TEMPLATES = [
-  { value: 'MODERN', label: 'Moderno', desc: 'Diseño profesional de dos columnas', preview: '💙' },
-  { value: 'CLASSIC', label: 'Clásico', desc: 'Estilo tradicional y elegante', preview: '📋' },
-  { value: 'MINIMAL', label: 'Minimalista', desc: 'Limpio y moderno', preview: '⚪' },
-];
+const EXPERIENCE_KEYS = ['junior', 'mid', 'senior', 'lead'];
+const FOCUS_KEYS = ['technical', 'soft', 'both', 'careerChange'];
+const TEMPLATE_KEYS = ['modern', 'classic', 'minimal'];
 
 type Step = 'upload' | 'context' | 'template' | 'uploading';
 
@@ -63,6 +48,7 @@ interface ContextAnswers {
 
 export function CVUploadForm() {
   const router = useRouter();
+  const { t } = useI18n();
   const [step, setStep] = useState<Step>('upload');
   const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState('');
@@ -82,12 +68,12 @@ export function CVUploadForm() {
   const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
-      if (selectedFile.type !== 'application/pdf') { toast.error('Solo se aceptan archivos PDF'); return; }
-      if (selectedFile.size > 10 * 1024 * 1024) { toast.error('El archivo debe ser menor a 10MB'); return; }
+      if (selectedFile.type !== 'application/pdf') { toast.error(t('cvUpload.toasts.invalidFile')); return; }
+      if (selectedFile.size > 10 * 1024 * 1024) { toast.error(t('cvUpload.toasts.fileTooBig')); return; }
       setFile(selectedFile);
       if (!title) setTitle(selectedFile.name.replace('.pdf', ''));
     }
-  }, [title]);
+  }, [title, t]);
 
   const handleDragEnter = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -98,7 +84,6 @@ export function CVUploadForm() {
   const handleDragLeave = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    // Solo resetear si no hay elementos hijos (evitar flicker)
     if (e.currentTarget && !e.currentTarget.contains(e.relatedTarget as Node)) {
       setIsDragOver(false);
     }
@@ -114,19 +99,18 @@ export function CVUploadForm() {
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    // Also prevent native browser behavior
     if (e.nativeEvent) {
       e.nativeEvent.preventDefault();
     }
     setIsDragOver(false);
     const droppedFile = e.dataTransfer.files?.[0];
     if (droppedFile) {
-      if (droppedFile.type !== 'application/pdf') { toast.error('Solo se aceptan archivos PDF'); return; }
-      if (droppedFile.size > 10 * 1024 * 1024) { toast.error('El archivo debe ser menor a 10MB'); return; }
+      if (droppedFile.type !== 'application/pdf') { toast.error(t('cvUpload.toasts.invalidFile')); return; }
+      if (droppedFile.size > 10 * 1024 * 1024) { toast.error(t('cvUpload.toasts.fileTooBig')); return; }
       setFile(droppedFile);
       if (!title) setTitle(droppedFile.name.replace('.pdf', ''));
     }
-  }, [title]);
+  }, [title, t]);
 
   const canProceedToContext = file && title.trim().length > 0;
   const canSubmit = context.targetJob.trim().length > 0 && context.experienceLevel.length > 0;
@@ -150,10 +134,10 @@ export function CVUploadForm() {
           if (progressEvent.total) setUploadProgress(Math.round((progressEvent.loaded * 100) / progressEvent.total));
         },
       });
-      toast.success('¡CV subido! La IA lo está analizando...');
+      toast.success(t('cvUpload.toasts.uploadSuccess'));
       router.push('/dashboard');
     } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Error al subir el CV');
+      toast.error(error.response?.data?.error || t('cvUpload.toasts.uploadError'));
       setStep('context');
     }
   };
@@ -165,8 +149,8 @@ export function CVUploadForm() {
     return (
       <Card className="glass-card">
         <CardHeader>
-          <CardTitle className="text-white text-2xl">Subí tu CV</CardTitle>
-          <CardDescription className="text-gray-400">Arrastrá tu CV en PDF o seleccionalo manualmente</CardDescription>
+          <CardTitle className="text-white text-2xl">{t('cvUpload.step1.title')}</CardTitle>
+          <CardDescription className="text-gray-400">{t('cvUpload.step1.description')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Drop Zone */}
@@ -186,50 +170,50 @@ export function CVUploadForm() {
             >
               <input type="file" accept=".pdf" onChange={handleFileChange} className="hidden" id="file-upload" />
 
-            {file ? (
-              <div className="flex flex-col items-center gap-3">
-                <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center">
-                  <FileText className="h-8 w-8 text-green-400" />
+              {file ? (
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center">
+                    <FileText className="h-8 w-8 text-green-400" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-white text-lg">{file.name}</p>
+                    <p className="text-sm text-gray-400">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="text-gray-400 hover:text-white mt-1"
+                    onClick={(e) => { e.stopPropagation(); setFile(null); setTitle(''); }}
+                  >
+                    <X className="h-4 w-4 mr-1" /> {t('cvUpload.step1.remove')}
+                  </Button>
                 </div>
-                <div>
-                  <p className="font-medium text-white text-lg">{file.name}</p>
-                  <p className="text-sm text-gray-400">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+              ) : (
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center">
+                    <Upload className="h-8 w-8 text-gray-500" />
+                  </div>
+                  <div>
+                    <p className="text-gray-300">
+                      {t('cvUpload.step1.dropzone.dragText')} <span className="text-white font-medium underline">{t('cvUpload.step1.dropzone.browseText')}</span>
+                    </p>
+                    <p className="text-sm text-gray-500 mt-1">{t('cvUpload.step1.dropzone.maxSize')}</p>
+                  </div>
                 </div>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="text-gray-400 hover:text-white mt-1"
-                  onClick={(e) => { e.stopPropagation(); setFile(null); setTitle(''); }}
-                >
-                  <X className="h-4 w-4 mr-1" /> Quitar
-                </Button>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center gap-3">
-                <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center">
-                  <Upload className="h-8 w-8 text-gray-500" />
-                </div>
-                <div>
-                  <p className="text-gray-300">
-                    Arrastrá tu CV acá o <span className="text-white font-medium underline">buscá en tu computadora</span>
-                  </p>
-                  <p className="text-sm text-gray-500 mt-1">Solo PDF — máximo 10MB</p>
-                </div>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
           </label>
 
           {/* Title */}
           {file && (
             <div className="space-y-2">
-              <Label htmlFor="title" className="text-white">Título del CV *</Label>
+              <Label htmlFor="title" className="text-white">{t('cvUpload.step1.titleLabel')}</Label>
               <Input
                 id="title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="Ej: Mi CV — Desarrollador Full Stack"
+                placeholder={t('cvUpload.step1.titlePlaceholder')}
                 className="bg-black/40 border-white/10 text-white placeholder:text-gray-500"
               />
             </div>
@@ -241,7 +225,7 @@ export function CVUploadForm() {
             disabled={!canProceedToContext}
             onClick={() => setStep('context')}
           >
-            Continuar <ArrowRight className="ml-2 h-5 w-5" />
+            {t('cvUpload.step1.continue')} <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
         </CardContent>
       </Card>
@@ -257,11 +241,11 @@ export function CVUploadForm() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-white text-2xl">Contexto para la IA</CardTitle>
-              <CardDescription className="text-gray-400">Respondé estas preguntas para que la IA optimice mejor tu CV</CardDescription>
+              <CardTitle className="text-white text-2xl">{t('cvUpload.step2.title')}</CardTitle>
+              <CardDescription className="text-gray-400">{t('cvUpload.step2.description')}</CardDescription>
             </div>
             <Badge variant="secondary" className="bg-white/10 text-white border-white/10">
-              <Sparkles className="h-3 w-3 mr-1" /> Paso 2 de 3
+              <Sparkles className="h-3 w-3 mr-1" /> {t('cvUpload.step2.stepIndicator')}
             </Badge>
           </div>
         </CardHeader>
@@ -274,20 +258,20 @@ export function CVUploadForm() {
               <p className="text-xs text-gray-500">{file ? (file.size / 1024 / 1024).toFixed(2) : '0'} MB</p>
             </div>
             <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white shrink-0" onClick={() => setStep('upload')}>
-              Cambiar
+              {t('cvUpload.step2.change')}
             </Button>
           </div>
 
-          {/* Q1: Target Job (required) */}
+          {/* Q1: Target Job */}
           <div className="space-y-2">
             <Label className="text-white flex items-center gap-2">
               <Briefcase className="h-4 w-4 text-gray-400" />
-              ¿A qué puesto querés aplicar? *
+              {t('cvUpload.step2.targetJob')}
             </Label>
             <Input
               value={context.targetJob}
               onChange={(e) => setContext(prev => ({ ...prev, targetJob: e.target.value }))}
-              placeholder="Ej: Desarrollador Full Stack, Data Scientist, Product Manager"
+              placeholder={t('cvUpload.step2.targetJobPlaceholder')}
               className="bg-black/40 border-white/10 text-white placeholder:text-gray-500"
             />
           </div>
@@ -296,12 +280,12 @@ export function CVUploadForm() {
           <div className="space-y-2">
             <Label className="text-white flex items-center gap-2">
               <Building2 className="h-4 w-4 text-gray-400" />
-              ¿A qué empresa va dirigido? <span className="text-gray-500 font-normal">(opcional)</span>
+              {t('cvUpload.step2.targetCompany')} <span className="text-gray-500 font-normal">{t('cvUpload.step2.optional')}</span>
             </Label>
             <Input
               value={context.targetCompany}
               onChange={(e) => setContext(prev => ({ ...prev, targetCompany: e.target.value }))}
-              placeholder="Ej: Google, MercadoLibre, Accenture"
+              placeholder={t('cvUpload.step2.targetCompanyPlaceholder')}
               className="bg-black/40 border-white/10 text-white placeholder:text-gray-500"
             />
           </div>
@@ -310,14 +294,14 @@ export function CVUploadForm() {
           <div className="space-y-2">
             <Label className="text-white flex items-center gap-2">
               <Target className="h-4 w-4 text-gray-400" />
-              ¿A qué industria/sector pertenece? <span className="text-gray-500 font-normal">(opcional)</span>
+              {t('cvUpload.step2.industry')} <span className="text-gray-500 font-normal">{t('cvUpload.step2.optional')}</span>
             </Label>
             <select
               value={context.targetIndustry}
               onChange={(e) => setContext(prev => ({ ...prev, targetIndustry: e.target.value }))}
               className="flex h-10 w-full rounded-md border border-white/10 bg-black/40 px-3 py-2 text-sm text-white shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30"
             >
-              <option value="" className="bg-black">Seleccionar industria...</option>
+              <option value="" className="bg-black">{t('cvUpload.step2.industrySelect')}</option>
               {INDUSTRIES.map((ind) => (
                 <option key={ind} value={ind} className="bg-black">{ind}</option>
               ))}
@@ -328,22 +312,22 @@ export function CVUploadForm() {
           <div className="space-y-3">
             <Label className="text-white flex items-center gap-2">
               <FileQuestion className="h-4 w-4 text-gray-400" />
-              ¿Cuál es tu nivel de experiencia? *
+              {t('cvUpload.step2.experienceLevelLabel')}
             </Label>
             <div className="grid grid-cols-2 gap-3">
-              {EXPERIENCE_LEVELS.map((level) => (
+              {EXPERIENCE_KEYS.map((key) => (
                 <button
-                  key={level.value}
+                  key={key}
                   type="button"
-                  onClick={() => setContext(prev => ({ ...prev, experienceLevel: level.value }))}
+                  onClick={() => setContext(prev => ({ ...prev, experienceLevel: key }))}
                   className={`p-3 rounded-lg border text-left transition-all ${
-                    context.experienceLevel === level.value
+                    context.experienceLevel === key
                       ? 'border-white/40 bg-white/10 shadow-md'
                       : 'border-white/10 bg-black/20 hover:bg-white/5'
                   }`}
                 >
-                  <p className="text-sm font-medium text-white">{level.label}</p>
-                  <p className="text-xs text-gray-400">{level.desc}</p>
+                  <p className="text-sm font-medium text-white">{t(`cvUpload.step2.experienceLevel.${key}`)}</p>
+                  <p className="text-xs text-gray-400">{t(`cvUpload.step2.experienceLevel.${key}Desc`)}</p>
                 </button>
               ))}
             </div>
@@ -353,22 +337,22 @@ export function CVUploadForm() {
           <div className="space-y-3">
             <Label className="text-white flex items-center gap-2">
               <Lightbulb className="h-4 w-4 text-gray-400" />
-              ¿Qué querés destacar en tu CV?
+              {t('cvUpload.step2.optimizationFocusLabel')}
             </Label>
             <div className="grid grid-cols-2 gap-3">
-              {OPTIMIZATION_FOCUSES.map((focus) => (
+              {FOCUS_KEYS.map((key) => (
                 <button
-                  key={focus.value}
+                  key={key}
                   type="button"
-                  onClick={() => setContext(prev => ({ ...prev, optimizationFocus: focus.value }))}
+                  onClick={() => setContext(prev => ({ ...prev, optimizationFocus: key }))}
                   className={`p-3 rounded-lg border text-left transition-all ${
-                    context.optimizationFocus === focus.value
+                    context.optimizationFocus === key
                       ? 'border-white/40 bg-white/10 shadow-md'
                       : 'border-white/10 bg-black/20 hover:bg-white/5'
                   }`}
                 >
-                  <p className="text-sm font-medium text-white">{focus.icon} {focus.label}</p>
-                  <p className="text-xs text-gray-400">{focus.desc}</p>
+                  <p className="text-sm font-medium text-white">{t(`cvUpload.step2.optimizationFocus.${key}`)}</p>
+                  <p className="text-xs text-gray-400">{t(`cvUpload.step2.optimizationFocus.${key}Desc`)}</p>
                 </button>
               ))}
             </div>
@@ -378,12 +362,12 @@ export function CVUploadForm() {
           <div className="space-y-2">
             <Label className="text-white flex items-center gap-2">
               <FileQuestion className="h-4 w-4 text-gray-400" />
-              ¿Hay algo específico que quieras mejorar? <span className="text-gray-500 font-normal">(opcional)</span>
+              {t('cvUpload.step2.additionalNotes')} <span className="text-gray-500 font-normal">{t('cvUpload.step2.optional')}</span>
             </Label>
             <textarea
               value={context.additionalNotes}
               onChange={(e) => setContext(prev => ({ ...prev, additionalNotes: e.target.value }))}
-              placeholder="Ej: Quiero que destaque más mi experiencia en liderazgo de equipos, o que agregue keywords de React y Node.js..."
+              placeholder={t('cvUpload.step2.additionalNotesPlaceholder')}
               rows={3}
               className="flex w-full rounded-md border border-white/10 bg-black/40 px-3 py-2 text-sm text-white placeholder:text-gray-500 shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/30 resize-none"
             />
@@ -396,14 +380,14 @@ export function CVUploadForm() {
               className="flex-1 text-white hover:bg-white/10 h-12"
               onClick={() => setStep('upload')}
             >
-              <ArrowLeft className="mr-2 h-5 w-5" /> Volver
+              <ArrowLeft className="mr-2 h-5 w-5" /> {t('cvUpload.step2.back')}
             </Button>
             <Button
               className="flex-[2] bg-white text-black font-semibold hover:bg-gray-200 shadow-lg shadow-white/10 h-12 text-base"
               disabled={!canSubmit}
               onClick={() => setStep('template')}
             >
-              Continuar <ArrowRight className="ml-2 h-5 w-5" />
+              {t('cvUpload.step2.continue')} <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           </div>
         </CardContent>
@@ -420,11 +404,11 @@ export function CVUploadForm() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-white text-2xl">Elegí tu plantilla</CardTitle>
-              <CardDescription className="text-gray-400">Seleccioná el estilo visual para tu CV mejorado</CardDescription>
+              <CardTitle className="text-white text-2xl">{t('cvUpload.step3.title')}</CardTitle>
+              <CardDescription className="text-gray-400">{t('cvUpload.step3.description')}</CardDescription>
             </div>
             <Badge variant="secondary" className="bg-white/10 text-white border-white/10">
-              <Sparkles className="h-3 w-3 mr-1" /> Paso 3 de 3
+              <Sparkles className="h-3 w-3 mr-1" /> {t('cvUpload.step3.stepIndicator')}
             </Badge>
           </div>
         </CardHeader>
@@ -437,7 +421,7 @@ export function CVUploadForm() {
               <p className="text-xs text-gray-500">{title}</p>
             </div>
             <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white shrink-0" onClick={() => setStep('context')}>
-              Cambiar
+              {t('cvUpload.step3.change')}
             </Button>
           </div>
 
@@ -445,23 +429,23 @@ export function CVUploadForm() {
           <div className="space-y-3">
             <Label className="text-white flex items-center gap-2">
               <Palette className="h-4 w-4 text-gray-400" />
-              ¿Qué estilo preferís?
+              {t('cvUpload.step3.templateStyle')}
             </Label>
             <div className="grid grid-cols-3 gap-3">
-              {TEMPLATES.map((t) => (
+              {TEMPLATE_KEYS.map((key) => (
                 <button
-                  key={t.value}
+                  key={key}
                   type="button"
-                  onClick={() => setSelectedTemplate(t.value)}
+                  onClick={() => setSelectedTemplate(key.toUpperCase())}
                   className={`p-4 rounded-lg border text-center transition-all ${
-                    selectedTemplate === t.value
+                    selectedTemplate === key.toUpperCase()
                       ? 'border-white/40 bg-white/10 shadow-md'
                       : 'border-white/10 bg-black/20 hover:bg-white/5'
                   }`}
                 >
-                  <p className="text-2xl mb-2">{t.preview}</p>
-                  <p className="text-sm font-medium text-white">{t.label}</p>
-                  <p className="text-xs text-gray-400 mt-1">{t.desc}</p>
+                  <p className="text-2xl mb-2">{t(`cvUpload.step3.template.${key}Icon`)}</p>
+                  <p className="text-sm font-medium text-white">{t(`cvUpload.step3.template.${key}`)}</p>
+                  <p className="text-xs text-gray-400 mt-1">{t(`cvUpload.step3.template.${key}Desc`)}</p>
                 </button>
               ))}
             </div>
@@ -474,13 +458,13 @@ export function CVUploadForm() {
               className="flex-1 text-white hover:bg-white/10 h-12"
               onClick={() => setStep('context')}
             >
-              <ArrowLeft className="mr-2 h-5 w-5" /> Volver
+              <ArrowLeft className="mr-2 h-5 w-5" /> {t('cvUpload.step3.back')}
             </Button>
             <Button
               className="flex-[2] bg-white text-black font-semibold hover:bg-gray-200 shadow-lg shadow-white/10 h-12 text-base"
               onClick={handleSubmit}
             >
-              <Sparkles className="mr-2 h-5 w-5" /> Analizar y Mejorar con IA
+              <Sparkles className="mr-2 h-5 w-5" /> {t('cvUpload.step3.submit')}
             </Button>
           </div>
         </CardContent>
@@ -502,12 +486,10 @@ export function CVUploadForm() {
           )}
         </div>
         <h3 className="text-xl font-semibold text-white mb-2">
-          {uploadProgress >= 100 ? '¡CV subido!' : 'Subiendo tu CV...'}
+          {uploadProgress >= 100 ? t('cvUpload.uploading.titleComplete') : t('cvUpload.uploading.titleUploading')}
         </h3>
         <p className="text-gray-400 mb-6">
-          {uploadProgress >= 100
-            ? 'La IA está analizando y optimizando tu CV'
-            : 'Esto puede tomar unos momentos'}
+          {uploadProgress >= 100 ? t('cvUpload.uploading.subtitleProcessing') : t('cvUpload.uploading.subtitleUploading')}
         </p>
         <Progress value={uploadProgress} className="max-w-md mx-auto h-2" />
         <p className="text-sm text-gray-500 mt-3">{uploadProgress}%</p>
