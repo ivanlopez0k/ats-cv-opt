@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import apiClient from '@/lib/api';
 import { toast } from 'sonner';
+import { useI18n } from '@/i18n';
 
 const INDUSTRIES = [
   'Tecnología / Software',
@@ -29,17 +30,17 @@ const INDUSTRIES = [
 ];
 
 const EXPERIENCE_LEVELS = [
-  { value: 'junior', label: 'Junior / Trainee' },
-  { value: 'mid', label: 'Semi-Senior' },
-  { value: 'senior', label: 'Senior' },
-  { value: 'lead', label: 'Lead / Manager' },
+  { value: 'junior', labelKey: 'dashboard.cvList.uploadDialog.experienceLevels.junior' },
+  { value: 'mid', labelKey: 'dashboard.cvList.uploadDialog.experienceLevels.mid' },
+  { value: 'senior', labelKey: 'dashboard.cvList.uploadDialog.experienceLevels.senior' },
+  { value: 'lead', labelKey: 'dashboard.cvList.uploadDialog.experienceLevels.lead' },
 ];
 
 const OPTIMIZATION_FOCUSES = [
-  { value: 'technical', label: 'Experiencia técnica', icon: '💻' },
-  { value: 'soft', label: 'Habilidades blandas', icon: '🤝' },
-  { value: 'both', label: 'Ambas', icon: '⚡' },
-  { value: 'career-change', label: 'Cambio de carrera', icon: '🔄' },
+  { value: 'technical', labelKey: 'dashboard.cvList.uploadDialog.optimizationFocuses.technical', icon: '💻' },
+  { value: 'soft', labelKey: 'dashboard.cvList.uploadDialog.optimizationFocuses.soft', icon: '🤝' },
+  { value: 'both', labelKey: 'dashboard.cvList.uploadDialog.optimizationFocuses.both', icon: '⚡' },
+  { value: 'career-change', labelKey: 'dashboard.cvList.uploadDialog.optimizationFocuses.careerChange', icon: '🔄' },
 ];
 
 interface ContextAnswers {
@@ -53,6 +54,7 @@ interface ContextAnswers {
 
 export function CVUploadDialog({ trigger }: { trigger?: React.ReactNode }) {
   const router = useRouter();
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState<1 | 2>(1);
   const [file, setFile] = useState<File | null>(null);
@@ -73,16 +75,16 @@ export function CVUploadDialog({ trigger }: { trigger?: React.ReactNode }) {
   const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
-      if (selectedFile.type !== 'application/pdf') { toast.error('Solo se aceptan archivos PDF'); return; }
-      if (selectedFile.size > 10 * 1024 * 1024) { toast.error('El archivo debe ser menor a 10MB'); return; }
+      if (selectedFile.type !== 'application/pdf') { toast.error(t('dashboard.cvList.uploadDialog.toasts.invalidFile')); return; }
+      if (selectedFile.size > 10 * 1024 * 1024) { toast.error(t('dashboard.cvList.uploadDialog.toasts.fileTooBig')); return; }
       setFile(selectedFile);
       if (!title) setTitle(selectedFile.name.replace('.pdf', ''));
     }
-  }, [title]);
+  }, [title, t]);
 
   const handleSubmit = async () => {
-    if (!file || !title.trim()) { toast.error('Subí un archivo PDF y poné un título'); return; }
-    if (!context.targetJob.trim()) { toast.error('Decí a qué puesto querés aplicar'); return; }
+    if (!file || !title.trim()) { toast.error(t('dashboard.cvList.uploadDialog.toasts.missingFields')); return; }
+    if (!context.targetJob.trim()) { toast.error(t('dashboard.cvList.uploadDialog.toasts.missingTargetJob')); return; }
 
     setIsUploading(true);
     setUploadProgress(0);
@@ -102,12 +104,12 @@ export function CVUploadDialog({ trigger }: { trigger?: React.ReactNode }) {
           if (progressEvent.total) setUploadProgress(Math.round((progressEvent.loaded * 100) / progressEvent.total));
         },
       });
-      toast.success('¡CV subido! La IA lo está analizando...');
+      toast.success(t('dashboard.cvList.uploadDialog.toasts.uploadSuccess'));
       setOpen(false);
       router.push('/dashboard');
       router.refresh();
     } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Error al subir el CV');
+      toast.error(error.response?.data?.error || t('dashboard.cvList.uploadDialog.toasts.uploadError'));
     } finally {
       setIsUploading(false);
     }
@@ -130,21 +132,21 @@ export function CVUploadDialog({ trigger }: { trigger?: React.ReactNode }) {
       ) : (
         <DialogTrigger>
           <Button className="text-background bg-foreground font-medium hover:bg-foreground/90">
-            <Upload className="mr-2 h-4 w-4" /> Subir CV
+            <Upload className="mr-2 h-4 w-4" /> {t('dashboard.cvList.uploadDialog.trigger')}
           </Button>
         </DialogTrigger>
       )}
       <DialogContent className="max-w-xl bg-card border-border text-foreground" showCloseButton={!isUploading}>
         <DialogHeader>
           <DialogTitle className="text-xl text-foreground">
-            {isUploading ? 'Procesando tu CV...' : step === 1 ? 'Subí tu CV' : 'Contexto para la IA'}
+            {isUploading ? t('dashboard.cvList.uploadDialog.dialogTitle.uploading') : step === 1 ? t('dashboard.cvList.uploadDialog.dialogTitle.step1') : t('dashboard.cvList.uploadDialog.dialogTitle.step2')}
           </DialogTitle>
           <DialogDescription className="text-muted-foreground">
             {isUploading
-              ? 'La IA está analizando y optimizando tu CV'
+              ? t('dashboard.cvList.uploadDialog.description.uploading')
               : step === 1
-                ? 'Arrastrá tu CV en PDF o seleccionalo'
-                : 'Respondé para que la IA optimice mejor'}
+                ? t('dashboard.cvList.uploadDialog.description.step1')
+                : t('dashboard.cvList.uploadDialog.description.step2')}
           </DialogDescription>
         </DialogHeader>
 
@@ -191,21 +193,21 @@ export function CVUploadDialog({ trigger }: { trigger?: React.ReactNode }) {
                 <div>
                   <Upload className="h-8 w-8 mx-auto text-muted-foreground/70 mb-2" />
                   <p className="text-sm text-muted-foreground">
-                    Hacé click para <span className="text-foreground font-medium">seleccionar tu PDF</span>
+                    {t('dashboard.cvList.uploadDialog.dropzone.clickToSelect')} <span className="text-foreground font-medium">{t('dashboard.cvList.uploadDialog.dropzone.selectPdf')}</span>
                   </p>
-                  <p className="text-xs text-muted-foreground/70 mt-1">Máximo 10MB</p>
+                  <p className="text-xs text-muted-foreground/70 mt-1">{t('dashboard.cvList.uploadDialog.dropzone.maxSize')}</p>
                 </div>
               )}
             </div>
 
             {/* Title */}
             <div className="space-y-2">
-              <Label htmlFor="modal-title" className="text-foreground">Título *</Label>
+              <Label htmlFor="modal-title" className="text-foreground">{t('dashboard.cvList.uploadDialog.cvTitle.label')}</Label>
               <Input
                 id="modal-title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="Ej: Mi CV — Desarrollador Full Stack"
+                placeholder={t('dashboard.cvList.uploadDialog.cvTitle.placeholder')}
                 className="bg-muted/50 border-border text-foreground placeholder:text-muted-foreground"
               />
             </div>
@@ -215,7 +217,7 @@ export function CVUploadDialog({ trigger }: { trigger?: React.ReactNode }) {
               disabled={!file || !title.trim()}
               onClick={() => setStep(2)}
             >
-              Siguiente <Sparkles className="ml-2 h-4 w-4" />
+              {t('dashboard.cvList.uploadDialog.next')} <Sparkles className="ml-2 h-4 w-4" />
             </Button>
           </div>
         ) : (
@@ -227,8 +229,144 @@ export function CVUploadDialog({ trigger }: { trigger?: React.ReactNode }) {
                 <p className="text-sm text-foreground truncate">{file?.name}</p>
                 <p className="text-xs text-muted-foreground/70">{file ? (file.size / 1024 / 1024).toFixed(2) : '0'} MB</p>
               </div>
-              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground shrink-0" onClick={() => setStep(1)}>
-                Cambiar
+<Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground shrink-0" onClick={() => setStep(1)}>
+                {t('dashboard.cvList.uploadDialog.step2.changeFile')}
+              </Button>
+            </div>
+
+            {/* Puesto */}
+            <div className="space-y-2">
+              <Label className="text-foreground flex items-center gap-2">
+                <Briefcase className="h-4 w-4 text-muted-foreground" />
+                {t('dashboard.cvList.uploadDialog.step2.targetJob.label')}
+              </Label>
+              <Input
+                value={context.targetJob}
+                onChange={(e) => setContext(prev => ({ ...prev, targetJob: e.target.value }))}
+                placeholder={t('dashboard.cvList.uploadDialog.step2.targetJob.placeholder')}
+                className="bg-muted/50 border-border text-foreground placeholder:text-muted-foreground"
+              />
+            </div>
+
+            {/* Empresa */}
+            <div className="space-y-2">
+              <Label className="text-foreground flex items-center gap-2">
+                <Building2 className="h-4 w-4 text-muted-foreground" />
+                {t('dashboard.cvList.uploadDialog.step2.targetCompany.label')} <span className="text-muted-foreground/70 font-normal">{t('dashboard.cvList.uploadDialog.step2.targetCompany.optional')}</span>
+              </Label>
+              <Input
+                value={context.targetCompany}
+                onChange={(e) => setContext(prev => ({ ...prev, targetCompany: e.target.value }))}
+                placeholder={t('dashboard.cvList.uploadDialog.step2.targetCompany.placeholder')}
+                className="bg-muted/50 border-border text-foreground placeholder:text-muted-foreground"
+              />
+            </div>
+
+            {/* Industria */}
+            <div className="space-y-2">
+              <Label className="text-foreground flex items-center gap-2">
+                <Target className="h-4 w-4 text-muted-foreground" />
+                {t('dashboard.cvList.uploadDialog.step2.industry.label')} <span className="text-muted-foreground/70 font-normal">{t('dashboard.cvList.uploadDialog.step2.industry.optional')}</span>
+              </Label>
+              <select
+                value={context.targetIndustry}
+                onChange={(e) => setContext(prev => ({ ...prev, targetIndustry: e.target.value }))}
+                className="flex h-9 w-full rounded-md border border-border bg-muted/50 px-3 py-1 text-sm text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              >
+                <option value="" className="bg-background">{t('dashboard.cvList.uploadDialog.step2.industry.selectPlaceholder')}</option>
+                {INDUSTRIES.map((ind) => (
+                  <option key={ind} value={ind} className="bg-background">{ind}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* nivel */}
+            <div className="space-y-2">
+              <Label className="text-foreground flex items-center gap-2">
+                <FileQuestion className="h-4 w-4 text-muted-foreground" />
+                {t('dashboard.cvList.uploadDialog.step2.experienceLevel.label')}
+              </Label>
+              <div className="grid grid-cols-2 gap-2">
+                {EXPERIENCE_LEVELS.map((level) => (
+                  <button
+                    key={level.value}
+                    type="button"
+                    onClick={() => setContext(prev => ({ ...prev, experienceLevel: level.value }))}
+                    className={`p-2 rounded-lg border-2 text-center text-sm transition-all ${
+                      context.experienceLevel === level.value
+                        ? 'border-foreground bg-foreground/10 text-foreground font-semibold ring-1 ring-foreground/20'
+                        : 'border-border bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground'
+                    }`}
+                  >
+                    {t(level.labelKey)}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Enfoque */}
+            <div className="space-y-2">
+              <Label className="text-foreground flex items-center gap-2">
+                <Lightbulb className="h-4 w-4 text-muted-foreground" />
+                {t('dashboard.cvList.uploadDialog.step2.optimizationFocus.label')}
+              </Label>
+              <div className="grid grid-cols-2 gap-2">
+                {OPTIMIZATION_FOCUSES.map((focus) => (
+                  <button
+                    key={focus.value}
+                    type="button"
+                    onClick={() => setContext(prev => ({ ...prev, optimizationFocus: focus.value }))}
+                    className={`p-2 rounded-lg border-2 text-center text-sm transition-all ${
+                      context.optimizationFocus === focus.value
+                        ? 'border-foreground bg-foreground/10 text-foreground font-semibold ring-1 ring-foreground/20'
+                        : 'border-border bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground'
+                    }`}
+                  >
+                    {focus.icon} {t(focus.labelKey)}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Notas */}
+            <div className="space-y-2">
+              <Label className="text-foreground flex items-center gap-2">
+                <FileQuestion className="h-4 w-4 text-muted-foreground" />
+                {t('dashboard.cvList.uploadDialog.step2.additionalNotes.label')} <span className="text-muted-foreground/70 font-normal">{t('dashboard.cvList.uploadDialog.step2.additionalNotes.optional')}</span>
+              </Label>
+              <textarea
+                value={context.additionalNotes}
+                onChange={(e) => setContext(prev => ({ ...prev, additionalNotes: e.target.value }))}
+                placeholder={t('dashboard.cvList.uploadDialog.step2.additionalNotes.placeholder')}
+                rows={2}
+                className="flex w-full rounded-md border border-border bg-muted/50 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none"
+              />
+            </div>
+
+            {/* Share with community */}
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 border border-border">
+              <input
+                type="checkbox"
+                id="share-community"
+                checked={isPublic}
+                onChange={(e) => setIsPublic(e.target.checked)}
+                className="h-4 w-4 rounded border-border text-foreground focus:ring-ring focus:ring-offset-0"
+              />
+              <Label htmlFor="share-community" className="text-foreground text-sm cursor-pointer">
+                {t('dashboard.cvList.uploadDialog.step2.shareCommunity')}
+              </Label>
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <Button variant="ghost" className="flex-1 text-foreground hover:bg-muted" onClick={() => setStep(1)}>
+                {t('dashboard.cvList.uploadDialog.back')}
+              </Button>
+              <Button
+                className="flex-[2] text-background bg-foreground font-semibold hover:bg-foreground/90"
+                disabled={!context.targetJob.trim() || !context.experienceLevel}
+                onClick={handleSubmit}
+              >
+                <Sparkles className="mr-2 h-4 w-4" /> {t('dashboard.cvList.uploadDialog.submit')}
               </Button>
             </div>
 
@@ -296,7 +434,7 @@ export function CVUploadDialog({ trigger }: { trigger?: React.ReactNode }) {
                         : 'border-border bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground'
                     }`}
                   >
-                    {level.label}
+                    {t(level.labelKey)}
                   </button>
                 ))}
               </div>
@@ -306,7 +444,7 @@ export function CVUploadDialog({ trigger }: { trigger?: React.ReactNode }) {
             <div className="space-y-2">
               <Label className="text-foreground flex items-center gap-2">
                 <Lightbulb className="h-4 w-4 text-muted-foreground" />
-                Enfoque de optimización
+                {t('dashboard.cvList.uploadDialog.step2.optimizationFocus.label')}
               </Label>
               <div className="grid grid-cols-2 gap-2">
                 {OPTIMIZATION_FOCUSES.map((focus) => (
@@ -320,7 +458,7 @@ export function CVUploadDialog({ trigger }: { trigger?: React.ReactNode }) {
                         : 'border-border bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground'
                     }`}
                   >
-                    {focus.icon} {focus.label}
+                    {focus.icon} {t(focus.labelKey)}
                   </button>
                 ))}
               </div>
@@ -330,7 +468,7 @@ export function CVUploadDialog({ trigger }: { trigger?: React.ReactNode }) {
             <div className="space-y-2">
               <Label className="text-foreground flex items-center gap-2">
                 <FileQuestion className="h-4 w-4 text-muted-foreground" />
-                Notas adicionales <span className="text-muted-foreground/70 font-normal">(opcional)</span>
+                {t('dashboard.cvList.uploadDialog.step2.additionalNotes.label')} <span className="text-muted-foreground/70 font-normal">{t('dashboard.cvList.uploadDialog.step2.additionalNotes.optional')}</span>
               </Label>
               <textarea
                 value={context.additionalNotes}

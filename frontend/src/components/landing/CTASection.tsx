@@ -3,9 +3,11 @@
 import Link from 'next/link';
 import { ArrowRight, Sparkles } from 'lucide-react';
 import { useAuthStore } from '@/lib/stores/authStore';
+import { useI18n } from '@/i18n';
 
 export function CTASection() {
   const { isAuthenticated } = useAuthStore();
+  const { t } = useI18n();
 
   return (
     <section className="py-20 px-4">
@@ -15,19 +17,19 @@ export function CTASection() {
             <Sparkles className="h-8 w-8 text-foreground" />
           </div>
           <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
-            Empezá hoy
+            {t('landing.cta.title')}
           </h2>
           <p className="text-muted-foreground mb-8">
             {isAuthenticated
-              ? 'Gestioná y optimizá tus CVs desde el dashboard'
-              : 'Registrate gratis y recibí tu primer CV optimizado en minutos'}
+              ? t('landing.cta.subtitleAuth')
+              : t('landing.cta.subtitle')}
           </p>
           {isAuthenticated ? (
             <Link
               href="/dashboard"
               className="inline-flex items-center px-8 py-4 text-base font-semibold text-background bg-gradient-to-r from-foreground to-foreground/80 rounded-lg shadow-lg hover:scale-105 transition-all duration-300"
             >
-              Ir al Dashboard
+              {t('landing.hero.dashboard')}
               <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
           ) : (
@@ -35,7 +37,7 @@ export function CTASection() {
               href="/register"
               className="inline-flex items-center px-8 py-4 text-base font-semibold text-background bg-gradient-to-r from-foreground to-foreground/80 rounded-lg shadow-lg hover:scale-105 transition-all duration-300"
             >
-              Crear cuenta gratis
+              {t('landing.cta.button')}
               <ArrowRight className="ml-2 h-5 w-5" />
             </a>
           )}

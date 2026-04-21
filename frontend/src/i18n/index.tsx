@@ -106,16 +106,153 @@ const es: TranslationContent = {
     cta: {
       title: "Empezá hoy",
       subtitle: "Tu primer CV optimizado en minutos",
+      subtitleAuth: "Gestioná y optimizá tus CVs desde el dashboard",
       button: "Subir mi CV gratis"
     },
     footer: {
-      rights: "Todos los derechos reservados"
+      rights: "Todos los derechos reservados",
+      tagline: "Optimizá tu CV, conseguí más entrevistas."
     }
   },
   dashboard: {
     title: "Mi Dashboard",
+    myCvs: "Mis CVs",
+    manageCvs: "Gestiona tus currículums",
+    newCv: "Nuevo CV",
+    cvList: {
+      status: {
+        processing: "Procesando",
+        completed: "Listo",
+        failed: "Fallido"
+      },
+      uploadDialog: {
+        experienceLevels: {
+          junior: "Junior / Trainee",
+          mid: "Semi-Senior",
+          senior: "Senior",
+          lead: "Lead / Manager"
+        },
+        optimizationFocuses: {
+          technical: "Experiencia técnica",
+          soft: "Habilidades blandas",
+          both: "Ambas",
+          careerChange: "Cambio de carrera"
+        },
+        dialogTitle: {
+          uploading: "Procesando tu CV...",
+          step1: "Subí tu CV",
+          step2: "Contexto para la IA"
+        },
+        description: {
+          uploading: "La IA está analizando y optimizando tu CV",
+          step1: "Arrastrá tu CV en PDF o seleccionalo",
+          step2: "Respondé para que la IA optimice mejor"
+        },
+        dropzone: {
+          clickToSelect: "Hacé click para",
+          selectPdf: "seleccionar tu PDF",
+          maxSize: "Máximo 10MB"
+        },
+        cvTitle: {
+          label: "Título *",
+          placeholder: "Ej: Mi CV — Desarrollador Full Stack"
+        },
+        next: "Siguiente",
+        step2: {
+          changeFile: "Cambiar",
+          targetJob: {
+            label: "¿A qué puesto querés aplicar? *",
+            placeholder: "Ej: Desarrollador Full Stack"
+          },
+          targetCompany: {
+            label: "¿A qué empresa?",
+            optional: "(opcional)",
+            placeholder: "Ej: Google, MercadoLibre"
+          },
+          industry: {
+            label: "Industria",
+            optional: "(opcional)",
+            selectPlaceholder: "Seleccionar..."
+          },
+          experienceLevel: {
+            label: "Nivel de experiencia *"
+          },
+          optimizationFocus: {
+            label: "Enfoque de optimización"
+          },
+          additionalNotes: {
+            label: "Notas adicionales",
+            optional: "(opcional)",
+            placeholder: "Ej: Destacar experiencia en React..."
+          },
+          shareCommunity: "Compartir en la comunidad"
+        },
+        back: "Volver",
+        submit: "Analizar con IA",
+        toasts: {
+          invalidFile: "Solo se aceptaan archivos PDF",
+          fileTooBig: "El archivo debe ser menor a 10MB",
+          missingFields: "Subí un archivo PDF y poné un título",
+          missingTargetJob: "Decí a qué puesto querés aplicar",
+          uploadSuccess: "¡CV subido! La IA lo está analizando...",
+          uploadError: "Error al subir el CV"
+        },
+        trigger: "Subir CV"
+      },
+      visibility: {
+        public: "Público",
+        private: "Privado"
+      },
+      votes: "votos",
+      actions: {
+        viewImproved: "Ver mejorado",
+        viewDetail: "Ver detalle",
+        originalPdf: "PDF original",
+        improvedPdf: "PDF mejorado",
+        makePrivate: "Volver privado",
+        shareCommunity: "Compartir en la comunidad",
+        delete: "Eliminar"
+      },
+      atsScore: "Score ATS",
+      deleteDialog: {
+        title: "Eliminar CV",
+        message: "¿Estás seguro de que querés eliminar",
+        messageEnd: "? Esta acción no se puede deshacer.",
+        cancel: "Cancelar",
+        deleting: "Eliminando...",
+        confirm: "Eliminar"
+      },
+      empty: {
+        title: "Sin CVs",
+        description: "Subí tu primer CV para empezar",
+        button: "Subir CV"
+      },
+      pagination: {
+        showing: "Mostrando",
+        of: "de",
+        cvs: "CVs",
+        page: "página",
+        of2: "de",
+        loading: "Cargando...",
+        loadMore: "Cargar más"
+      },
+      error: "Error al cargar"
+    },
     stats: {
       title: "Mis Estadísticas",
+      subtitle: "Resumen de tu actividad en CVMaster",
+      cards: {
+        total: "Total CVs",
+        completed: "Completados",
+        processing: "En proceso",
+        failed: "Fallidos",
+        publicCount: "Públicos",
+        privateCount: "Privados",
+        avgScore: "Score promedio",
+        totalVotes: "Votos recibidos",
+        suffix: "pts"
+      },
+      latestCv: "último CV subido",
       total: "Total CVs",
       completed: "Completados",
       processing: "En proceso",
@@ -130,32 +267,255 @@ const es: TranslationContent = {
       empty: "No tenés notificaciones"
     },
     settings: {
-      title: "Configuración"
+      title: "Configuración",
+      subtitle: "Gestioná tu perfil y preferencias",
+      tabs: {
+        profile: "Perfil",
+        workspace: "Área de trabajo",
+        security: "Seguridad",
+        deleted: "Eliminados"
+      },
+      profile: {
+        personalInfo: "Información personal",
+        personalInfoDesc: "Datos básicos de tu perfil público",
+        fullName: "Nombre completo",
+        email: "Email",
+        emailChange: "No se puede cambiar",
+        nationality: "Nacionalidad",
+        optional: "(opcional)",
+        selectPlaceholder: "Seleccionar...",
+        saving: "Guardando...",
+        saveChanges: "Guardar cambios",
+        username: {
+          title: "Username",
+          titleDesc: "Tu nombre de usuario público",
+          newUsername: "Nuevo username",
+          shownPublic: "Se muestra en tu perfil público"
+        },
+        changeUsername: "Cambiar username"
+      },
+      workspace: {
+        title: "Área de trabajo",
+        titleDesc: "Tu información laboral por defecto",
+        targetJob: "Puesto objetivo",
+        industry: "Industria",
+        optional: "(opcional)",
+        placeholder: {
+          targetJob: "Ej: Desarrollador Full Stack",
+          industry: "Ej: Tecnología"
+        },
+        hintTargetJob: "Se usará como valor por defecto al subir un nuevo CV",
+        saving: "Guardando...",
+        saveWorkspace: "Guardar área de trabajo"
+      },
+      security: {
+        title: "Cambiar contraseña",
+        titleDesc: "Ingresá tu contraseña actual y la nueva contraseña",
+        currentPassword: "Contraseña actual",
+        newPassword: "Nueva contraseña",
+        confirmPassword: "Confirmar contraseña",
+        placeholder: {
+          current: "••••••••",
+          minLength: "Mínimo 8 caracteres",
+          repeat: "Repetí la nueva contraseña"
+        },
+        changing: "Cambiando...",
+        changePassword: "Cambiar contraseña",
+        logout: {
+          title: "Cerrar sesión",
+          desc: "Salí de tu cuenta en este dispositivo",
+          button: "Cerrar sesión"
+        }
+      },
+      deleted: {
+        title: "CVs eliminados",
+        titleDesc: "Recuperá CVs que eliminaste recientemente",
+        loading: "Cargando...",
+        empty: "No tenés CVs eliminados",
+        deletedOn: "Eliminado el",
+        restore: "Restaurar",
+        restoring: "Restaurando...",
+        restoreConfirm: {
+          title: "Restaurar CV",
+          message: "¿Estás seguro de que querés restaurar",
+          messageEnd: "? Volverá a aparecer en tu lista de CVs.",
+          cancel: "Cancelar"
+        }
+      },
+      toasts: {
+        nameMinLength: "El nombre debe tener al menos 2 caracteres",
+        profileUpdated: "Perfil actualizado",
+        errorUpdating: "Error al actualizar",
+        usernameMinLength: "El username debe tener al menos 3 caracteres",
+        usernameUpdated: "Username actualizado",
+        errorUpdatingUsername: "Error al actualizar username",
+        workspaceUpdated: "Área de trabajo actualizada",
+        enterCurrentPassword: "Ingresá tu contraseña actual",
+        newPasswordMinLength: "La nueva contraseña debe tener al menos 8 caracteres",
+        passwordsMismatch: "Las contraseñas no coinciden",
+        passwordUpdated: "Contraseña actualizada correctamente",
+        errorChangingPassword: "Error al cambiar la contraseña"
+      }
     }
   },
   auth: {
+    common: {
+      back: "Volver",
+      showPassword: "Mostrar contraseña",
+      hidePassword: "Ocultar contraseña",
+      emailPlaceholder: "tu@email.com",
+      passwordPlaceholder: "••••••••",
+      processing: "Procesando..."
+    },
     login: {
       title: "Iniciar sesión",
+      subtitle: "Ingresá tus credenciales",
       email: "Email",
       password: "Contraseña",
       submit: "Iniciar sesión",
       forgotPassword: "¿Olvidaste tu contraseña?",
       noAccount: "¿No tenés cuenta?",
-      register: "Crear cuenta"
+      register: "Crear cuenta",
+      loggingIn: "Ingresando...",
+      welcome: "¡Bienvenido!"
     },
     register: {
       title: "Crear cuenta",
+      subtitle: "Completá tus datos para empezar",
       name: "Nombre completo",
+      namePlaceholder: "Juan Pérez",
       email: "Email",
       password: "Contraseña",
       confirmPassword: "Confirmar contraseña",
       submit: "Crear cuenta",
       hasAccount: "¿Ya tenés cuenta?",
-      login: "Iniciar sesión"
+      login: "Iniciar sesión",
+      creating: "Creando...",
+      username: "Username *",
+      usernamePlaceholder: "tu_nombre",
+      nationality: "Nacionalidad",
+      nationalityPlaceholder: "Seleccionar...",
+      optional: "(opcional)",
+      targetJob: "Puesto objetivo",
+      targetJobPlaceholder: "Ej: Desarrollador Full Stack",
+      industry: "Industria",
+      industryPlaceholder: "Ej: Tecnología",
+      usernameAvailable: "Username disponible",
+      usernameTaken: "El username no está disponible",
+      usernameCheckError: "Error al verificar el username"
+    },
+    forgotPassword: {
+      title: "¿Olvidaste tu contraseña?",
+      subtitle: "Ingresá tu email y te enviaremos un link para resetearla",
+      email: "Email",
+      submit: "Enviar link de reset",
+      sending: "Enviando...",
+      submitted: {
+        title: "Email enviado",
+        message: "Si el email existe, recibirás un link para resetear tu contraseña.",
+        note: "El enlace expira en 1 hora. Revisá tu bandeja de entrada y spam.",
+        backToLogin: "Volver al login"
+      },
+      enterEmail: "Ingresá tu email",
+      successMessage: "Si el email existe, recibirás un link para resetear tu contraseña"
+    },
+    resetPassword: {
+      title: "Resetear contraseña",
+      subtitle: "Ingresá tu nueva contraseña",
+      newPassword: "Nueva contraseña",
+      confirmPassword: "Confirmar contraseña",
+      passwordMinLength: "Mínimo 8 caracteres",
+      passwordPlaceholder: "Mínimo 8 caracteres",
+      confirmPlaceholder: "Repetí tu nueva contraseña",
+      submit: "Actualizar contraseña",
+      updating: "Actualizando...",
+      verifyingToken: "Verificando token...",
+      success: "Contraseña actualizada exitosamente",
+      mismatch: "Las contraseñas no coinciden",
+      minLength: "La contraseña debe tener al menos 8 caracteres",
+      invalidToken: "Token de reset inválido",
+      errorReset: "Error al resetear contraseña"
+    },
+    verifyEmail: {
+      verifying: {
+        title: "Verificando tu email...",
+        subtitle: "Esto tomará un momento"
+      },
+      success: {
+        title: "¡Email verificado!",
+        message: "Tu email fue verificado exitosamente. Ya podés iniciar sesión.",
+        redirect: "Serás redirigido al login en unos segundos...",
+        goToLogin: "Ir al login"
+      },
+      error: {
+        title: "No se pudo verificar",
+        resend: "Reenviar email de verificación",
+        resending: "Reenviando...",
+        backToLogin: "Volver al login"
+      },
+      sent: {
+        title: "Revisá tu email",
+        message: "Te enviamos un link de verificación. Hacé click en el link para activar tu cuenta.",
+        hint: "El enlace expira en 24 horas. Revisá también tu carpeta de spam.",
+        resend: "Reenviar email",
+        resending: "Reenviando...",
+        backToLogin: "Volver al login"
+      },
+      noToken: {
+        message: "No se encontró un token de verificación",
+        goToLogin: "Ir al login"
+      },
+      emailVerified: "Email verificado exitosamente!",
+      verifyFailed: "No se pudo verificar el email",
+      invalidToken: "Token inválido o expirado",
+      resendSuccess: "Email de verificación reenviado. Revisá tu bandeja de entrada.",
+      resendError: "Error al reenviar email"
     }
   },
   community: {
-    title: "Comunidad"
+    title: "Comunidad",
+    subtitle: "Descubre los mejores CVs",
+    tabs: {
+      explore: "Explorar",
+      top: "Top CVs"
+    },
+    search: {
+      placeholder: "Buscar por puesto, título o nombre..."
+    },
+    filters: {
+      sortBy: "Ordenar por:",
+      options: {
+        votes: "Más votados",
+        recent: "Más recientes",
+        score: "Mejor score"
+      },
+      clearFilters: "Limpiar filtros",
+      activeFilters: "Filtros activos:",
+      clearAll: "Limpiar todo",
+      industry: "Industria",
+      scoreAts: "Score ATS",
+      job: "Puesto",
+      noResults: "No hay CVs que coincidan con los filtros",
+      noVoted: "No hay CVs votados"
+    },
+    card: {
+      votes: "votos",
+      voted: "Votado",
+      vote: "Votar",
+      viewCv: "Ver CV",
+      toast: {
+        voteRemoved: "Voto eliminado",
+        voted: "¡Votado!",
+        error: "Error al votar"
+      }
+    },
+    notAuthenticated: {
+      title: "Iniciá sesión para ver la comunidad",
+      description: "Descubrí los mejores CVs de otros usuarios, votá los que más te gusten y aprendé de lo que funciona.",
+      login: "Iniciar sesión",
+      register: "Crear cuenta"
+    },
+    dashboard: "Mi Dashboard"
   }
 };
 
@@ -249,16 +609,153 @@ const en: TranslationContent = {
     cta: {
       title: "Start today",
       subtitle: "Your first optimized CV in minutes",
+      subtitleAuth: "Manage and optimize your CVs from the dashboard",
       button: "Upload my CV for free"
     },
     footer: {
-      rights: "All rights reserved"
+      rights: "All rights reserved",
+      tagline: "Optimize your CV, get more interviews."
     }
   },
   dashboard: {
     title: "My Dashboard",
+    myCvs: "My CVs",
+    manageCvs: "Manage your resumes",
+    newCv: "New CV",
+    cvList: {
+      status: {
+        processing: "Processing",
+        completed: "Done",
+        failed: "Failed"
+      },
+      uploadDialog: {
+        experienceLevels: {
+          junior: "Junior / Trainee",
+          mid: "Mid-Level",
+          senior: "Senior",
+          lead: "Lead / Manager"
+        },
+        optimizationFocuses: {
+          technical: "Technical experience",
+          soft: "Soft skills",
+          both: "Both",
+          careerChange: "Career change"
+        },
+        dialogTitle: {
+          uploading: "Processing your CV...",
+          step1: "Upload your CV",
+          step2: "AI Context"
+        },
+        description: {
+          uploading: "The AI is analyzing and optimizing your CV",
+          step1: "Drag and drop your PDF or select it",
+          step2: "Answer so the AI can optimize better"
+        },
+        dropzone: {
+          clickToSelect: "Click to",
+          selectPdf: "select your PDF",
+          maxSize: "Max 10MB"
+        },
+        cvTitle: {
+          label: "Title *",
+          placeholder: "Ex: My CV — Full Stack Developer"
+        },
+        next: "Next",
+        step2: {
+          changeFile: "Change",
+          targetJob: {
+            label: "What position are you applying for? *",
+            placeholder: "Ex: Full Stack Developer"
+          },
+          targetCompany: {
+            label: "What company?",
+            optional: "(optional)",
+            placeholder: "Ex: Google, MercadoLibre"
+          },
+          industry: {
+            label: "Industry",
+            optional: "(optional)",
+            selectPlaceholder: "Select..."
+          },
+          experienceLevel: {
+            label: "Experience level *"
+          },
+          optimizationFocus: {
+            label: "Optimization focus"
+          },
+          additionalNotes: {
+            label: "Additional notes",
+            optional: "(optional)",
+            placeholder: "Ex: Highlight React experience..."
+          },
+          shareCommunity: "Share with community"
+        },
+        back: "Back",
+        submit: "Analyze with AI",
+        toasts: {
+          invalidFile: "Only PDF files are accepted",
+          fileTooBig: "File must be less than 10MB",
+          missingFields: "Upload a PDF file and add a title",
+          missingTargetJob: "Tell us what position you're applying for",
+          uploadSuccess: "CV uploaded! AI is analyzing it...",
+          uploadError: "Error uploading CV"
+        },
+        trigger: "Upload CV"
+      },
+      visibility: {
+        public: "Public",
+        private: "Private"
+      },
+      votes: "votes",
+      actions: {
+        viewImproved: "View improved",
+        viewDetail: "View details",
+        originalPdf: "Original PDF",
+        improvedPdf: "Improved PDF",
+        makePrivate: "Make private",
+        shareCommunity: "Share to community",
+        delete: "Delete"
+      },
+      atsScore: "ATS Score",
+      deleteDialog: {
+        title: "Delete CV",
+        message: "Are you sure you want to delete",
+        messageEnd: "? This action cannot be undone.",
+        cancel: "Cancel",
+        deleting: "Deleting...",
+        confirm: "Delete"
+      },
+      empty: {
+        title: "No CVs",
+        description: "Upload your first CV to get started",
+        button: "Upload CV"
+      },
+      pagination: {
+        showing: "Showing",
+        of: "of",
+        cvs: "CVs",
+        page: "page",
+        of2: "of",
+        loading: "Loading...",
+        loadMore: "Load more"
+      },
+      error: "Error loading"
+    },
     stats: {
       title: "My Statistics",
+      subtitle: "Summary of your activity on CVMaster",
+      cards: {
+        total: "Total CVs",
+        completed: "Completed",
+        processing: "Processing",
+        failed: "Failed",
+        publicCount: "Public",
+        privateCount: "Private",
+        avgScore: "Avg score",
+        totalVotes: "Votes received",
+        suffix: "pts"
+      },
+      latestCv: "latest CV uploaded",
       total: "Total CVs",
       completed: "Completed",
       processing: "Processing",
@@ -273,32 +770,255 @@ const en: TranslationContent = {
       empty: "You have no notifications"
     },
     settings: {
-      title: "Settings"
+      title: "Settings",
+      subtitle: "Manage your profile and preferences",
+      tabs: {
+        profile: "Profile",
+        workspace: "Workspace",
+        security: "Security",
+        deleted: "Deleted"
+      },
+      profile: {
+        personalInfo: "Personal information",
+        personalInfoDesc: "Basic data for your public profile",
+        fullName: "Full name",
+        email: "Email",
+        emailChange: "Cannot be changed",
+        nationality: "Nationality",
+        optional: "(optional)",
+        selectPlaceholder: "Select...",
+        saving: "Saving...",
+        saveChanges: "Save changes",
+        username: {
+          title: "Username",
+          titleDesc: "Your public username",
+          newUsername: "New username",
+          shownPublic: "Shown on your public profile"
+        },
+        changeUsername: "Change username"
+      },
+      workspace: {
+        title: "Workspace",
+        titleDesc: "Your default work information",
+        targetJob: "Target job",
+        industry: "Industry",
+        optional: "(optional)",
+        placeholder: {
+          targetJob: "Ex: Full Stack Developer",
+          industry: "Ex: Technology"
+        },
+        hintTargetJob: "Will be used as default when uploading a new CV",
+        saving: "Saving...",
+        saveWorkspace: "Save workspace"
+      },
+      security: {
+        title: "Change password",
+        titleDesc: "Enter your current password and new password",
+        currentPassword: "Current password",
+        newPassword: "New password",
+        confirmPassword: "Confirm password",
+        placeholder: {
+          current: "••••••••",
+          minLength: "Minimum 8 characters",
+          repeat: "Repeat new password"
+        },
+        changing: "Changing...",
+        changePassword: "Change password",
+        logout: {
+          title: "Log out",
+          desc: "Sign out of your account on this device",
+          button: "Log out"
+        }
+      },
+      deleted: {
+        title: "Deleted CVs",
+        titleDesc: "Recover CVs you deleted recently",
+        loading: "Loading...",
+        empty: "You have no deleted CVs",
+        deletedOn: "Deleted on",
+        restore: "Restore",
+        restoring: "Restoring...",
+        restoreConfirm: {
+          title: "Restore CV",
+          message: "Are you sure you want to restore",
+          messageEnd: "? It will appear again in your CV list.",
+          cancel: "Cancel"
+        }
+      },
+      toasts: {
+        nameMinLength: "Name must be at least 2 characters",
+        profileUpdated: "Profile updated",
+        errorUpdating: "Error updating",
+        usernameMinLength: "Username must be at least 3 characters",
+        usernameUpdated: "Username updated",
+        errorUpdatingUsername: "Error updating username",
+        workspaceUpdated: "Workspace updated",
+        enterCurrentPassword: "Enter your current password",
+        newPasswordMinLength: "New password must be at least 8 characters",
+        passwordsMismatch: "Passwords don't match",
+        passwordUpdated: "Password updated successfully",
+        errorChangingPassword: "Error changing password"
+      }
     }
   },
   auth: {
+    common: {
+      back: "Back",
+      showPassword: "Show password",
+      hidePassword: "Hide password",
+      emailPlaceholder: "your@email.com",
+      passwordPlaceholder: "••••••••",
+      processing: "Processing..."
+    },
     login: {
       title: "Log in",
+      subtitle: "Enter your credentials",
       email: "Email",
       password: "Password",
       submit: "Log in",
       forgotPassword: "Forgot your password?",
       noAccount: "Don't have an account?",
-      register: "Sign up"
+      register: "Sign up",
+      loggingIn: "Logging in...",
+      welcome: "Welcome!"
     },
     register: {
       title: "Create account",
+      subtitle: "Fill in your details to get started",
       name: "Full name",
+      namePlaceholder: "John Smith",
       email: "Email",
       password: "Password",
       confirmPassword: "Confirm password",
       submit: "Create account",
       hasAccount: "Already have an account?",
-      login: "Log in"
+      login: "Log in",
+      creating: "Creating...",
+      username: "Username *",
+      usernamePlaceholder: "your_name",
+      nationality: "Nationality",
+      nationalityPlaceholder: "Select...",
+      optional: "(optional)",
+      targetJob: "Target job",
+      targetJobPlaceholder: "Ex: Full Stack Developer",
+      industry: "Industry",
+      industryPlaceholder: "Ex: Technology",
+      usernameAvailable: "Username available",
+      usernameTaken: "Username not available",
+      usernameCheckError: "Error checking username"
+    },
+    forgotPassword: {
+      title: "Forgot your password?",
+      subtitle: "Enter your email and we'll send you a link to reset it",
+      email: "Email",
+      submit: "Send reset link",
+      sending: "Sending...",
+      submitted: {
+        title: "Email sent",
+        message: "If the email exists, you'll receive a link to reset your password.",
+        note: "The link expires in 1 hour. Check your inbox and spam folder.",
+        backToLogin: "Back to login"
+      },
+      enterEmail: "Enter your email",
+      successMessage: "If the email exists, you'll receive a link to reset your password"
+    },
+    resetPassword: {
+      title: "Reset password",
+      subtitle: "Enter your new password",
+      newPassword: "New password",
+      confirmPassword: "Confirm password",
+      passwordMinLength: "Minimum 8 characters",
+      passwordPlaceholder: "minimum 8 characters",
+      confirmPlaceholder: "Repeat your new password",
+      submit: "Update password",
+      updating: "Updating...",
+      verifyingToken: "Verifying token...",
+      success: "Password updated successfully",
+      mismatch: "Passwords don't match",
+      minLength: "Password must be at least 8 characters",
+      invalidToken: "Invalid reset token",
+      errorReset: "Error resetting password"
+    },
+    verifyEmail: {
+      verifying: {
+        title: "Verifying your email...",
+        subtitle: "This will take a moment"
+      },
+      success: {
+        title: "Email verified!",
+        message: "Your email was verified successfully. You can now log in.",
+        redirect: "You'll be redirected to login in a few seconds...",
+        goToLogin: "Go to login"
+      },
+      error: {
+        title: "Could not verify",
+        resend: "Resend verification email",
+        resending: "Resending...",
+        backToLogin: "Back to login"
+      },
+      sent: {
+        title: "Check your email",
+        message: "We sent you a verification link. Click the link to activate your account.",
+        hint: "The link expires in 24 hours. Check your spam folder as well.",
+        resend: "Resend email",
+        resending: "Resending...",
+        backToLogin: "Back to login"
+      },
+      noToken: {
+        message: "No verification token found",
+        goToLogin: "Go to login"
+      },
+      emailVerified: "Email verified successfully!",
+      verifyFailed: "Could not verify email",
+      invalidToken: "Invalid or expired token",
+      resendSuccess: "Verification email resent. Check your inbox.",
+      resendError: "Error resending email"
     }
   },
   community: {
-    title: "Community"
+    title: "Community",
+    subtitle: "Discover the best CVs",
+    tabs: {
+      explore: "Explore",
+      top: "Top CVs"
+    },
+    search: {
+      placeholder: "Search by job, title or name..."
+    },
+    filters: {
+      sortBy: "Sort by:",
+      options: {
+        votes: "Most voted",
+        recent: "Most recent",
+        score: "Best score"
+      },
+      clearFilters: "Clear filters",
+      activeFilters: "Active filters:",
+      clearAll: "Clear all",
+      industry: "Industry",
+      scoreAts: "ATS Score",
+      job: "Job",
+      noResults: "No CVs match the filters",
+      noVoted: "No voted CVs"
+    },
+    card: {
+      votes: "votes",
+      voted: "Voted",
+      vote: "Vote",
+      viewCv: "View CV",
+      toast: {
+        voteRemoved: "Vote removed",
+        voted: "Voted!",
+        error: "Error voting"
+      }
+    },
+    notAuthenticated: {
+      title: "Log in to see the community",
+      description: "Discover the best CVs from other users, vote for the ones you like most, and learn from what works.",
+      login: "Log in",
+      register: "Sign up"
+    },
+    dashboard: "My Dashboard"
   }
 };
 

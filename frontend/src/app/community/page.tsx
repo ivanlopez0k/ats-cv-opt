@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, use } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ThumbsUp, Search, User, ChevronLeft, ChevronRight, FileText, Loader2, X } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,6 +16,7 @@ import { toast } from 'sonner';
 import Link from 'next/link';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { ProfileDropdown } from '@/components/ProfileDropdown';
+import { useI18n } from '@/i18n';
 
 const PAGE_SIZE = 9;
 
@@ -91,6 +92,7 @@ function CVPreviewThumbnail({ htmlUrl }: { htmlUrl: string }) {
 }
 
 function CommunityCard({ cv }: { cv: CV }) {
+  const { t } = useI18n();
   const queryClient = useQueryClient();
   const { isAuthenticated } = useAuthStore();
   const voteMutation = useMutation({
@@ -100,10 +102,10 @@ function CommunityCard({ cv }: { cv: CV }) {
     },
     onSuccess: async () => {
       await queryClient.refetchQueries({ queryKey: ['community-cvs'] });
-      if (cv.hasVoted) toast.success('Voto eliminado');
-      else toast.success('¡Votado!');
+      if (cv.hasVoted) toast.success(t('community.card.toast.voteRemoved'));
+      else toast.success(t('community.card.toast.voted'));
     },
-    onError: (e: any) => toast.error(e.response?.data?.error || 'Error al votar'),
+    onError: (e: any) => toast.error(e.response?.data?.error || t('community.card.toast.error')),
   });
   const initials = cv.user?.username?.slice(0, 2).toUpperCase() || cv.user?.name?.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) || 'U';
 
@@ -125,7 +127,7 @@ function CommunityCard({ cv }: { cv: CV }) {
 
       <CardContent>
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground"><ThumbsUp className="h-4 w-4" /><span>{cv.upvotes} votos</span></div>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground"><ThumbsUp className="h-4 w-4" /><span>{cv.upvotes} {t('community.card.votes')}</span></div>
           <div className="flex gap-2">
             {isAuthenticated && (
               <Button
@@ -139,11 +141,11 @@ function CommunityCard({ cv }: { cv: CV }) {
                 variant={cv.hasVoted ? 'default' : 'outline'}
               >
                 <ThumbsUp className={`h-4 w-4 mr-1 ${cv.hasVoted ? 'fill-current' : ''}`} />
-                {cv.hasVoted ? 'Votado' : 'Votar'}
+                {cv.hasVoted ? t('community.card.voted') : t('community.card.vote')}
               </Button>
             )}
             <Button variant="outline" size="sm" className="border-border text-foreground hover:bg-secondary transition-all" onClick={() => window.location.href = `/cvs/${cv.id}`}>
-              Ver CV
+              {t('community.card.viewCv')}
             </Button>
           </div>
         </div>
@@ -153,6 +155,7 @@ function CommunityCard({ cv }: { cv: CV }) {
 }
 
 export default function CommunityPage() {
+  const { t } = useI18n();
   const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(1);
   const [selectedIndustry, setSelectedIndustry] = useState<string | null>(null);
@@ -214,18 +217,18 @@ export default function CommunityPage() {
           <div className="container mx-auto px-4 h-16 flex items-center justify-between">
             <Link href="/" className="font-bold text-xl text-foreground">CVMaster</Link>
             <nav className="flex items-center gap-3">
-              <Link href="/dashboard" className="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg hover:bg-secondary transition-colors">Mi Dashboard</Link>
+              <Link href="/dashboard" className="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg hover:bg-secondary transition-colors">{t('community.dashboard')}</Link>
               <ThemeToggle />
             </nav>
           </div>
         </header>
         <main className="container mx-auto px-4 py-8 flex flex-col items-center justify-center min-h-[60vh]">
           <FileText className="h-16 w-16 text-muted-foreground/50 mb-6" />
-          <h1 className="text-2xl font-bold text-foreground mb-2">Iniciá sesión para ver la comunidad</h1>
-          <p className="text-muted-foreground mb-6 text-center max-w-md">Descubrí los mejores CVs de otros usuarios, votá los que más te gusten y aprendé de lo que funciona.</p>
+          <h1 className="text-2xl font-bold text-foreground mb-2">{t('community.notAuthenticated.title')}</h1>
+          <p className="text-muted-foreground mb-6 text-center max-w-md">{t('community.notAuthenticated.description')}</p>
           <div className="flex gap-3">
-            <Link href="/login"><Button className="bg-foreground text-background hover:bg-foreground/90">Iniciar sesión</Button></Link>
-            <Link href="/register"><Button variant="outline" className="border-border text-foreground hover:bg-secondary">Crear cuenta</Button></Link>
+            <Link href="/login"><Button className="bg-foreground text-background hover:bg-foreground/90">{t('community.notAuthenticated.login')}</Button></Link>
+            <Link href="/register"><Button variant="outline" className="border-border text-foreground hover:bg-secondary">{t('community.notAuthenticated.register')}</Button></Link>
           </div>
         </main>
       </div>
@@ -238,32 +241,32 @@ export default function CommunityPage() {
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <Link href="/" className="font-bold text-xl text-foreground">CVMaster</Link>
           <nav className="flex items-center gap-3">
-            <Link href="/dashboard" className="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg hover:bg-secondary transition-colors">Mi Dashboard</Link>
+            <Link href="/dashboard" className="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg hover:bg-secondary transition-colors">{t('community.dashboard')}</Link>
             <ThemeToggle />
             <ProfileDropdown />
           </nav>
         </div>
       </header>
       <main className="container mx-auto px-4 py-8">
-        <div className="mb-8"><h1 className="text-3xl font-bold mb-2 text-foreground">Comunidad</h1><p className="text-muted-foreground">Descubre los mejores CVs</p></div>
+        <div className="mb-8"><h1 className="text-3xl font-bold mb-2 text-foreground">{t('community.title')}</h1><p className="text-muted-foreground">{t('community.subtitle')}</p></div>
         <Tabs defaultValue="explore" className="space-y-6">
-          <TabsList className="bg-card border-border"><TabsTrigger value="explore" className="text-foreground data-[state=active]:bg-foreground data-[state=active]:text-background">Explorar</TabsTrigger><TabsTrigger value="top" className="text-foreground data-[state=active]:bg-foreground data-[state=active]:text-background">Top CVs</TabsTrigger></TabsList>
+          <TabsList className="bg-card border-border"><TabsTrigger value="explore" className="text-foreground data-[state=active]:bg-foreground data-[state=active]:text-background">{t('community.tabs.explore')}</TabsTrigger><TabsTrigger value="top" className="text-foreground data-[state=active]:bg-foreground data-[state=active]:text-background">{t('community.tabs.top')}</TabsTrigger></TabsList>
           <TabsContent value="explore">
-            <div className="relative mb-6"><Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground/70" /><Input placeholder="Buscar por puesto, título o nombre..." value={searchTerm} onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }} className="pl-10 bg-muted/50 border-border text-foreground placeholder:text-muted-foreground" /></div>
+            <div className="relative mb-6"><Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground/70" /><Input placeholder={t('community.search.placeholder')} value={searchTerm} onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }} className="pl-10 bg-muted/50 border-border text-foreground placeholder:text-muted-foreground" /></div>
 
             {/* Sort + Clear */}
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">Ordenar por:</span>
+                <span className="text-sm text-muted-foreground">{t('community.filters.sortBy')}</span>
                 <select value={sortBy} onChange={(e) => { setSortBy(e.target.value); setPage(1); }} className="bg-muted border border-border text-foreground text-sm rounded px-3 py-1.5">
-                  <option value="votes">Más votados</option>
-                  <option value="recent">Más recientes</option>
-                  <option value="score">Mejor score</option>
+                  <option value="votes">{t('community.filters.options.votes')}</option>
+                  <option value="recent">{t('community.filters.options.recent')}</option>
+                  <option value="score">{t('community.filters.options.score')}</option>
                 </select>
               </div>
               {hasActiveFilters && (
                 <button onClick={clearFilters} className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1">
-                  <X className="h-4 w-4" /> Limpiar filtros
+                  <X className="h-4 w-4" /> {t('community.filters.clearFilters')}
                 </button>
               )}
             </div>
@@ -271,7 +274,7 @@ export default function CommunityPage() {
             {/* Industry + Score Filters Row */}
             <div className="mb-4 flex items-end gap-6">
               <div>
-                <p className="text-sm text-muted-foreground mb-2">Industria</p>
+                <p className="text-sm text-muted-foreground mb-2">{t('community.filters.industry')}</p>
                 <div className="flex flex-wrap gap-2">
                   {INDUSTRY_FILTERS.map((industry) => (
                     <button
@@ -289,7 +292,7 @@ export default function CommunityPage() {
                 </div>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground mb-2">Score ATS</p>
+                <p className="text-sm text-muted-foreground mb-2">{t('community.filters.scoreAts')}</p>
                 <div className="flex gap-2">
                   {SCORE_FILTERS.map((filter) => (
                     <button
@@ -310,7 +313,7 @@ export default function CommunityPage() {
 
             {/* Job Filters */}
             <div className="mb-6">
-              <p className="text-sm text-muted-foreground mb-2">Puesto</p>
+              <p className="text-sm text-muted-foreground mb-2">{t('community.filters.job')}</p>
               <div className="flex flex-wrap gap-2">
                 {JOB_FILTERS.map((job) => (
                   <button
@@ -331,7 +334,7 @@ export default function CommunityPage() {
             {/* Active filters indicator */}
             {hasActiveFilters && (
               <div className="flex items-center gap-2 mb-4">
-                <span className="text-sm text-muted-foreground">Filtros activos:</span>
+                <span className="text-sm text-muted-foreground">{t('community.filters.activeFilters')}</span>
                 <div className="flex gap-2 flex-wrap">
                   {selectedIndustry && (
                     <Badge variant="secondary" className="gap-1 cursor-pointer hover:bg-secondary/80" onClick={() => { setSelectedIndustry(null); setPage(1); }}>
@@ -353,12 +356,12 @@ export default function CommunityPage() {
                   )}
                 </div>
                 <button onClick={clearFilters} className="text-xs text-muted-foreground hover:text-foreground underline">
-                  Limpiar todo
+                  {t('community.filters.clearAll')}
                 </button>
               </div>
             )}
 
-            {isLoading ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{[1, 2, 3, 4, 5, 6].map((i) => <Skeleton key={i} className="h-96 bg-secondary" />)}</div> : !cvs?.length ? <Card className="bg-card"><CardContent className="py-12 text-center text-muted-foreground">No hay CVs que coincidan con los filtros</CardContent></Card> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{cvs.map((cv) => <CommunityCard key={cv.id} cv={cv} />)}</div>}
+            {isLoading ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{[1, 2, 3, 4, 5, 6].map((i) => <Skeleton key={i} className="h-96 bg-secondary" />)}</div> : !cvs?.length ? <Card className="bg-card"><CardContent className="py-12 text-center text-muted-foreground">{t('community.filters.noResults')}</CardContent></Card> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{cvs.map((cv) => <CommunityCard key={cv.id} cv={cv} />)}</div>}
             {totalPages > 1 && (
               <div className="flex items-center justify-center gap-2 mt-8">
                 <Button variant="outline" size="icon" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}><ChevronLeft className="h-4 w-4" /></Button>
@@ -370,7 +373,7 @@ export default function CommunityPage() {
             )}
           </TabsContent>
           <TabsContent value="top">
-            {isLoading ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{[1, 2, 3].map((i) => <Skeleton key={i} className="h-96 bg-secondary" />)}</div> : !topCVs?.length ? <Card className="bg-card"><CardContent className="py-12 text-center text-muted-foreground">No hay CVs votados</CardContent></Card> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{topCVs.map((cv) => <CommunityCard key={cv.id} cv={cv} />)}</div>}
+            {isLoading ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{[1, 2, 3].map((i) => <Skeleton key={i} className="h-96 bg-secondary" />)}</div> : !topCVs?.length ? <Card className="bg-card"><CardContent className="py-12 text-center text-muted-foreground">{t('community.filters.noVoted')}</CardContent></Card> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{topCVs.map((cv) => <CommunityCard key={cv.id} cv={cv} />)}</div>}
           </TabsContent>
         </Tabs>
       </main>

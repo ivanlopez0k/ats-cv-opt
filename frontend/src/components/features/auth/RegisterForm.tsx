@@ -13,6 +13,7 @@ import { registerSchema, RegisterInput } from '@/lib/validations/auth';
 import { useAuthStore } from '@/lib/stores/authStore';
 import apiClient from '@/lib/api';
 import { toast } from 'sonner';
+import { useI18n } from '@/i18n';
 
 const NATIONALITIES = [
   'Argentina', 'Bolivia', 'Brasil', 'Chile', 'Colombia', 'Costa Rica',
@@ -28,6 +29,7 @@ export function RegisterForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [usernameStatus, setUsernameStatus] = useState<'checking' | 'available' | 'taken' | 'error' | null>(null);
   const [usernameError, setUsernameError] = useState<string>('');
+  const { t } = useI18n();
 
   const { register, handleSubmit, formState: { errors }, watch } = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
@@ -52,13 +54,13 @@ export function RegisterForm() {
         setUsernameError('');
       } else {
         setUsernameStatus('taken');
-        setUsernameError(response.data.error || 'El username no está disponible');
+        setUsernameError(response.data.error || t('auth.register.usernameTaken'));
       }
     } catch {
       setUsernameStatus('error');
-      setUsernameError('Error al verificar el username');
+      setUsernameError(t('auth.register.usernameCheckError'));
     }
-  }, []);
+  }, [t]);
 
   // Debounce effect
   const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout | null>(null);
@@ -77,14 +79,14 @@ export function RegisterForm() {
       setAuth(user, accessToken, refreshToken);
 
       if (emailVerificationRequired) {
-        toast.success('¡Cuenta creada! Verificá tu email para continuar.');
+        toast.success(t('auth.verifyEmail.sent.title'));
         router.push('/auth/verify-email?sent=true');
       } else {
-        toast.success('¡Bienvenido!');
+        toast.success(t('auth.login.welcome'));
         router.push('/dashboard');
       }
     } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Error al registrarse');
+      toast.error(error.response?.data?.error || t('common.error'));
     } finally {
       setIsLoading(false);
     }
@@ -93,18 +95,18 @@ export function RegisterForm() {
   return (
     <Card className="w-full max-w-md mx-auto bg-card">
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold text-center text-foreground">Crear Cuenta</CardTitle>
-        <CardDescription className="text-center text-muted-foreground">Completá tus datos para empezar</CardDescription>
+        <CardTitle className="text-2xl font-bold text-center text-foreground">{t('auth.register.title')}</CardTitle>
+        <CardDescription className="text-center text-muted-foreground">{t('auth.register.subtitle')}</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {/* Username */}
           <div className="space-y-2">
-            <Label htmlFor="username" className="text-foreground">Username *</Label>
+            <Label htmlFor="username" className="text-foreground">{t('auth.register.username')}</Label>
             <div className="relative">
               <Input
                 id="username"
-                placeholder="tu_nombre"
+                placeholder={t('auth.register.usernamePlaceholder')}
                 {...register('username')}
                 onChange={handleUsernameChange}
                 className={`bg-muted/50 border-border text-foreground placeholder:text-muted-foreground pr-10 ${
@@ -119,31 +121,31 @@ export function RegisterForm() {
               </div>
             </div>
             {errors.username && <p className="text-sm text-destructive">{errors.username.message}</p>}
-            {usernameStatus === 'available' && <p className="text-sm text-emerald-500">Username disponible</p>}
+            {usernameStatus === 'available' && <p className="text-sm text-emerald-500">{t('auth.register.usernameAvailable')}</p>}
             {usernameStatus === 'taken' && <p className="text-sm text-destructive">{usernameError}</p>}
             {usernameStatus === 'error' && <p className="text-sm text-yellow-500">{usernameError}</p>}
           </div>
 
           {/* Name */}
           <div className="space-y-2">
-            <Label htmlFor="name" className="text-foreground">Nombre *</Label>
-            <Input id="name" type="text" placeholder="Juan Pérez" {...register('name')} className="bg-muted/50 border-border text-foreground placeholder:text-muted-foreground" />
+            <Label htmlFor="name" className="text-foreground">{t('auth.register.name')} *</Label>
+            <Input id="name" type="text" placeholder={t('auth.register.namePlaceholder')} {...register('name')} className="bg-muted/50 border-border text-foreground placeholder:text-muted-foreground" />
             {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
           </div>
 
           {/* Email */}
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-foreground">Email *</Label>
-            <Input id="email" type="email" placeholder="tu@email.com" {...register('email')} className="bg-muted/50 border-border text-foreground placeholder:text-muted-foreground" />
+            <Label htmlFor="email" className="text-foreground">{t('auth.register.email')} *</Label>
+            <Input id="email" type="email" placeholder={t('auth.common.emailPlaceholder')} {...register('email')} className="bg-muted/50 border-border text-foreground placeholder:text-muted-foreground" />
             {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
           </div>
 
           {/* Password */}
           <div className="space-y-2">
-            <Label htmlFor="password" className="text-foreground">Contraseña *</Label>
+            <Label htmlFor="password" className="text-foreground">{t('auth.register.password')} *</Label>
             <div className="relative">
-              <Input id="password" type={showPassword ? 'text' : 'password'} placeholder="••••••••" {...register('password')} className="bg-muted/50 border-border text-foreground placeholder:text-muted-foreground pr-10" />
-              <Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-full px-3 text-muted-foreground hover:text-foreground" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}>
+              <Input id="password" type={showPassword ? 'text' : 'password'} placeholder={t('auth.common.passwordPlaceholder')} {...register('password')} className="bg-muted/50 border-border text-foreground placeholder:text-muted-foreground pr-10" />
+              <Button type="button" variant="ghost" size="icon" className="absolute right-0 top-0 h-full px-3 text-muted-foreground hover:text-foreground" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? t('auth.common.hidePassword') : t('auth.common.showPassword')}>
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </Button>
             </div>
@@ -152,13 +154,13 @@ export function RegisterForm() {
 
           {/* Nationality (optional) */}
           <div className="space-y-2">
-            <Label htmlFor="nationality" className="text-foreground">Nacionalidad <span className="text-muted-foreground/70">(opcional)</span></Label>
+            <Label htmlFor="nationality" className="text-foreground">{t('auth.register.nationality')} <span className="text-muted-foreground/70">{t('auth.register.optional')}</span></Label>
             <select
               id="nationality"
               {...register('nationality')}
               className="flex h-9 w-full rounded-md border border-border bg-muted/50 px-3 py-1 text-sm text-foreground shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             >
-              <option value="">Seleccionar...</option>
+              <option value="">{t('auth.register.nationalityPlaceholder')}</option>
               {NATIONALITIES.map((n) => (
                 <option key={n} value={n}>{n}</option>
               ))}
@@ -167,22 +169,22 @@ export function RegisterForm() {
 
           {/* Default Target Job (optional) */}
           <div className="space-y-2">
-            <Label htmlFor="defaultTargetJob" className="text-foreground">Puesto objetivo <span className="text-muted-foreground/70">(opcional)</span></Label>
-            <Input id="defaultTargetJob" placeholder="Ej: Desarrollador Full Stack" {...register('defaultTargetJob')} className="bg-muted/50 border-border text-foreground placeholder:text-muted-foreground" />
+            <Label htmlFor="defaultTargetJob" className="text-foreground">{t('auth.register.targetJob')} <span className="text-muted-foreground/70">{t('auth.register.optional')}</span></Label>
+            <Input id="defaultTargetJob" placeholder={t('auth.register.targetJobPlaceholder')} {...register('defaultTargetJob')} className="bg-muted/50 border-border text-foreground placeholder:text-muted-foreground" />
           </div>
 
           {/* Default Target Industry (optional) */}
           <div className="space-y-2">
-            <Label htmlFor="defaultTargetIndustry" className="text-foreground">Industria <span className="text-muted-foreground/70">(opcional)</span></Label>
-            <Input id="defaultTargetIndustry" placeholder="Ej: Tecnología" {...register('defaultTargetIndustry')} className="bg-muted/50 border-border text-foreground placeholder:text-muted-foreground" />
+            <Label htmlFor="defaultTargetIndustry" className="text-foreground">{t('auth.register.industry')} <span className="text-muted-foreground/70">{t('auth.register.optional')}</span></Label>
+            <Input id="defaultTargetIndustry" placeholder={t('auth.register.industryPlaceholder')} {...register('defaultTargetIndustry')} className="bg-muted/50 border-border text-foreground placeholder:text-muted-foreground" />
           </div>
 
           <Button type="submit" className="w-full bg-foreground text-background font-semibold hover:bg-foreground/90" disabled={isLoading}>
-            {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Creando...</> : 'Crear Cuenta'}
+            {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />{t('auth.register.creating')}</> : t('auth.register.submit')}
           </Button>
         </form>
         <div className="mt-4 text-center text-sm">
-          <span className="text-muted-foreground">¿Ya tienes cuenta?</span> <a href="/login" className="text-foreground hover:underline font-medium">Inicia sesión</a>
+          <span className="text-muted-foreground">{t('auth.register.hasAccount')}</span> <a href="/login" className="text-foreground hover:underline font-medium">{t('auth.register.login')}</a>
         </div>
       </CardContent>
     </Card>

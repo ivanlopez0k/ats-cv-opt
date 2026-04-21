@@ -38,7 +38,7 @@ export default function VerifyEmailPage() {
       
       // Redirect to login after 3 seconds
       setTimeout(() => {
-        router.push('/auth/login');
+        router.push('/login');
       }, 3000);
     } catch (error: any) {
       setVerificationStatus('error');
@@ -94,7 +94,7 @@ export default function VerifyEmailPage() {
             <p className="text-sm text-muted-foreground mb-4">
               Serás redirigido al login en unos segundos...
             </p>
-            <Link href="/auth/login">
+            <Link href="/login">
               <Button className="w-full">
                 <ArrowLeft className="mr-2 h-4 w-4" /> Ir al login
               </Button>
@@ -129,7 +129,7 @@ export default function VerifyEmailPage() {
                 <><Mail className="mr-2 h-4 w-4" /> Reenviar email de verificación</>
               )}
             </Button>
-            <Link href="/auth/login">
+            <Link href="/login">
               <Button variant="ghost" className="w-full">
                 <ArrowLeft className="mr-2 h-4 w-4" /> Volver al login
               </Button>
@@ -170,7 +170,7 @@ export default function VerifyEmailPage() {
                 <><RefreshCw className="mr-2 h-4 w-4" /> Reenviar email</>
               )}
             </Button>
-            <Link href="/auth/login">
+            <Link href="/login">
               <Button variant="ghost" className="w-full">
                 <ArrowLeft className="mr-2 h-4 w-4" /> Volver al login
               </Button>
@@ -187,7 +187,7 @@ export default function VerifyEmailPage() {
       <Card className="w-full max-w-md">
         <CardContent className="py-12 text-center">
           <p className="text-muted-foreground mb-4">No se encontró un token de verificación</p>
-          <Link href="/auth/login">
+          <Link href="/login">
             <Button>
               <ArrowLeft className="mr-2 h-4 w-4" /> Ir al login
             </Button>
