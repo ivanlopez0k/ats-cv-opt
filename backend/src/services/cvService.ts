@@ -67,6 +67,11 @@ export const cvService = {
       template?: 'MODERN' | 'CLASSIC' | 'MINIMAL';
     }
   ) {
+    // Convert isPublic to boolean if it comes as string
+    const isPublicBool = typeof data.isPublic === 'string' 
+      ? data.isPublic === 'true' 
+      : Boolean(data.isPublic);
+    
     // Create a mock CV with fake URLs and completed status (no AI processing)
     const mockCV = await prisma.cV.create({
       data: {
@@ -76,7 +81,7 @@ export const cvService = {
         improvedPdfUrl: 'https://res.cloudinary.com/demo/sample-improved.pdf',
         targetJob: data.targetJob || 'Desarrollador Full Stack',
         targetIndustry: data.targetIndustry || 'Tecnología',
-        isPublic: data.isPublic || false,
+        isPublic: isPublicBool,
         template: data.template || 'MODERN',
         status: 'COMPLETED',
         atsScore: 85,
