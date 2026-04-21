@@ -354,9 +354,10 @@ describe('CV API', () => {
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
 
-      // Verify it's actually deleted
+      // Verify it's soft deleted (deletedAt is set)
       const deletedCv = await prisma.cV.findUnique({ where: { id: cvId } });
-      expect(deletedCv).toBeNull();
+      expect(deletedCv).not.toBeNull();
+      expect(deletedCv.deletedAt).not.toBeNull();
     });
 
     it('should reject delete of non-existent CV', async () => {

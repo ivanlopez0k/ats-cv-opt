@@ -24,9 +24,17 @@ export const cvController = {
   async upload(req: AuthenticatedRequest, res: Response): Promise<void> {
     const userId = req.user?.userId;
     const file = req.file;
+    const isMock = req.query.mock === 'true';
 
     if (!userId) {
       res.status(401).json({ success: false, error: 'No autenticado' });
+      return;
+    }
+
+    // MOCK MODE: Return a demo CV without calling AI
+    if (isMock) {
+      const mockCV = await cvService.createMock(userId, req.body);
+      createdResponse(res, mockCV, 'CV de demo creado (sin IA)');
       return;
     }
 

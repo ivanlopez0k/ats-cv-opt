@@ -20,6 +20,9 @@ export const sessionService = {
     const refreshPayload = verifyRefreshToken(refreshToken);
     const expiresAt = new Date((refreshPayload.exp ?? 0) * 1000);
 
+    // Delete old sessions for this user to prevent refreshToken unique constraint
+    await prisma.session.deleteMany({ where: { userId: user.id } });
+
     await prisma.session.create({
       data: {
         userId: user.id,

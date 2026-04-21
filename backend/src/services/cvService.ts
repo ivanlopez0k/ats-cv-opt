@@ -57,6 +57,51 @@ export const cvService = {
     return cv;
   },
 
+  async createMock(
+    userId: string,
+    data: {
+      title: string;
+      targetJob?: string;
+      targetIndustry?: string;
+      isPublic?: boolean;
+      template?: 'MODERN' | 'CLASSIC' | 'MINIMAL';
+    }
+  ) {
+    // Create a mock CV with fake URLs and completed status (no AI processing)
+    const mockCV = await prisma.cV.create({
+      data: {
+        userId,
+        title: data.title || 'CV de Demo',
+        originalPdfUrl: 'https://res.cloudinary.com/demo/sample.pdf',
+        improvedPdfUrl: 'https://res.cloudinary.com/demo/sample-improved.pdf',
+        targetJob: data.targetJob || 'Desarrollador Full Stack',
+        targetIndustry: data.targetIndustry || 'Tecnología',
+        isPublic: data.isPublic || false,
+        template: data.template || 'MODERN',
+        status: 'COMPLETED',
+        atsScore: 85,
+        analysisResult: {
+          score: 85,
+          missingKeywords: ['microservices', 'AWS'],
+          suggestions: ['Agregar experiencia con Microservices', 'Añadir AWS en habilidades'],
+        },
+        improvedJson: {
+          summary: 'Desarrollador Full Stack con 5 años de experiencia...',
+          experience: [
+            {
+              company: 'Empresa Demo',
+              position: 'Desarrollador Full Stack',
+              period: '2020 - Presente',
+              description: 'Desarrollo de aplicaciones web...',
+            },
+          ],
+        },
+      },
+    });
+
+    return mockCV;
+  },
+
   async findAllByUser(userId: string, page: number = 1, limit: number = 20) {
     const skip = (page - 1) * limit;
 

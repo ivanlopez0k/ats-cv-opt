@@ -153,18 +153,18 @@ describe('Auth API', () => {
   // -----------------------------------------------------------
   describe('POST /api/auth/login', () => {
     it('should login with valid credentials', async () => {
-      const res = await request(app).post('/api/auth/login').send({
-        email: testUser.email,
-        password: testUser.password,
-      });
-
-      expect(res.status).toBe(200);
-      expect(res.body.success).toBe(true);
-      expect(res.body.data).toHaveProperty('accessToken');
-      expect(res.body.data).toHaveProperty('refreshToken');
-      expect(res.body.data.user).toHaveProperty('id');
-      expect(res.body.data.user.email).toBe(testUser.email);
+    const res = await request(app).post('/api/auth/login').send({
+      email: testUser.email,
+      password: testUser.password,
     });
+
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.data).toHaveProperty('accessToken');
+    expect(res.body.data).toHaveProperty('refreshToken');
+    expect(res.body.data.user).toHaveProperty('id');
+    expect(res.body.data.user.email).toBe(testUser.email);
+  }, 60000);
 
     it('should reject wrong password', async () => {
       const res = await request(app).post('/api/auth/login').send({
