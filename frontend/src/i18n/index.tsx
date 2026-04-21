@@ -138,7 +138,7 @@ const es: TranslationContent = {
           both: "Ambas",
           careerChange: "Cambio de carrera"
         },
-        title: {
+        dialogTitle: {
           uploading: "Procesando tu CV...",
           step1: "Subí tu CV",
           step2: "Contexto para la IA"
@@ -153,7 +153,7 @@ const es: TranslationContent = {
           selectPdf: "seleccionar tu PDF",
           maxSize: "Máximo 10MB"
         },
-        title: {
+        cvTitle: {
           label: "Título *",
           placeholder: "Ej: Mi CV — Desarrollador Full Stack"
         },
@@ -198,11 +198,6 @@ const es: TranslationContent = {
           uploadError: "Error al subir el CV"
         },
         trigger: "Subir CV"
-      },
-      status: {
-        processing: "Procesando",
-        completed: "Listo",
-        failed: "Fallido"
       },
       visibility: {
         public: "Público",
@@ -646,7 +641,7 @@ const en: TranslationContent = {
           both: "Both",
           careerChange: "Career change"
         },
-        title: {
+        dialogTitle: {
           uploading: "Processing your CV...",
           step1: "Upload your CV",
           step2: "AI Context"
@@ -661,7 +656,7 @@ const en: TranslationContent = {
           selectPdf: "select your PDF",
           maxSize: "Max 10MB"
         },
-        title: {
+        cvTitle: {
           label: "Title *",
           placeholder: "Ex: My CV — Full Stack Developer"
         },
@@ -706,11 +701,6 @@ const en: TranslationContent = {
           uploadError: "Error uploading CV"
         },
         trigger: "Upload CV"
-      },
-      status: {
-        processing: "Processing",
-        completed: "Done",
-        failed: "Failed"
       },
       visibility: {
         public: "Public",

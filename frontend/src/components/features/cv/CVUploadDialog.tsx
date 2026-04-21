@@ -139,7 +139,7 @@ export function CVUploadDialog({ trigger }: { trigger?: React.ReactNode }) {
       <DialogContent className="max-w-xl bg-card border-border text-foreground" showCloseButton={!isUploading}>
         <DialogHeader>
           <DialogTitle className="text-xl text-foreground">
-            {isUploading ? t('dashboard.cvList.uploadDialog.title.uploading') : step === 1 ? t('dashboard.cvList.uploadDialog.title.step1') : t('dashboard.cvList.uploadDialog.title.step2')}
+            {isUploading ? t('dashboard.cvList.uploadDialog.dialogTitle.uploading') : step === 1 ? t('dashboard.cvList.uploadDialog.dialogTitle.step1') : t('dashboard.cvList.uploadDialog.dialogTitle.step2')}
           </DialogTitle>
           <DialogDescription className="text-muted-foreground">
             {isUploading
@@ -202,12 +202,12 @@ export function CVUploadDialog({ trigger }: { trigger?: React.ReactNode }) {
 
             {/* Title */}
             <div className="space-y-2">
-              <Label htmlFor="modal-title" className="text-foreground">{t('dashboard.cvList.uploadDialog.title.label')}</Label>
+              <Label htmlFor="modal-title" className="text-foreground">{t('dashboard.cvList.uploadDialog.cvTitle.label')}</Label>
               <Input
                 id="modal-title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder={t('dashboard.cvList.uploadDialog.title.placeholder')}
+                placeholder={t('dashboard.cvList.uploadDialog.cvTitle.placeholder')}
                 className="bg-muted/50 border-border text-foreground placeholder:text-muted-foreground"
               />
             </div>

@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, use } from 'react';
+import { useEffect, useState, use } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ThumbsUp, Search, User, ChevronLeft, ChevronRight, FileText, Loader2, X } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
