@@ -28,6 +28,11 @@ jobs:
         
       - name: Run tests
         working-directory: ./backend
+        env:
+          NODE_ENV: test
+          DATABASE_URL: postgresql://test:test@localhost:5432/test
+          OPENAI_API_KEY: sk-test-mock-key
+          OPENAI_MOCK_ENABLED: true
         run: npm test
 
   test-frontend:
