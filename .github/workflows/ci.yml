@@ -41,6 +41,12 @@ jobs:
         working-directory: ./backend
         run: npm run lint || true
         
+      - name: Run Prisma migrations
+        working-directory: ./backend
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test
+        run: npx prisma migrate deploy
+        
       - name: Run tests
         working-directory: ./backend
         env:
