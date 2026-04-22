@@ -8,10 +8,29 @@ import { requestLogger, logger } from './utils/logger.js';
 import path from 'path';
 import { createServer, Server } from 'http';
 
-// Import AI worker to start processing jobs
-import { aiWorker } from './workers/aiWorker.js';
-import { aiQueue } from './services/cvService.js';
-import { prisma } from './services/userService.js';
+// Import AI worker to start processing jobs (optional in production)
+let aiWorker: any;
+let aiQueue: any;
+let prisma: any;
+try {
+  // Only import if Redis is properly configured
+  if (config.redis.url && config.redis.url.includes('upstash')) {
+    const { aiWorker: worker } = await import('./workers/aiWorker.js');
+    const { aiQueue: queue } = await import('./services/cvService.js');
+    aiWorker = worker;
+    aiQueue = queue;
+  }
+} catch (error) {
+  logger.debug('AI worker not initialized (Redis not available)');
+}
+
+try {
+  // Import Prisma client
+  const { prisma: prismaClient } = await import('../services/userService.js');
+  prisma = prismaClient;
+} catch (error) {
+  logger.error('Failed to import Prisma:', error);
+}
 
 const app = express();
 const server: Server = createServer(app);
@@ -69,7 +88,7 @@ const httpServer = server.listen(PORT, async () => {
   logger.info(`📦 Environment: ${config.nodeEnv}`);
 
   // Clean stale jobs from previous test runs (development only)
-  if (!config.isProd) {
+  if (!config.isProd && aiQueue) {
     try {
       const waitingJobs = await aiQueue.getWaiting();
       const delayedJobs = await aiQueue.getDelayed();
@@ -101,8 +120,15 @@ async function gracefulShutdown(signal: string): Promise<void> {
   logger.info(`\n🛑 ${signal} received. Starting graceful shutdown...`);
 
   // Check if there are active jobs being processed
-  const activeJobs = await aiQueue.getActive();
-  const hasActiveJob = activeJobs.length > 0;
+  let hasActiveJob = false;
+  if (aiQueue) {
+    try {
+      const activeJobs = await aiQueue.getActive();
+      hasActiveJob = activeJobs.length > 0;
+    } catch (e) {
+      // Ignore if queue not available
+    }
+  }
 
   if (hasActiveJob) {
     logger.warn(`⚠️  ${activeJobs.length} AI job(s) in progress. Waiting for completion...`);
