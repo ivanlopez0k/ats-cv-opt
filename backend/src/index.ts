@@ -33,7 +33,7 @@ app.use(helmet({
   crossOriginEmbedderPolicy: false,
 }));
 app.use(cors({
-  origin: config.frontend.url,
+  origin: true, // Allow all for debug - change to config.frontend.url in production
   credentials: true,
 }));
 app.use(express.json());
