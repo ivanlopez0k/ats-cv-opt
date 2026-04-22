@@ -4,7 +4,7 @@ import { cvController, createCVSchema, updateCVSchema } from '../controllers/ind
 import { cvService } from '../services/index.js';
 import { authenticate, validate } from '../middlewares/index.js';
 import { uploadRateLimit } from '../middlewares/rateLimit.js';
-import { successResponse } from '../utils/response.js';
+import { successResponse, errorResponse } from '../utils/response.js';
 import { downloadFromCloudinary } from '../utils/cloudinary.js';
 import { renderHTMLToPDF } from '../services/pdfRenderer.js';
 import { extractTextFromPDF } from '../utils/pdf.js';
@@ -41,12 +41,12 @@ router.get('/:id/export', authenticate, async (req: Request, res: Response) => {
 
   const cv = await cvService.findById(id);
   if (!cv) {
-    res.status(404).json(successResponse(null, 'CV no encontrado'));
+    res.status(404).json(errorResponse('CV no encontrado', 404));
     return;
   }
 
   if (cv.userId !== userId) {
-    res.status(403).json(successResponse(null, 'No tienes acceso'));
+    res.status(403).json(errorResponse('No tienes acceso', 403));
     return;
   }
 
@@ -55,7 +55,7 @@ router.get('/:id/export', authenticate, async (req: Request, res: Response) => {
       // Convert HTML to DOCX
       const htmlContent = (cv.improvedJson as any)?.html || '';
       if (!htmlContent) {
-        res.status(400).json(successResponse(null, 'CV no tiene contenido para exportar'));
+        res.status(400).json(errorResponse('CV no tiene contenido para exportar', 400));
         return;
       }
 
@@ -84,12 +84,12 @@ router.get('/:id/export', authenticate, async (req: Request, res: Response) => {
       if (cv.improvedPdfUrl) {
         res.redirect(cv.improvedPdfUrl);
       } else {
-        res.status(400).json(successResponse(null, 'PDF no disponible'));
+        res.status(400).json(errorResponse('PDF no disponible', 400));
       }
     }
   } catch (error) {
     console.error('Export error:', error);
-    res.status(500).json(successResponse(null, 'Error al exportar'));
+    res.status(500).json(errorResponse('Error al exportar', 500));
   }
 });
 router.get('/:id', authenticate, cvController.getById);

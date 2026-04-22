@@ -85,6 +85,9 @@ const aiWorker = new Worker(
       // Get PDF buffer: either from job data (base64) or download from Cloudinary
       let pdfBuffer: Buffer;
       
+      // Get the PDF URL to use
+      const pdfUrl = originalPdfUrl || cv.originalPdfUrl;
+      
       if (pdfBufferBase64) {
         // Use buffer passed directly from upload (most efficient)
         logger.info(`📦 Using PDF buffer from job data`);
@@ -96,8 +99,8 @@ const aiWorker = new Worker(
         pdfBuffer = await downloadFromCloudinaryApi(originalPdfPublicId);
       } else {
         // Last resort: try downloading from URL (may fail for private resources)
-        logger.info(`⬇️ Downloading PDF from URL: ${originalPdfUrl || cv.originalPdfUrl}`);
-        pdfBuffer = await downloadBuffer(originalPdfUrl || cv.originalPdfUrl);
+        logger.info(`⬇️ Downloading PDF from URL: ${pdfUrl}`);
+        pdfBuffer = await downloadBuffer(pdfUrl);
       }
 
       const extracted = await extractTextFromPDF(pdfBuffer);

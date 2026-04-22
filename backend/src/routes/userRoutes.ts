@@ -11,14 +11,14 @@ router.get('/:username', async (req: Request, res: Response) => {
   // Find user by username
   const user = await userService.findByUsername(username);
   if (!user) {
-    res.status(404).json(successResponse(false, 'Usuario no encontrado'));
+    res.status(404).json(errorResponse('Usuario no encontrado', 404));
     return;
   }
 
   // Get public profile
   const profile = await userService.findPublicProfile(user.id);
   if (!profile) {
-    res.status(404).json(successResponse(false, 'Usuario no encontrado'));
+    res.status(404).json(errorResponse('Usuario no encontrado', 404));
     return;
   }
 
@@ -33,13 +33,13 @@ router.get('/:username/cvs', async (req: Request, res: Response) => {
 
   const user = await userService.findByUsername(username);
   if (!user) {
-    res.status(404).json(successResponse(false, 'Usuario no encontrado'));
+    res.status(404).json(errorResponse('Usuario no encontrado', 404));
     return;
   }
 
   const result = await cvService.getPublicCVsByUser(user.id, page, limit);
 
-  res.json(successResponse(result.cvs, { pagination: result.pagination }));
+  res.json(successResponse(result.cvs, undefined, { pagination: result.pagination }));
 });
 
 export default router;
