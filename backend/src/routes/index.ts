@@ -41,13 +41,17 @@ router.get('/health', async (req, res) => {
     logger.error('Health check: Database connection failed', error);
   }
 
-  // Check Redis (via BullMQ queue)
+  // Check Redis (optional - skip if no URL configured)
   try {
-    const Redis = (await import('ioredis')).default;
-    const redis = new Redis(config.redis.url);
-    await redis.ping();
-    await redis.quit();
-    services.redis = 'connected';
+    if (config.redis.url && config.redis.url !== 'redis://localhost:6379') {
+      const Redis = (await import('ioredis')).default;
+      const redis = new Redis(config.redis.url);
+      await redis.ping();
+      await redis.quit();
+      services.redis = 'connected';
+    } else {
+      services.redis = 'not_configured';
+    }
   } catch (error) {
     services.redis = 'disconnected';
     overallStatus = 'degraded';
