@@ -34,12 +34,14 @@ export function successResponse<T>(
   res: Response,
   data: T,
   message?: string,
-  statusCode: number = 200
+  statusCode: number = 200,
+  pagination?: { page: number; limit: number; total: number; totalPages: number }
 ): void {
   res.status(statusCode).json({
     success: true,
     data,
     ...(message && { message }),
+    ...(pagination && { pagination }),
   });
 }
 
